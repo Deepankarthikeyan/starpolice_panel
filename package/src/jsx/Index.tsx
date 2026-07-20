@@ -1,5 +1,5 @@
 import { ReactNode, useContext, useEffect, useState } from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 
 /// Css
 import "./index.css";
@@ -13,6 +13,18 @@ import Nav2 from "./layouts/nav/index2";
 import Footer from "./layouts/Footer";
 import ScrollToTop from "./layouts/ScrollToTop";
 import WalletBar from "./layouts/WalletBar";
+
+/// Star Police Academy Panels
+import AdminLayout from "./starPolice/admin/AdminLayout";
+import AdminDashboard from "./starPolice/admin/AdminDashboard";
+import DaywiseUpload from "./starPolice/admin/DaywiseUpload";
+import AdminStudentInteraction from "./starPolice/admin/StudentInteraction";
+import MonthlyCalendar from "./starPolice/admin/MonthlyCalendar";
+import StudentLayout from "./starPolice/student/StudentLayout";
+import StudentDashboard from "./starPolice/student/StudentDashboard";
+import StudentMaterials from "./starPolice/student/StudentMaterials";
+import StudentInteraction from "./starPolice/student/StudentInteraction";
+import StudentCalendar from "./starPolice/student/StudentCalendar";
 
 /// Dashboard
 
@@ -132,6 +144,10 @@ interface routerType {
   component: ReactNode;
 }
 const Markup = () => {
+  const { auth } = useContext(ThemeContext);
+  const defaultRoute =
+    auth?.role === "student" ? "/student-panel/dashboard" : "/admin/dashboard";
+
   const routhPath: routerType[] = [
     { url: "finance", component: <Finance /> },
     { url: "student", component: <Students /> },
@@ -205,6 +221,22 @@ const Markup = () => {
   return (
     <>
       <Routes>
+        <Route path="/" element={<Navigate to={defaultRoute} replace />} />
+
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/daywise-upload" element={<DaywiseUpload />} />
+          <Route path="/admin/student-interaction" element={<AdminStudentInteraction />} />
+          <Route path="/admin/monthly-calendar" element={<MonthlyCalendar />} />
+        </Route>
+
+        <Route element={<StudentLayout />}>
+          <Route path="/student-panel/dashboard" element={<StudentDashboard />} />
+          <Route path="/student-panel/materials" element={<StudentMaterials />} />
+          <Route path="/student-panel/interaction" element={<StudentInteraction />} />
+          <Route path="/student-panel/calendar" element={<StudentCalendar />} />
+        </Route>
+
         <Route path="/page-error-400" element={<Error400 />} />
         <Route path="/page-error-403" element={<Error403 />} />
         <Route path="/page-error-404" element={<Error404 />} />

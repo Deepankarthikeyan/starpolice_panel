@@ -5,23 +5,17 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
+import type { AuthUser } from "../jsx/starPolice/types";
 
-interface AuthData {
-  email: string;
-  password: string;
-}
-
-// Define the shape of the AppContext
 interface AppContextValue {
   openMenuToggle: boolean;
   setOpenMenuToggle: Dispatch<SetStateAction<boolean>>;
-  auth: AuthData | null;
-  setAuth: Dispatch<SetStateAction<AuthData | null>>;
+  auth: AuthUser | null;
+  setAuth: Dispatch<SetStateAction<AuthUser | null>>;
   iconhover: boolean;
   setIconhover: Dispatch<SetStateAction<boolean>>;
 }
 
-// Provide a default state for the context
 const defaultState: AppContextValue = {
   openMenuToggle: false,
   setOpenMenuToggle: () => {},
@@ -41,7 +35,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({
   children,
 }) => {
   const [openMenuToggle, setOpenMenuToggle] = useState<boolean>(false);
-  const [auth, setAuth] = useState<AuthData | null>(null);
+  const [auth, setAuth] = useState<AuthUser | null>(null);
   const [iconhover, setIconhover] = useState<boolean>(false);
 
   return (
