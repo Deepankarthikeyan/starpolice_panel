@@ -1,0 +1,14 @@
+<svg width="420" height="320" viewBox="0 0 420 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="40" y="180" width="340" height="18" rx="9" fill="rgba(255,255,255,0.15)"/>
+  <rect x="70" y="70" width="120" height="90" rx="12" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+  <rect x="82" y="82" width="96" height="12" rx="6" fill="rgba(255,255,255,0.45)"/>
+  <rect x="82" y="102" width="72" height="8" rx="4" fill="rgba(255,255,255,0.25)"/>
+  <rect x="82" y="118" width="84" height="8" rx="4" fill="rgba(255,255,255,0.25)"/>
+  <rect x="82" y="134" width="60" height="8" rx="4" fill="rgba(255,255,255,0.25)"/>
+  <path d="M230 95L290 125V185C290 210 260 228 230 240C200 228 170 210 170 185V125L230 95Z" fill="rgba(255,255,255,0.18)" stroke="rgba(255,255,255,0.45)" stroke-width="2"/>
+  <path d="M215 150L228 163L248 138" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="320" cy="88" r="34" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+  <path d="M320 72V104M304 88H336" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="98" cy="220" r="22" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <circle cx="322" cy="220" r="22" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+</svg>

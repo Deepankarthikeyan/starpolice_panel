@@ -50,6 +50,22 @@
   justify-content: center;
 }
 
+.spa-auth-logo-small {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: contain;
+  margin-bottom: 1.25rem;
+}
+
+.spa-auth-vector {
+  width: 100%;
+  max-width: 22rem;
+  height: auto;
+  margin-top: 1.5rem;
+  opacity: 0.95;
+  filter: brightness(1.15) contrast(0.95);
+}
+
 .spa-auth-logo {
   width: 100%;
   max-width: 18rem;
@@ -68,18 +84,11 @@
 }
 
 .spa-auth-badges {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 2rem;
-  flex-wrap: wrap;
+  display: none;
 }
 
-.spa-auth-badges span {
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.85rem;
+.spa-auth-switch {
+  display: none;
 }
 
 .spa-auth-form-wrap {
