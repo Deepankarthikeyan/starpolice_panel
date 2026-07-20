@@ -32,7 +32,7 @@ const Alerts: React.FC<AlertsProps> = ({ toggleTab, toggleChatBox }) => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const { auth } = useContext(ThemeContext);
-  const isAdmin = auth?.role === "admin";
+  const isAdmin = auth?.role === "admin" || auth?.role === "superadmin";
 
   const loadAlerts = async () => {
     if (!auth?.token) return;

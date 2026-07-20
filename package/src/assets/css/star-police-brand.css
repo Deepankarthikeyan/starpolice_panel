@@ -1,3 +1,149 @@
+.spa-auth-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.spa-auth-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.05);
+}
+
+.spa-auth-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(8, 24, 61, 0.92), rgba(15, 52, 96, 0.78));
+}
+
+.spa-auth-student .spa-auth-overlay {
+  background: linear-gradient(135deg, rgba(10, 61, 42, 0.92), rgba(18, 88, 70, 0.78));
+}
+
+.spa-auth-container {
+  position: relative;
+  z-index: 2;
+}
+
+.spa-auth-card {
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 1.25rem;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
+.spa-auth-brand {
+  background: linear-gradient(160deg, #0b1f4a 0%, #123d73 55%, #1d5f9f 100%);
+  color: #fff;
+}
+
+.spa-auth-student .spa-auth-brand {
+  background: linear-gradient(160deg, #0d3d2b 0%, #146b4a 55%, #1f8f63 100%);
+}
+
+.spa-auth-brand-inner {
+  padding: 3rem 2.5rem;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.spa-auth-logo {
+  width: 100%;
+  max-width: 18rem;
+  margin-bottom: 2rem;
+}
+
+.spa-auth-brand h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.spa-auth-brand p {
+  opacity: 0.9;
+  line-height: 1.7;
+}
+
+.spa-auth-badges {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.spa-auth-badges span {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.spa-auth-form-wrap {
+  background: #fff;
+}
+
+.spa-auth-form-inner {
+  padding: 3rem 2.5rem;
+}
+
+.spa-auth-form-inner h2 {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.spa-auth-subtitle {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+}
+
+.spa-auth-input {
+  border-radius: 0.75rem;
+  padding: 0.8rem 1rem;
+}
+
+.spa-auth-btn {
+  background: linear-gradient(135deg, #123d73, #1d5f9f);
+  border: none;
+  color: #fff;
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  font-weight: 600;
+}
+
+.spa-auth-btn:hover {
+  color: #fff;
+  opacity: 0.92;
+}
+
+.spa-auth-btn-student {
+  background: linear-gradient(135deg, #146b4a, #1f8f63);
+}
+
+.spa-auth-link {
+  color: #1d5f9f;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.spa-auth-student .spa-auth-link {
+  color: #1f8f63;
+}
+
+.spa-auth-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 991px) {
+  .spa-auth-brand-inner,
+  .spa-auth-form-inner {
+    padding: 2rem 1.5rem;
+  }
+}
+
 .star-police-login-logo {
   background: transparent !important;
 }

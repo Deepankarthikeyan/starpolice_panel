@@ -1,11 +1,11 @@
 import express from "express";
 import Upload from "../models/Upload.js";
 import Message from "../models/Message.js";
-import { authRequired, adminOnly } from "../middleware/auth.js";
+import { authRequired, adminPanelOnly } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/stats", authRequired, adminOnly, async (_req, res) => {
+router.get("/stats", authRequired, adminPanelOnly, async (_req, res) => {
   try {
     const uploads = await Upload.find().select("date category createdAt");
     const messages = await Message.find().select("senderRole createdAt");
@@ -24,7 +24,7 @@ router.get("/stats", authRequired, adminOnly, async (_req, res) => {
       totalUploads: uploads.length,
       activeDays: Object.keys(calendarCounts).length,
       studentMessages: messages.filter((item) => item.senderRole === "student").length,
-      adminReplies: messages.filter((item) => item.senderRole === "admin").length,
+      adminReplies: messages.filter((item) => ["admin", "superadmin"].includes(item.senderRole)).length,
       categoryCounts,
       recentUploads: uploads
         .sort((a, b) => b.createdAt - a.createdAt)

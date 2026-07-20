@@ -1,4 +1,5 @@
-export type UserRole = "admin" | "student";
+export type UserRole = "superadmin" | "admin" | "student";
+export type PanelType = "admin" | "student";
 
 export type FileCategory = "video" | "pdf" | "image" | "document";
 
@@ -7,7 +8,22 @@ export interface AuthUser {
   email: string;
   role: UserRole;
   name: string;
+  isActive: boolean;
+  panel: PanelType;
   token: string;
+}
+
+export interface ManagedUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface SetupStatus {
+  needsSuperAdmin: boolean;
 }
 
 export interface UploadedFile {

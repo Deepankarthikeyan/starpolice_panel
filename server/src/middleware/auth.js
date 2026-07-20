@@ -17,9 +17,23 @@ export function authRequired(req, res, next) {
   }
 }
 
-export function adminOnly(req, res, next) {
-  if (req.user?.role !== "admin") {
-    return res.status(403).json({ message: "Admin access required." });
+export function adminPanelOnly(req, res, next) {
+  if (!["superadmin", "admin"].includes(req.user?.role)) {
+    return res.status(403).json({ message: "Admin panel access required." });
+  }
+  next();
+}
+
+export function superAdminOnly(req, res, next) {
+  if (req.user?.role !== "superadmin") {
+    return res.status(403).json({ message: "Super admin access required." });
+  }
+  next();
+}
+
+export function studentPanelOnly(req, res, next) {
+  if (req.user?.role !== "student") {
+    return res.status(403).json({ message: "Student panel access required." });
   }
   next();
 }

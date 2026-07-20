@@ -4,24 +4,45 @@ import type {
   AuthUser,
   ChatMessage,
   DashboardStats,
+  ManagedUser,
   Note,
+  PanelType,
+  SetupStatus,
   UploadedFile,
 } from "./types";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
-function getToken() {
-  const raw = localStorage.getItem("AUTH");
+function getStorageKey(panel?: PanelType) {
+  const resolved =
+    panel || (window.location.pathname.startsWith("/student") ? "student" : "admin");
+  return resolved === "student" ? "AUTH_STUDENT" : "AUTH_ADMIN";
+}
+
+export function getStoredAuth(panel?: PanelType): AuthUser | null {
+  const raw = localStorage.getItem(getStorageKey(panel));
   if (!raw) return null;
   try {
-    return (JSON.parse(raw) as AuthUser).token;
+    return JSON.parse(raw) as AuthUser;
   } catch {
     return null;
   }
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = getToken();
+export function storeAuth(user: AuthUser) {
+  localStorage.setItem(getStorageKey(user.panel), JSON.stringify(user));
+}
+
+export function clearAuth(panel: PanelType) {
+  localStorage.removeItem(getStorageKey(panel));
+}
+
+function getToken(panel?: PanelType) {
+  return getStoredAuth(panel)?.token ?? null;
+}
+
+async function request<T>(path: string, options: RequestInit = {}, panel?: PanelType): Promise<T> {
+  const token = getToken(panel);
   const headers = new Headers(options.headers);
 
   if (!(options.body instanceof FormData)) {
@@ -44,15 +65,50 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  login(email: string, password: string, role: AuthUser["role"]) {
-    return request<AuthUser>("/api/auth/login", {
+  getSetupStatus() {
+    return request<SetupStatus>("/api/auth/setup");
+  },
+
+  register(name: string, email: string, password: string, panel: PanelType) {
+    return request<AuthUser>("/api/auth/register", {
       method: "POST",
-      body: JSON.stringify({ email, password, role }),
+      body: JSON.stringify({ name, email, password, panel }),
     });
   },
 
-  getMe() {
-    return request<Omit<AuthUser, "token">>("/api/auth/me");
+  login(email: string, password: string, panel: PanelType) {
+    return request<AuthUser>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password, panel }),
+    });
+  },
+
+  getMe(panel?: PanelType) {
+    return request<Omit<AuthUser, "token">>("/api/auth/me", {}, panel);
+  },
+
+  getUsers(type: "admin" | "student") {
+    return request<ManagedUser[]>(`/api/users?type=${type}`);
+  },
+
+  createUser(name: string, email: string, password: string, role: "admin" | "student") {
+    return request<ManagedUser>("/api/users", {
+      method: "POST",
+      body: JSON.stringify({ name, email, password, role }),
+    });
+  },
+
+  setUserAccess(id: string, isActive: boolean) {
+    return request<ManagedUser>(`/api/users/${id}/access`, {
+      method: "PATCH",
+      body: JSON.stringify({ isActive }),
+    });
+  },
+
+  deleteUser(id: string) {
+    return request<{ message: string }>(`/api/users/${id}`, {
+      method: "DELETE",
+    });
   },
 
   getUploads(date?: string) {

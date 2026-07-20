@@ -12,7 +12,9 @@ const StudentDashboard = () => {
     Promise.all([api.getUploads(), api.getMessages()])
       .then(([uploadData, messageData]) => {
         setUploads(uploadData);
-        setAdminMessages(messageData.filter((item) => item.senderRole === "admin").length);
+        setAdminMessages(
+          messageData.filter((item) => item.senderRole === "admin" || item.senderRole === "superadmin").length
+        );
       })
       .catch(console.error);
   }, []);

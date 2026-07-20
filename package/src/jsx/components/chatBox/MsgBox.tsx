@@ -133,7 +133,10 @@ const MsgBox: React.FC<MsgBoxProps> = ({
           <p className="text-muted text-center mt-3">No messages yet. Start the conversation.</p>
         ) : (
           messages.map((item) => {
-            const isMine = item.senderRole === auth?.role;
+            const isMine =
+              item.senderRole === auth?.role ||
+              (["admin", "superadmin"].includes(item.senderRole) &&
+                ["admin", "superadmin"].includes(auth?.role || ""));
             return (
               <div
                 key={item.id}

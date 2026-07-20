@@ -6,43 +6,132 @@ import { authRequired } from "../middleware/auth.js";
 
 const router = express.Router();
 
-function createToken(user) {
+function createToken(user, panel) {
   return jwt.sign(
-    { id: user._id.toString(), email: user.email, role: user.role, name: user.name },
+    {
+      id: user._id.toString(),
+      email: user.email,
+      role: user.role,
+      name: user.name,
+      panel,
+      isActive: user.role === "superadmin" ? true : user.isActive,
+    },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
 }
 
-function publicUser(user, token) {
+function publicUser(user, token, panel) {
   return {
     id: user._id.toString(),
     name: user.name,
     email: user.email,
     role: user.role,
+    isActive: user.role === "superadmin" ? true : user.isActive,
+    panel,
     token,
   };
 }
 
-router.post("/login", async (req, res) => {
+function canAccessAdminPanel(user) {
+  return ["superadmin", "admin"].includes(user.role) && (user.role === "superadmin" || user.isActive);
+}
+
+function canAccessStudentPanel(user) {
+  return user.role === "student" && user.isActive;
+}
+
+router.get("/setup", async (_req, res) => {
   try {
-    const { email, password, role } = req.body;
-    if (!email || !password || !role) {
-      return res.status(400).json({ message: "Email, password, and role are required." });
+    const superAdminCount = await User.countDocuments({ role: "superadmin" });
+    res.json({ needsSuperAdmin: superAdminCount === 0 });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post("/register", async (req, res) => {
+  try {
+    const { name, email, password, panel } = req.body;
+    if (!name?.trim() || !email?.trim() || !password || !panel) {
+      return res.status(400).json({ message: "Name, email, password, and panel are required." });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase(), role });
+    if (panel !== "admin") {
+      return res.status(403).json({ message: "Student accounts are created by an admin." });
+    }
+
+    const existing = await User.findOne({ email: email.toLowerCase() });
+    if (existing) {
+      return res.status(409).json({ message: "Email is already registered." });
+    }
+
+    const superAdminCount = await User.countDocuments({ role: "superadmin" });
+    const role = superAdminCount === 0 ? "superadmin" : "admin";
+    const isActive = role === "superadmin";
+
+    if (role === "admin") {
+      return res.status(403).json({
+        message: "Admin signup is closed. Contact the super admin for access.",
+      });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      name: name.trim(),
+      email: email.toLowerCase(),
+      password: hashed,
+      role,
+      isActive,
+    });
+
+    const token = createToken(user, "admin");
+    res.status(201).json(publicUser(user, token, "admin"));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password, panel } = req.body;
+    if (!email || !password || !panel) {
+      return res.status(400).json({ message: "Email, password, and panel are required." });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials for the selected panel." });
+      return res.status(401).json({ message: "Invalid credentials." });
     }
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
-      return res.status(401).json({ message: "Invalid credentials for the selected panel." });
+      return res.status(401).json({ message: "Invalid credentials." });
     }
 
-    const token = createToken(user);
-    res.json(publicUser(user, token));
+    if (panel === "admin") {
+      if (!canAccessAdminPanel(user)) {
+        return res.status(403).json({
+          message:
+            user.role === "admin" && !user.isActive
+              ? "Your admin access has not been activated yet. Contact the super admin."
+              : "You do not have admin panel access.",
+        });
+      }
+    } else if (panel === "student") {
+      if (!canAccessStudentPanel(user)) {
+        return res.status(403).json({
+          message: user.role === "student" && !user.isActive
+            ? "Your student panel access has not been activated yet. Contact your admin."
+            : "You do not have student panel access.",
+        });
+      }
+    } else {
+      return res.status(400).json({ message: "Invalid panel." });
+    }
+
+    const token = createToken(user, panel);
+    res.json(publicUser(user, token, panel));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -58,6 +147,8 @@ router.get("/me", authRequired, async (req, res) => {
     name: user.name,
     email: user.email,
     role: user.role,
+    isActive: user.role === "superadmin" ? true : user.isActive,
+    panel: req.user.panel,
   });
 });
 

@@ -46,7 +46,7 @@ router.post("/", authRequired, async (req, res) => {
         message: `${req.user.name}: ${message.trim().slice(0, 80)}`,
         type: "message",
       });
-    } else {
+    } else if (["admin", "superadmin"].includes(req.user.role)) {
       await notifyAllStudents({
         title: "Admin Reply",
         message: message.trim().slice(0, 80),

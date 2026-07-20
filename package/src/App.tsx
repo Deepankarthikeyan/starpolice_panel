@@ -5,16 +5,32 @@ import "./assets/css/style.css";
 import "./assets/css/star-police-brand.css";
 
 import { Fragment, Suspense, useContext, useEffect } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
-import Index from "./jsx/Index";
-import Login from "./jsx/pages/Login";
+import AdminPanel from "./jsx/AdminPanel";
+import StudentPanel from "./jsx/StudentPanel";
+import AdminLogin from "./jsx/pages/auth/AdminLogin";
+import AdminSignup from "./jsx/pages/auth/AdminSignup";
+import StudentLogin from "./jsx/pages/auth/StudentLogin";
 import { ThemeContext } from "./context/ThemeContext";
-import type { AuthUser } from "./jsx/starPolice/types";
+import { clearAuth, getStoredAuth } from "./jsx/starPolice/api";
+import type { AuthUser, PanelType } from "./jsx/starPolice/types";
+
+function Preloader() {
+  return (
+    <div id="preloader">
+      <div className="sk-three-bounce">
+        <div className="sk-child sk-bounce1"></div>
+        <div className="sk-child sk-bounce2"></div>
+        <div className="sk-child sk-bounce3"></div>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   const { auth, setAuth } = useContext(ThemeContext);
-  const navigate = useNavigate();
+  const location = useLocation();
 
   function resizeHandler() {
     if (window.innerWidth <= 775) {
@@ -27,69 +43,73 @@ function App() {
   }
 
   useEffect(() => {
-    setTimeout(() => {
-      resizeHandler();
-    }, 100);
+    setTimeout(() => resizeHandler(), 100);
     window.addEventListener("resize", resizeHandler);
-    return () => {
-      window.removeEventListener("resize", resizeHandler);
-    };
+    return () => window.removeEventListener("resize", resizeHandler);
   }, []);
 
   useEffect(() => {
-    const data = localStorage.getItem("AUTH");
-    if (data) {
-      const parsedData = JSON.parse(data) as AuthUser;
-      if (parsedData.role === "admin") {
-        setAuth(parsedData);
-      } else {
-        localStorage.removeItem("AUTH");
-        navigate("/login");
+    const panel: PanelType = location.pathname.startsWith("/student") ? "student" : "admin";
+    const stored = getStoredAuth(panel);
+    if (stored) {
+      if (
+        (panel === "admin" && ["superadmin", "admin"].includes(stored.role)) ||
+        (panel === "student" && stored.role === "student")
+      ) {
+        setAuth(stored);
+        return;
       }
-    } else {
-      navigate("/login");
+      clearAuth(panel);
     }
-  }, [navigate, setAuth]);
+    setAuth(null);
+  }, [location.pathname, setAuth]);
 
-  if (auth?.email && auth?.token && auth?.role === "admin") {
-    return (
-      <Fragment>
-        <Suspense
-          fallback={
-            <div id="preloader">
-              <div className="sk-three-bounce">
-                <div className="sk-child sk-bounce1"></div>
-                <div className="sk-child sk-bounce2"></div>
-                <div className="sk-child sk-bounce3"></div>
-              </div>
-            </div>
-          }
-        >
-          <Index />
-        </Suspense>
-      </Fragment>
-    );
-  }
+  const setPanelAuth = (user: AuthUser) => setAuth(user);
+
+  const isAdminAuthed = auth?.panel === "admin" && ["superadmin", "admin"].includes(auth.role);
+  const isStudentAuthed = auth?.panel === "student" && auth.role === "student";
 
   return (
     <Fragment>
-      <div className="vh-100">
-        <Suspense
-          fallback={
-            <div id="preloader">
-              <div className="sk-three-bounce">
-                <div className="sk-child sk-bounce1"></div>
-                <div className="sk-child sk-bounce2"></div>
-                <div className="sk-child sk-bounce3"></div>
-              </div>
-            </div>
-          }
-        >
-          <Routes>
-            <Route path="/login" element={<Login setAuth={setAuth} />} />
-          </Routes>
-        </Suspense>
-      </div>
+      <Suspense fallback={<Preloader />}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/admin/login" replace />} />
+
+          <Route
+            path="/admin/login"
+            element={
+              isAdminAuthed ? <Navigate to="/admin/dashboard" replace /> : <AdminLogin setAuth={setPanelAuth} />
+            }
+          />
+          <Route
+            path="/admin/signup"
+            element={
+              isAdminAuthed ? <Navigate to="/admin/dashboard" replace /> : <AdminSignup setAuth={setPanelAuth} />
+            }
+          />
+          <Route
+            path="/student/login"
+            element={
+              isStudentAuthed ? (
+                <Navigate to="/student/dashboard" replace />
+              ) : (
+                <StudentLogin setAuth={setPanelAuth} />
+              )
+            }
+          />
+
+          <Route
+            path="/admin/*"
+            element={isAdminAuthed ? <AdminPanel /> : <Navigate to="/admin/login" replace />}
+          />
+          <Route
+            path="/student/*"
+            element={isStudentAuthed ? <StudentPanel /> : <Navigate to="/student/login" replace />}
+          />
+
+          <Route path="*" element={<Navigate to="/admin/login" replace />} />
+        </Routes>
+      </Suspense>
     </Fragment>
   );
 }

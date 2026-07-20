@@ -4,6 +4,12 @@ import { Link } from "react-router-dom";
 import { getMenuList } from "./Menu";
 import { useScrollPosition } from "@n8tb1t/use-scroll-position";
 import { ThemeContext } from "../../../context/ThemeContext";
+import type { PanelType } from "../../starPolice/types";
+
+interface SideBarProps {
+  basePath?: string;
+  panel?: PanelType;
+}
 
 interface MenuItem {
   title: string;
@@ -33,10 +39,10 @@ const initialState: State = {
   activeSubmenu: "",
 };
 
-const SideBar: React.FC = () => {
+const SideBar: React.FC<SideBarProps> = ({ basePath = "/admin", panel = "admin" }) => {
   const [state, setState] = useReducer(reducer, initialState);
-  const { setIconhover } = useContext(ThemeContext);
-  const menuList = getMenuList();
+  const { setIconhover, auth } = useContext(ThemeContext);
+  const menuList = getMenuList(panel, auth);
 
   useEffect(() => {
     const btn = document.querySelector(".nav-control") as HTMLDivElement | null;
@@ -158,7 +164,7 @@ const SideBar: React.FC = () => {
                               {item.content && item.content.length > 0 ? (
                                 <>
                                   <Link
-                                    to={item.to || "#"}
+                                    to={item.to ? `${basePath}/${item.to}` : "#"}
                                     className={item.hasMenu ? "has-arrow" : ""}
                                     onClick={() =>
                                       handleSubmenuActive(item.title)
@@ -184,7 +190,7 @@ const SideBar: React.FC = () => {
                                                 ? "mm-active"
                                                 : ""
                                             }`}
-                                            to={subItem.to || "#"}
+                                            to={subItem.to ? `${basePath}/${subItem.to}` : "#"}
                                           >
                                             {subItem.title}
                                           </Link>
@@ -195,7 +201,7 @@ const SideBar: React.FC = () => {
                                 </>
                               ) : (
                                 <Link
-                                  to={item.to || "#"}
+                                  to={item.to ? `${basePath}/${item.to}` : "#"}
                                   className={`${
                                     path === item.to ? "mm-active" : ""
                                   }`}
@@ -210,7 +216,7 @@ const SideBar: React.FC = () => {
                     </>
                   ) : (
                     <Link
-                      to={data.to || "#"}
+                      to={data.to ? `${basePath}/${data.to}` : "#"}
                       className={`${path === data.to ? "mm-active" : ""}`}
                     >
                       {data.iconStyle}

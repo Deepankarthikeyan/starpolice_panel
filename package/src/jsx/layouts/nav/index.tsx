@@ -3,29 +3,22 @@ import SideBar from "./SideBar";
 import NavHader from "./NavHader";
 import Header from "./Header";
 import ChatBox from "../ChatBox";
+import type { PanelType } from "../../starPolice/types";
 
-interface propType {
-  title?: string;
-  onClick?: () => void;
+interface NavProps {
+  basePath?: string;
+  panel?: PanelType;
 }
 
-const NavBlog = ({ title, onClick: ClickToAddEvent }: propType) => {
+const NavBlog = ({ basePath = "/admin", panel = "admin" }: NavProps) => {
   const [toggle, setToggle] = useState<string>();
   const onClick = (name: string) => setToggle(toggle === name ? "" : name);
   return (
     <Fragment>
-      <NavHader />
+      <NavHader basePath={basePath} />
       <ChatBox onClick={() => onClick("chatbox")} toggle={toggle} />
-      <Header
-        onNote={() => onClick("chatbox")}
-        onNotification={() => onClick("notification")}
-        onProfile={() => onClick("profile")}
-        toggle={toggle}
-        title={title}
-        onBox={() => onClick("box")}
-        onClick={() => ClickToAddEvent}
-      />
-      <SideBar />
+      <Header onNote={() => onClick("chatbox")} toggle={toggle} />
+      <SideBar basePath={basePath} panel={panel} />
     </Fragment>
   );
 };

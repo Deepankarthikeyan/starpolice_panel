@@ -31,7 +31,7 @@ const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab }) => {
   }, [auth?.token]);
 
   const chatTitle =
-    auth?.role === "admin" ? "Students" : "Star Police Admin";
+    auth?.role === "admin" || auth?.role === "superadmin" ? "Students" : "Star Police Admin";
   const lastMessage = messages[messages.length - 1];
   const preview = lastMessage
     ? `${lastMessage.senderName}: ${lastMessage.message.slice(0, 40)}`
@@ -109,7 +109,7 @@ const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab }) => {
               <div className="d-flex bd-highlight">
                 <div className="img_cont">
                   <div className="rounded-circle user_img d-flex align-items-center justify-content-center bg-primary text-white fw-bold">
-                    {auth?.role === "admin" ? "ST" : "AD"}
+                    {auth?.role === "admin" || auth?.role === "superadmin" ? "ST" : "AD"}
                   </div>
                   <span className="online_icon"></span>
                 </div>

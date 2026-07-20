@@ -1,6 +1,6 @@
 import express from "express";
 import Upload from "../models/Upload.js";
-import { authRequired, adminOnly } from "../middleware/auth.js";
+import { authRequired, adminPanelOnly } from "../middleware/auth.js";
 import { upload } from "../middleware/upload.js";
 import { notifyAllStudents } from "../utils/notifications.js";
 
@@ -38,7 +38,7 @@ router.get("/", authRequired, async (req, res) => {
   }
 });
 
-router.post("/", authRequired, adminOnly, upload.array("files", 10), async (req, res) => {
+router.post("/", authRequired, adminPanelOnly, upload.array("files", 10), async (req, res) => {
   try {
     const { date, category } = req.body;
     if (!date) {
@@ -74,7 +74,7 @@ router.post("/", authRequired, adminOnly, upload.array("files", 10), async (req,
   }
 });
 
-router.delete("/:id", authRequired, adminOnly, async (req, res) => {
+router.delete("/:id", authRequired, adminPanelOnly, async (req, res) => {
   try {
     const deleted = await Upload.findByIdAndDelete(req.params.id);
     if (!deleted) {

@@ -1,6 +1,6 @@
 import express from "express";
 import Alert from "../models/Alert.js";
-import { authRequired, adminOnly } from "../middleware/auth.js";
+import { authRequired, adminPanelOnly } from "../middleware/auth.js";
 import { notifyAllUsers } from "../utils/notifications.js";
 
 const router = express.Router();
@@ -25,7 +25,7 @@ router.get("/", authRequired, async (_req, res) => {
   }
 });
 
-router.post("/", authRequired, adminOnly, async (req, res) => {
+router.post("/", authRequired, adminPanelOnly, async (req, res) => {
   try {
     const { title, message, category } = req.body;
     if (!title?.trim() || !message?.trim()) {
@@ -52,7 +52,7 @@ router.post("/", authRequired, adminOnly, async (req, res) => {
   }
 });
 
-router.delete("/:id", authRequired, adminOnly, async (req, res) => {
+router.delete("/:id", authRequired, adminPanelOnly, async (req, res) => {
   try {
     const deleted = await Alert.findByIdAndDelete(req.params.id);
     if (!deleted) {
