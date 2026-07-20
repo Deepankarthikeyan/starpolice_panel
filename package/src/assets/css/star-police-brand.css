@@ -1,3 +1,8 @@
+.star-police-logo,
+.star-police-login-logo {
+  background: transparent !important;
+}
+
 .nav-header .brand-logo .star-police-logo {
   max-width: 17rem !important;
   width: auto !important;
