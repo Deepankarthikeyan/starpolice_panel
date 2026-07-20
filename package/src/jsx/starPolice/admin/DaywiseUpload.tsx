@@ -57,12 +57,19 @@ const DaywiseUpload = () => {
             </div>
             <div className="card-body">
               <label className="form-label fw-semibold">Upload Date</label>
-              <DatePicker
-                selected={selectedDate}
-                onChange={(date) => date && setSelectedDate(date)}
-                className="form-control mb-3"
-                dateFormat="yyyy-MM-dd"
-              />
+              <p className="text-muted small mb-2">Click a date on the calendar — no typing needed.</p>
+              <div className="daywise-upload-calendar dz-calender mb-3">
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={(date) => date && setSelectedDate(date)}
+                  inline
+                  fixedHeight
+                  calendarClassName="w-100"
+                />
+              </div>
+              <div className="alert alert-light py-2 mb-3">
+                Selected: <strong>{dateKey}</strong>
+              </div>
 
               <label className="form-label fw-semibold">File Type</label>
               <select
