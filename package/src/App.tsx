@@ -46,7 +46,7 @@ function App() {
     }
   }, [navigate, setAuth]);
 
-  if (auth?.email && auth?.password && auth?.role) {
+  if (auth?.email && auth?.token && auth?.role) {
     return (
       <Fragment>
         <Suspense

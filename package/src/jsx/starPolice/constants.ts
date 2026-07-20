@@ -1,9 +1,14 @@
-import type { AuthUser } from "./types";
+import type { UserRole } from "./types";
 
 export const APP_NAME = "Star Police Academy";
 export const APP_LOCATION = "Vellore";
 
-export const DEMO_USERS: AuthUser[] = [
+export const DEMO_USERS: Array<{
+  email: string;
+  password: string;
+  role: UserRole;
+  name: string;
+}> = [
   {
     email: "admin@starpolice.academy",
     password: "admin123",

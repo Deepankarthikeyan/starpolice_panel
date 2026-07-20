@@ -1,14 +1,21 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
-import { getMessages, getUploads } from "../storage";
+import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
+import type { UploadedFile } from "../types";
 
 const StudentDashboard = () => {
-  const uploads = getUploads();
-  const messages = getMessages();
+  const [uploads, setUploads] = useState<UploadedFile[]>([]);
+  const [adminMessages, setAdminMessages] = useState(0);
 
-  const latestUploads = useMemo(() => uploads.slice(0, 6), [uploads]);
-  const unreadAdminMessages = messages.filter((item) => item.senderRole === "admin").length;
+  useEffect(() => {
+    Promise.all([api.getUploads(), api.getMessages()])
+      .then(([uploadData, messageData]) => {
+        setUploads(uploadData);
+        setAdminMessages(messageData.filter((item) => item.senderRole === "admin").length);
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <>
@@ -26,9 +33,7 @@ const StudentDashboard = () => {
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Study Days</h6>
-              <h2>
-                {new Set(uploads.map((item) => item.date)).size}
-              </h2>
+              <h2>{new Set(uploads.map((item) => item.date)).size}</h2>
             </div>
           </div>
         </div>
@@ -36,7 +41,7 @@ const StudentDashboard = () => {
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Admin Messages</h6>
-              <h2>{unreadAdminMessages}</h2>
+              <h2>{adminMessages}</h2>
             </div>
           </div>
         </div>
@@ -47,7 +52,7 @@ const StudentDashboard = () => {
           <h4 className="card-title mb-0">Latest Study Materials</h4>
         </div>
         <div className="card-body">
-          {latestUploads.length === 0 ? (
+          {uploads.length === 0 ? (
             <p className="text-muted mb-0">No materials uploaded yet by admin.</p>
           ) : (
             <div className="table-responsive">
@@ -60,7 +65,7 @@ const StudentDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {latestUploads.map((upload) => (
+                  {uploads.slice(0, 6).map((upload) => (
                     <tr key={upload.id}>
                       <td>{upload.date}</td>
                       <td>{upload.name}</td>

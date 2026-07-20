@@ -1,13 +1,19 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DatePicker from "react-datepicker";
 import PageTitle from "../../layouts/PageTitle";
-import { getUploadsByDate } from "../storage";
+import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
+import type { UploadedFile } from "../types";
 
 const StudentMaterials = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [uploads, setUploads] = useState<UploadedFile[]>([]);
+
   const dateKey = useMemo(() => selectedDate.toISOString().slice(0, 10), [selectedDate]);
-  const uploads = useMemo(() => getUploadsByDate(dateKey), [dateKey]);
+
+  useEffect(() => {
+    api.getUploads(dateKey).then(setUploads).catch(console.error);
+  }, [dateKey]);
 
   return (
     <>
@@ -47,13 +53,18 @@ const StudentMaterials = () => {
                       </div>
                     </div>
                     {upload.category === "image" && (
-                      <img src={upload.dataUrl} alt={upload.name} className="img-fluid rounded" />
+                      <img src={upload.fileUrl} alt={upload.name} className="img-fluid rounded" />
                     )}
                     {upload.category === "video" && (
-                      <video src={upload.dataUrl} controls className="w-100 rounded" />
+                      <video src={upload.fileUrl} controls className="w-100 rounded" />
                     )}
                     {(upload.category === "pdf" || upload.category === "document") && (
-                      <a href={upload.dataUrl} download={upload.name} className="btn btn-sm btn-primary">
+                      <a
+                        href={upload.fileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-sm btn-primary"
+                      >
                         Download {upload.name}
                       </a>
                     )}

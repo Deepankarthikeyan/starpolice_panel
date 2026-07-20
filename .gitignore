@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+package/node_modules/
+server/node_modules/
+
+# Build
+package/dist/
+server/uploads/
+
+# Environment
+server/.env
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store

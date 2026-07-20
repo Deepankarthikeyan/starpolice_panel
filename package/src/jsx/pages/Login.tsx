@@ -4,22 +4,19 @@ import logo from "../../assets/images/star-police-academy-logo-white.png";
 import pol from "../../assets/images/pol.jpg";
 import BgImage from "../../assets/images/bg1.png";
 import { DEMO_USERS } from "../starPolice/constants";
+import { api } from "../starPolice/api";
 import type { AuthUser, UserRole } from "../starPolice/types";
 
 interface Props {
   setAuth: (auth: AuthUser) => void;
 }
 
-interface Errors {
-  email: string;
-  password: string;
-}
-
 const Login: React.FC<Props> = ({ setAuth }) => {
   const [role, setRole] = useState<UserRole>("admin");
   const [email, setEmail] = useState("admin@starpolice.academy");
   const [password, setPassword] = useState("admin123");
-  const [errors, setErrors] = useState<Errors>({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const onRoleChange = (nextRole: UserRole) => {
@@ -29,45 +26,24 @@ const Login: React.FC<Props> = ({ setAuth }) => {
       setEmail(demoUser.email);
       setPassword(demoUser.password);
     }
-    setErrors({ email: "", password: "" });
+    setError("");
   };
 
-  const onLogin = (e: React.FormEvent<HTMLFormElement>): void => {
+  const onLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    const newErrors: Errors = { email: "", password: "" };
-    let hasError = false;
-
-    if (!email) {
-      newErrors.email = "Email is required";
-      hasError = true;
+    try {
+      const user = await api.login(email, password, role);
+      localStorage.setItem("AUTH", JSON.stringify(user));
+      setAuth(user);
+      navigate(role === "admin" ? "/admin-dashboard" : "/student-dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setLoading(false);
     }
-    if (!password) {
-      newErrors.password = "Password is required";
-      hasError = true;
-    }
-
-    setErrors(newErrors);
-    if (hasError) return;
-
-    const user = DEMO_USERS.find(
-      (item) =>
-        item.email === email && item.password === password && item.role === role
-    );
-
-    if (!user) {
-      setErrors({
-        email: "Invalid credentials for the selected panel.",
-        password: "",
-      });
-      return;
-    }
-
-    localStorage.setItem("AUTH", JSON.stringify(user));
-    setAuth(user);
-    navigate(
-      role === "admin" ? "/admin-dashboard" : "/student-dashboard"
-    );
   };
 
   return (
@@ -128,9 +104,7 @@ const Login: React.FC<Props> = ({ setAuth }) => {
                       </button>
                     </div>
 
-                    {errors.email && (
-                      <div className="alert alert-danger py-2">{errors.email}</div>
-                    )}
+                    {error && <div className="alert alert-danger py-2">{error}</div>}
                     <form onSubmit={onLogin}>
                       <div className="mb-3">
                         <label className="mb-1">
@@ -143,6 +117,7 @@ const Login: React.FC<Props> = ({ setAuth }) => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="Type Your Email Address"
+                          required
                         />
                       </div>
                       <div className="mb-3">
@@ -156,37 +131,16 @@ const Login: React.FC<Props> = ({ setAuth }) => {
                           value={password}
                           placeholder="Type Your Password"
                           onChange={(e) => setPassword(e.target.value)}
+                          required
                         />
-                        {errors.password && (
-                          <div className="text-danger fs-12">
-                            {errors.password}
-                          </div>
-                        )}
-                      </div>
-                      <div className="row d-flex justify-content-between mt-4 mb-2">
-                        <div className="mb-3">
-                          <div className="form-check custom-checkbox ms-1">
-                            <input
-                              type="checkbox"
-                              className="form-check-input"
-                              id="basic_checkbox_1"
-                              required
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="basic_checkbox_1"
-                            >
-                              Remember my preference
-                            </label>
-                          </div>
-                        </div>
                       </div>
                       <div className="text-center">
                         <button
                           type="submit"
                           className="btn btn-primary btn-block"
+                          disabled={loading}
                         >
-                          Sign Me In
+                          {loading ? "Signing in..." : "Sign Me In"}
                         </button>
                       </div>
                     </form>

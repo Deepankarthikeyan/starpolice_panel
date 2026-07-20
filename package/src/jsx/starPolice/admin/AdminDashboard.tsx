@@ -1,19 +1,21 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
-import { getCalendarUploadCounts, getMessages, getUploads } from "../storage";
+import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
+import type { DashboardStats } from "../types";
 
 const AdminDashboard = () => {
-  const uploads = getUploads();
-  const messages = getMessages();
-  const calendarCounts = getCalendarUploadCounts();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [uploads, setUploads] = useState<Awaited<ReturnType<typeof api.getUploads>>>([]);
 
-  const categoryCounts = useMemo(() => {
-    return uploads.reduce<Record<string, number>>((acc, upload) => {
-      acc[upload.category] = (acc[upload.category] ?? 0) + 1;
-      return acc;
-    }, {});
-  }, [uploads]);
+  useEffect(() => {
+    Promise.all([api.getDashboardStats(), api.getUploads()])
+      .then(([dashboardStats, allUploads]) => {
+        setStats(dashboardStats);
+        setUploads(allUploads);
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <>
@@ -23,7 +25,7 @@ const AdminDashboard = () => {
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Total Uploads</h6>
-              <h2>{uploads.length}</h2>
+              <h2>{stats?.totalUploads ?? 0}</h2>
             </div>
           </div>
         </div>
@@ -31,7 +33,7 @@ const AdminDashboard = () => {
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Active Days</h6>
-              <h2>{Object.keys(calendarCounts).length}</h2>
+              <h2>{stats?.activeDays ?? 0}</h2>
             </div>
           </div>
         </div>
@@ -39,9 +41,7 @@ const AdminDashboard = () => {
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Student Messages</h6>
-              <h2>
-                {messages.filter((item) => item.senderRole === "student").length}
-              </h2>
+              <h2>{stats?.studentMessages ?? 0}</h2>
             </div>
           </div>
         </div>
@@ -49,9 +49,7 @@ const AdminDashboard = () => {
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Admin Replies</h6>
-              <h2>
-                {messages.filter((item) => item.senderRole === "admin").length}
-              </h2>
+              <h2>{stats?.adminReplies ?? 0}</h2>
             </div>
           </div>
         </div>
@@ -67,7 +65,7 @@ const AdminDashboard = () => {
               {Object.entries(FILE_CATEGORY_LABELS).map(([key, label]) => (
                 <div key={key} className="d-flex justify-content-between py-2 border-bottom">
                   <span>{label}</span>
-                  <strong>{categoryCounts[key] ?? 0}</strong>
+                  <strong>{stats?.categoryCounts?.[key] ?? 0}</strong>
                 </div>
               ))}
             </div>

@@ -1,15 +1,20 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import type { EventClickArg } from "@fullcalendar/core";
 import PageTitle from "../../layouts/PageTitle";
-import { getUploads } from "../storage";
+import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
+import type { UploadedFile } from "../types";
 
 const MonthlyCalendar = () => {
-  const uploads = getUploads();
+  const [uploads, setUploads] = useState<UploadedFile[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    api.getUploads().then(setUploads).catch(console.error);
+  }, []);
 
   const events = useMemo(
     () =>
@@ -64,13 +69,18 @@ const MonthlyCalendar = () => {
                       {FILE_CATEGORY_LABELS[upload.category]}
                     </small>
                     {upload.category === "image" && (
-                      <img src={upload.dataUrl} alt={upload.name} className="img-fluid rounded" />
+                      <img src={upload.fileUrl} alt={upload.name} className="img-fluid rounded" />
                     )}
                     {upload.category === "video" && (
-                      <video src={upload.dataUrl} controls className="w-100 rounded" />
+                      <video src={upload.fileUrl} controls className="w-100 rounded" />
                     )}
                     {(upload.category === "pdf" || upload.category === "document") && (
-                      <a href={upload.dataUrl} download={upload.name} className="btn btn-sm btn-outline-primary">
+                      <a
+                        href={upload.fileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-sm btn-outline-primary"
+                      >
                         Download
                       </a>
                     )}

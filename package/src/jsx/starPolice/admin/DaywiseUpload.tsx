@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DatePicker from "react-datepicker";
 import PageTitle from "../../layouts/PageTitle";
-import { deleteUpload, getUploads, saveUpload } from "../storage";
+import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
 import type { FileCategory, UploadedFile } from "../types";
 
@@ -15,45 +15,40 @@ const categoryAccept: Record<FileCategory, string> = {
 const DaywiseUpload = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [category, setCategory] = useState<FileCategory>("video");
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [uploads, setUploads] = useState<UploadedFile[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const dateKey = useMemo(() => selectedDate.toISOString().slice(0, 10), [selectedDate]);
-  const uploads = useMemo(() => {
-    void refreshKey;
-    return getUploads().filter((item) => item.date === dateKey);
-  }, [dateKey, refreshKey]);
 
-  const readFile = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result));
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  const loadUploads = async () => {
+    const data = await api.getUploads(dateKey);
+    setUploads(data);
+  };
+
+  useEffect(() => {
+    loadUploads().catch(console.error);
+  }, [dateKey]);
 
   const handleFiles = async (files: FileList | null) => {
     if (!files?.length) return;
+    setLoading(true);
+    setError("");
 
-    for (const file of Array.from(files)) {
-      const dataUrl = await readFile(file);
-      const upload: UploadedFile = {
-        id: crypto.randomUUID(),
-        date: dateKey,
-        name: file.name,
-        category,
-        dataUrl,
-        uploadedAt: new Date().toISOString(),
-        uploadedBy: "Academy Admin",
-      };
-      saveUpload(upload);
+    try {
+      await api.uploadFiles(dateKey, category, Array.from(files));
+      await loadUploads();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setLoading(false);
     }
-
-    setRefreshKey((value) => value + 1);
   };
 
   return (
     <>
       <PageTitle motherMenu="Admin Panel" activeMenu="Daywise Upload" pageContent="" />
+      {error && <div className="alert alert-danger">{error}</div>}
       <div className="row">
         <div className="col-xl-4">
           <div className="card">
@@ -89,6 +84,7 @@ const DaywiseUpload = () => {
                   className="form-control"
                   accept={categoryAccept[category]}
                   multiple
+                  disabled={loading}
                   onChange={(event) => handleFiles(event.target.files)}
                 />
               </div>
@@ -125,13 +121,18 @@ const DaywiseUpload = () => {
                           <td>{new Date(upload.uploadedAt).toLocaleString()}</td>
                           <td>
                             {upload.category === "image" && (
-                              <img src={upload.dataUrl} alt={upload.name} width={60} />
+                              <img src={upload.fileUrl} alt={upload.name} width={60} />
                             )}
                             {upload.category === "video" && (
-                              <video src={upload.dataUrl} width={120} controls />
+                              <video src={upload.fileUrl} width={120} controls />
                             )}
                             {(upload.category === "pdf" || upload.category === "document") && (
-                              <a href={upload.dataUrl} download={upload.name} className="btn btn-sm btn-outline-primary">
+                              <a
+                                href={upload.fileUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-sm btn-outline-primary"
+                              >
                                 Download
                               </a>
                             )}
@@ -139,9 +140,9 @@ const DaywiseUpload = () => {
                           <td>
                             <button
                               className="btn btn-sm btn-danger"
-                              onClick={() => {
-                                deleteUpload(upload.id);
-                                setRefreshKey((value) => value + 1);
+                              onClick={async () => {
+                                await api.deleteUpload(upload.id);
+                                await loadUploads();
                               }}
                             >
                               Delete

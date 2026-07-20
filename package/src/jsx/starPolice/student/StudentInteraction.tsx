@@ -1,35 +1,40 @@
-import { FormEvent, useContext, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
-import { ThemeContext } from "../../../context/ThemeContext";
-import { getMessages, saveMessage } from "../storage";
+import { api } from "../api";
 import type { ChatMessage } from "../types";
 
 const StudentInteraction = () => {
-  const { auth } = useContext(ThemeContext);
   const [message, setMessage] = useState("");
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const messages = useMemo(() => {
-    void refreshKey;
-    return getMessages();
-  }, [refreshKey]);
+  const loadMessages = async () => {
+    const data = await api.getMessages();
+    setMessages(data);
+  };
 
-  const onSubmit = (event: FormEvent) => {
+  useEffect(() => {
+    loadMessages().catch(console.error);
+    const interval = setInterval(() => {
+      loadMessages().catch(console.error);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!message.trim() || !auth) return;
+    if (!message.trim()) return;
 
-    const entry: ChatMessage = {
-      id: crypto.randomUUID(),
-      senderRole: "student",
-      senderName: auth.name,
-      senderEmail: auth.email,
-      message: message.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    saveMessage(entry);
-    setMessage("");
-    setRefreshKey((value) => value + 1);
+    setLoading(true);
+    try {
+      await api.sendMessage(message.trim());
+      setMessage("");
+      await loadMessages();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,7 +78,7 @@ const StudentInteraction = () => {
               />
             </div>
             <div className="col-md-2 d-flex align-items-start">
-              <button type="submit" className="btn btn-primary w-100">
+              <button type="submit" className="btn btn-primary w-100" disabled={loading}>
                 Send
               </button>
             </div>
