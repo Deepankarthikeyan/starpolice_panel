@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../../assets/images/logo-full.png";
+import logo from "../../assets/images/star-police-academy-logo.png";
 import logolight from "../../assets/images/logo-white.png";
 import pol from "../../assets/images/pol.jpg";
 import BgImage from "../../assets/images/bg1.png";
+import { DEMO_USERS } from "../starPolice/constants";
+import type { AuthUser, UserRole } from "../starPolice/types";
 
 interface Props {
-  setAuth: (auth: { email: string; password: string }) => void;
+  setAuth: (auth: AuthUser) => void;
 }
 
 interface Errors {
@@ -15,10 +17,21 @@ interface Errors {
 }
 
 const Login: React.FC<Props> = ({ setAuth }) => {
-  const [email, setEmail] = useState<string>("demo@example.com");
-  const [password, setPassword] = useState<string>("123456");
+  const [role, setRole] = useState<UserRole>("admin");
+  const [email, setEmail] = useState("admin@starpolice.academy");
+  const [password, setPassword] = useState("admin123");
   const [errors, setErrors] = useState<Errors>({ email: "", password: "" });
   const navigate = useNavigate();
+
+  const onRoleChange = (nextRole: UserRole) => {
+    setRole(nextRole);
+    const demoUser = DEMO_USERS.find((user) => user.role === nextRole);
+    if (demoUser) {
+      setEmail(demoUser.email);
+      setPassword(demoUser.password);
+    }
+    setErrors({ email: "", password: "" });
+  };
 
   const onLogin = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
@@ -38,10 +51,24 @@ const Login: React.FC<Props> = ({ setAuth }) => {
     setErrors(newErrors);
     if (hasError) return;
 
-    const user = { email, password };
+    const user = DEMO_USERS.find(
+      (item) =>
+        item.email === email && item.password === password && item.role === role
+    );
+
+    if (!user) {
+      setErrors({
+        email: "Invalid credentials for the selected panel.",
+        password: "",
+      });
+      return;
+    }
+
     localStorage.setItem("AUTH", JSON.stringify(user));
-    setAuth(user); // Update parent state
-    navigate("/dashboard"); // Redirect to dashboard
+    setAuth(user);
+    navigate(
+      role === "admin" ? "/admin-dashboard" : "/student-dashboard"
+    );
   };
 
   return (
@@ -60,15 +87,15 @@ const Login: React.FC<Props> = ({ setAuth }) => {
                       <Link to={"#"}>
                         <img
                           className="logo-abbr dark-logo"
-                          width="200"
+                          width="280"
                           src={logo}
-                          alt=""
+                          alt="Star Police Academy"
                         />
                         <img
                           className="logo-abbr light-logo text-center m-auto"
-                          width="200"
+                          width="280"
                           src={logolight}
-                          alt=""
+                          alt="Star Police Academy"
                         />
                       </Link>
                     </div>
@@ -80,32 +107,37 @@ const Login: React.FC<Props> = ({ setAuth }) => {
                 </div>
                 <div className="col-xl-6 col-md-6">
                   <div className="sign-in-your px-2">
-                    <h4 className="fs-20 ">Sign in your account</h4>
+                    <h4 className="fs-20">Sign in your account</h4>
                     <span>
-                      Welcome back! Login with your data that you entered during
-                      registration
+                      Welcome to Star Police Academy. Choose your panel and sign
+                      in.
                     </span>
-                    <div className="login-social">
-                      <Link to={"#"} className="btn btn-primary  d-block my-3">
-                        <i className="fab fa-google me-2"></i>Login with Google
-                      </Link>
-                      <Link
-                        to={"#"}
-                        className="btn btn-secondary  d-block my-3"
+
+                    <div className="btn-group w-100 my-4" role="group">
+                      <button
+                        type="button"
+                        className={`btn ${
+                          role === "admin" ? "btn-primary" : "btn-outline-primary"
+                        }`}
+                        onClick={() => onRoleChange("admin")}
                       >
-                        <i className="fab fa-facebook-f me-2 facebook-log"></i>
-                        Login with Facebook
-                      </Link>
+                        Admin Panel
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn ${
+                          role === "student"
+                            ? "btn-primary"
+                            : "btn-outline-primary"
+                        }`}
+                        onClick={() => onRoleChange("student")}
+                      >
+                        Student Panel
+                      </button>
                     </div>
+
                     {errors.email && (
-                      <div className="bg-red-300 text-red-900 border border-red-900 p-1 my-2">
-                        {errors.email}
-                      </div>
-                    )}
-                    {errors.password && (
-                      <div className="bg-green-300 text-green-900 border border-green-900 p-1 my-2">
-                        {errors.password}
-                      </div>
+                      <div className="alert alert-danger py-2">{errors.email}</div>
                     )}
                     <form onSubmit={onLogin}>
                       <div className="mb-3">
@@ -120,12 +152,6 @@ const Login: React.FC<Props> = ({ setAuth }) => {
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="Type Your Email Address"
                         />
-
-                        {errors.email && (
-                          <div className="text-danger fs-12">
-                            {errors.email}
-                          </div>
-                        )}
                       </div>
                       <div className="mb-3">
                         <label className="mb-1">
@@ -161,9 +187,6 @@ const Login: React.FC<Props> = ({ setAuth }) => {
                               Remember my preference
                             </label>
                           </div>
-                        </div>
-                        <div className="mb-3">
-                          <Link to="/page-register">Sign up</Link>
                         </div>
                       </div>
                       <div className="text-center">

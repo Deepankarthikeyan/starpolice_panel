@@ -47,11 +47,10 @@ const StudentInteraction = () => {
               messages.map((item) => (
                 <div
                   key={item.id}
-                  className={`star-police-chat-bubble ${
-                    item.senderRole === "admin"
-                      ? "star-police-chat-admin"
-                      : "star-police-chat-student"
+                  className={`p-3 mb-3 rounded ${
+                    item.senderRole === "admin" ? "bg-primary-subtle ms-auto" : "bg-light"
                   }`}
+                  style={{ maxWidth: "75%" }}
                 >
                   <div className="fw-semibold">
                     {item.senderName} ({item.senderRole})

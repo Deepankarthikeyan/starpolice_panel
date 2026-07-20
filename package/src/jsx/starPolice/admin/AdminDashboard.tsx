@@ -20,36 +20,36 @@ const AdminDashboard = () => {
       <PageTitle motherMenu="Admin Panel" activeMenu="Dashboard" pageContent="" />
       <div className="row">
         <div className="col-xl-3 col-sm-6">
-          <div className="card star-police-stat-card">
+          <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Total Uploads</h6>
-              <h2 className="star-police-title">{uploads.length}</h2>
+              <h2>{uploads.length}</h2>
             </div>
           </div>
         </div>
         <div className="col-xl-3 col-sm-6">
-          <div className="card star-police-stat-card">
+          <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Active Days</h6>
-              <h2 className="star-police-title">{Object.keys(calendarCounts).length}</h2>
+              <h2>{Object.keys(calendarCounts).length}</h2>
             </div>
           </div>
         </div>
         <div className="col-xl-3 col-sm-6">
-          <div className="card star-police-stat-card">
+          <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Student Messages</h6>
-              <h2 className="star-police-title">
+              <h2>
                 {messages.filter((item) => item.senderRole === "student").length}
               </h2>
             </div>
           </div>
         </div>
         <div className="col-xl-3 col-sm-6">
-          <div className="card star-police-stat-card">
+          <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Admin Replies</h6>
-              <h2 className="star-police-title">
+              <h2>
                 {messages.filter((item) => item.senderRole === "admin").length}
               </h2>
             </div>

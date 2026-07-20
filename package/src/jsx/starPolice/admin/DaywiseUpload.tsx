@@ -82,7 +82,7 @@ const DaywiseUpload = () => {
                 ))}
               </select>
 
-              <div className="star-police-upload-box p-4 text-center">
+              <div className="border rounded p-4 text-center bg-light">
                 <p className="mb-3">Upload videos, PDFs, images, and documents for the selected day.</p>
                 <input
                   type="file"

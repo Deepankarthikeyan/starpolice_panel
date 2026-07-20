@@ -15,28 +15,28 @@ const StudentDashboard = () => {
       <PageTitle motherMenu="Student Panel" activeMenu="Dashboard" pageContent="" />
       <div className="row">
         <div className="col-xl-4 col-sm-6">
-          <div className="card star-police-stat-card">
+          <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Available Materials</h6>
-              <h2 className="star-police-title">{uploads.length}</h2>
+              <h2>{uploads.length}</h2>
             </div>
           </div>
         </div>
         <div className="col-xl-4 col-sm-6">
-          <div className="card star-police-stat-card">
+          <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Study Days</h6>
-              <h2 className="star-police-title">
+              <h2>
                 {new Set(uploads.map((item) => item.date)).size}
               </h2>
             </div>
           </div>
         </div>
         <div className="col-xl-4 col-sm-6">
-          <div className="card star-police-stat-card">
+          <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Admin Messages</h6>
-              <h2 className="star-police-title">{unreadAdminMessages}</h2>
+              <h2>{unreadAdminMessages}</h2>
             </div>
           </div>
         </div>

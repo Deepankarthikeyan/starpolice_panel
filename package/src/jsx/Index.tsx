@@ -15,12 +15,10 @@ import ScrollToTop from "./layouts/ScrollToTop";
 import WalletBar from "./layouts/WalletBar";
 
 /// Star Police Academy Panels
-import AdminLayout from "./starPolice/admin/AdminLayout";
 import AdminDashboard from "./starPolice/admin/AdminDashboard";
 import DaywiseUpload from "./starPolice/admin/DaywiseUpload";
 import AdminStudentInteraction from "./starPolice/admin/StudentInteraction";
 import MonthlyCalendar from "./starPolice/admin/MonthlyCalendar";
-import StudentLayout from "./starPolice/student/StudentLayout";
 import StudentDashboard from "./starPolice/student/StudentDashboard";
 import StudentMaterials from "./starPolice/student/StudentMaterials";
 import StudentInteraction from "./starPolice/student/StudentInteraction";
@@ -146,9 +144,17 @@ interface routerType {
 const Markup = () => {
   const { auth } = useContext(ThemeContext);
   const defaultRoute =
-    auth?.role === "student" ? "/student-panel/dashboard" : "/admin/dashboard";
+    auth?.role === "student" ? "/student-dashboard" : "/admin-dashboard";
 
   const routhPath: routerType[] = [
+    { url: "admin-dashboard", component: <AdminDashboard /> },
+    { url: "admin-daywise-upload", component: <DaywiseUpload /> },
+    { url: "admin-student-interaction", component: <AdminStudentInteraction /> },
+    { url: "admin-monthly-calendar", component: <MonthlyCalendar /> },
+    { url: "student-dashboard", component: <StudentDashboard /> },
+    { url: "student-materials", component: <StudentMaterials /> },
+    { url: "student-interaction", component: <StudentInteraction /> },
+    { url: "student-calendar", component: <StudentCalendar /> },
     { url: "finance", component: <Finance /> },
     { url: "student", component: <Students /> },
     { url: "student-detail", component: <StudentDetails /> },
@@ -222,20 +228,6 @@ const Markup = () => {
     <>
       <Routes>
         <Route path="/" element={<Navigate to={defaultRoute} replace />} />
-
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/daywise-upload" element={<DaywiseUpload />} />
-          <Route path="/admin/student-interaction" element={<AdminStudentInteraction />} />
-          <Route path="/admin/monthly-calendar" element={<MonthlyCalendar />} />
-        </Route>
-
-        <Route element={<StudentLayout />}>
-          <Route path="/student-panel/dashboard" element={<StudentDashboard />} />
-          <Route path="/student-panel/materials" element={<StudentMaterials />} />
-          <Route path="/student-panel/interaction" element={<StudentInteraction />} />
-          <Route path="/student-panel/calendar" element={<StudentCalendar />} />
-        </Route>
 
         <Route path="/page-error-400" element={<Error400 />} />
         <Route path="/page-error-403" element={<Error403 />} />

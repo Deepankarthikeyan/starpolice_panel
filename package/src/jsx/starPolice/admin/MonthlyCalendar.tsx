@@ -31,7 +31,7 @@ const MonthlyCalendar = () => {
       <PageTitle motherMenu="Admin Panel" activeMenu="Monthly Calendar" pageContent="" />
       <div className="row">
         <div className="col-xl-8">
-          <div className="card star-police-calendar">
+          <div className="card">
             <div className="card-body">
               <FullCalendar
                 plugins={[dayGridPlugin, interactionPlugin]}

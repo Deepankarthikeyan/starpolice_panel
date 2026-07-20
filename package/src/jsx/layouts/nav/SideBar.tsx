@@ -1,7 +1,7 @@
 import { useReducer, useEffect, useState, useContext } from "react";
 import { Collapse } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { MenuList } from "./Menu";
+import { getMenuList } from "./Menu";
 import { useScrollPosition } from "@n8tb1t/use-scroll-position";
 import { ThemeContext } from "../../../context/ThemeContext";
 
@@ -35,7 +35,8 @@ const initialState: State = {
 
 const SideBar: React.FC = () => {
   const [state, setState] = useReducer(reducer, initialState);
-  const { setIconhover } = useContext(ThemeContext);
+  const { auth, setIconhover } = useContext(ThemeContext);
+  const menuList = getMenuList(auth?.role);
 
   useEffect(() => {
     const btn = document.querySelector(".nav-control") as HTMLDivElement | null;
@@ -52,13 +53,6 @@ const SideBar: React.FC = () => {
       btn?.removeEventListener("click", toggleFunc);
     };
   }, []);
-
-  const heartElement = document.querySelector(
-    ".heart"
-  ) as HTMLSpanElement | null;
-  const heartBlast = () => {
-    heartElement?.classList.toggle("heart-blast");
-  };
 
   const [hideOnScroll, setHideOnScroll] = useState(true);
   useScrollPosition(
@@ -81,7 +75,10 @@ const SideBar: React.FC = () => {
   path = path.split("/").pop() || "";
 
   useEffect(() => {
-    MenuList.forEach((data: MenuItem) => {
+    menuList.forEach((data: MenuItem) => {
+      if (path === data.to) {
+        setState({ active: data.title });
+      }
       data.content?.forEach((item) => {
         if (path === item.to) {
           setState({ active: data.title });
@@ -93,7 +90,7 @@ const SideBar: React.FC = () => {
         });
       });
     });
-  }, [path]);
+  }, [path, menuList]);
 
   function hoverHandler() {
     if (
@@ -112,7 +109,7 @@ const SideBar: React.FC = () => {
     >
       <div className="dlabnav-scroll">
         <ul className="metismenu" id="menu">
-          {MenuList.map((data: MenuItem, index: number) => {
+          {menuList.map((data: MenuItem, index: number) => {
             const menuClass = data.classsChange;
             if (menuClass === "menu-title") {
               return (
@@ -228,12 +225,9 @@ const SideBar: React.FC = () => {
 
         <div className="copyright">
           <p>
-            <strong>School Admission Dashboard</strong>
+            <strong>Star Police Academy</strong>
           </p>
-          <p className="fs-12">
-            Made with <span className="heart" onClick={heartBlast}></span> by
-            DexignLab
-          </p>
+          <p className="fs-12">Vellore — No. 1 Police Academy in Tamil Nadu</p>
         </div>
       </div>
     </div>

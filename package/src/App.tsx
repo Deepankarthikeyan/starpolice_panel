@@ -2,13 +2,12 @@ import "react-datepicker/dist/react-datepicker.css";
 import "nouislider/distribute/nouislider.css";
 import "ckeditor5/ckeditor5.css";
 import "./assets/css/style.css";
-import "./jsx/starPolice/styles.css";
 
 import { Fragment, Suspense, useContext, useEffect } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 
 import Index from "./jsx/Index";
-import Login from "./jsx/starPolice/auth/Login";
+import Login from "./jsx/pages/Login";
 import { ThemeContext } from "./context/ThemeContext";
 import type { AuthUser } from "./jsx/starPolice/types";
 
