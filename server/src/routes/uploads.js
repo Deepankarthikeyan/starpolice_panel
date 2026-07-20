@@ -2,6 +2,7 @@ import express from "express";
 import Upload from "../models/Upload.js";
 import { authRequired, adminOnly } from "../middleware/auth.js";
 import { upload } from "../middleware/upload.js";
+import { notifyAllStudents } from "../utils/notifications.js";
 
 const router = express.Router();
 
@@ -57,6 +58,14 @@ router.post("/", authRequired, adminOnly, upload.array("files", 10), async (req,
         uploadedByName: req.user.name,
       });
       saved.push(mapUpload(entry));
+    }
+
+    if (saved.length) {
+      await notifyAllStudents({
+        title: "New Study Material",
+        message: `${saved.length} file(s) uploaded for ${date}`,
+        type: "upload",
+      });
     }
 
     res.status(201).json(saved);

@@ -1,6 +1,7 @@
 import express from "express";
 import Message from "../models/Message.js";
 import { authRequired } from "../middleware/auth.js";
+import { notifyAllAdmins, notifyAllStudents } from "../utils/notifications.js";
 
 const router = express.Router();
 
@@ -38,6 +39,20 @@ router.post("/", authRequired, async (req, res) => {
       senderEmail: req.user.email,
       message: message.trim(),
     });
+
+    if (req.user.role === "student") {
+      await notifyAllAdmins({
+        title: "New Student Message",
+        message: `${req.user.name}: ${message.trim().slice(0, 80)}`,
+        type: "message",
+      });
+    } else {
+      await notifyAllStudents({
+        title: "Admin Reply",
+        message: message.trim().slice(0, 80),
+        type: "message",
+      });
+    }
 
     res.status(201).json(mapMessage(entry));
   } catch (error) {

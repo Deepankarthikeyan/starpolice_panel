@@ -38,3 +38,28 @@ export interface DashboardStats {
   categoryCounts: Record<string, number>;
   recentUploads: Array<{ date: string; category: FileCategory }>;
 }
+
+export interface Note {
+  id: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AcademyAlert {
+  id: string;
+  title: string;
+  message: string;
+  category: "general" | "server" | "social";
+  createdByName: string;
+  createdAt: string;
+}
+
+export interface AppNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: "message" | "upload" | "alert" | "system";
+  read: boolean;
+  createdAt: string;
+}

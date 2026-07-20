@@ -1,5 +1,8 @@
-import React from "react";
+import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ThemeContext } from "../../../context/ThemeContext";
+import { api } from "../../starPolice/api";
+import type { Note } from "../../starPolice/types";
 
 interface NotesProps {
   toggleTab: string;
@@ -8,6 +11,64 @@ interface NotesProps {
 }
 
 const Notes: React.FC<NotesProps> = ({ toggleTab, toggleChatBox }) => {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [content, setContent] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { auth } = useContext(ThemeContext);
+
+  const loadNotes = async () => {
+    if (!auth?.token) return;
+    const data = await api.getNotes();
+    setNotes(data);
+  };
+
+  useEffect(() => {
+    loadNotes().catch(console.error);
+  }, [auth?.token]);
+
+  const resetForm = () => {
+    setContent("");
+    setEditingId(null);
+    setShowForm(false);
+  };
+
+  const onSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!content.trim()) return;
+
+    setLoading(true);
+    try {
+      if (editingId) {
+        await api.updateNote(editingId, content.trim());
+      } else {
+        await api.createNote(content.trim());
+      }
+      resetForm();
+      await loadNotes();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onEdit = (note: Note) => {
+    setEditingId(note.id);
+    setContent(note.content);
+    setShowForm(true);
+  };
+
+  const onDelete = async (id: string) => {
+    try {
+      await api.deleteNote(id);
+      await loadNotes();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div
       className={`tab-pane fade ${toggleTab === "notes" ? "active show" : ""}`}
@@ -15,7 +76,15 @@ const Notes: React.FC<NotesProps> = ({ toggleTab, toggleChatBox }) => {
     >
       <div className="card mb-sm-3 mb-md-0 note_card">
         <div className="card-header chat-list-header text-center">
-          <Link to="#">
+          <Link
+            to="#"
+            onClick={(event) => {
+              event.preventDefault();
+              setShowForm(true);
+              setEditingId(null);
+              setContent("");
+            }}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -25,14 +94,7 @@ const Notes: React.FC<NotesProps> = ({ toggleTab, toggleChatBox }) => {
               version="1.1"
             >
               <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                <rect
-                  fill="#000000"
-                  x="4"
-                  y="11"
-                  width="16"
-                  height="2"
-                  rx="1"
-                />
+                <rect fill="#000000" x="4" y="11" width="16" height="2" rx="1" />
                 <rect
                   fill="#000000"
                   opacity="0.3"
@@ -50,7 +112,7 @@ const Notes: React.FC<NotesProps> = ({ toggleTab, toggleChatBox }) => {
             <h6 className="mb-1">Notes</h6>
             <p className="mb-0">Add New Notes</p>
           </div>
-          <Link to="#">
+          <Link to="#" onClick={(event) => event.preventDefault()}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -76,6 +138,33 @@ const Notes: React.FC<NotesProps> = ({ toggleTab, toggleChatBox }) => {
             </svg>
           </Link>
         </div>
+
+        {showForm && (
+          <div className="card-body border-bottom p-3">
+            <form onSubmit={onSubmit}>
+              <textarea
+                className="form-control mb-2"
+                rows={3}
+                placeholder="Write your note..."
+                value={content}
+                onChange={(event) => setContent(event.target.value)}
+              />
+              <div className="d-flex gap-2">
+                <button type="submit" className="btn btn-primary btn-sm" disabled={loading}>
+                  {editingId ? "Update" : "Save"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-light btn-sm"
+                  onClick={resetForm}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         <div
           className={`card-body contacts_body p-0 dlab-scroll ${
             toggleChatBox ? "ps ps--active-y" : ""
@@ -83,70 +172,42 @@ const Notes: React.FC<NotesProps> = ({ toggleTab, toggleChatBox }) => {
           id="DZ_W_Contacts_Body2"
         >
           <ul className="contacts">
-            <li className="active">
-              <div className="d-flex bd-highlight">
-                <div className="user_info">
-                  <span>New order placed..</span>
-                  <p>10 Aug 2022</p>
-                </div>
-                <div className="ms-auto">
-                  <Link to="#" className="btn btn-primary btn-xs sharp me-1">
-                    <i className="fas fa-pencil-alt"></i>
-                  </Link>
-                  <Link to="#" className="btn btn-danger btn-xs sharp">
-                    <i className="fa fa-trash"></i>
-                  </Link>
-                </div>
-              </div>
-            </li>
-            <li>
-              <div className="d-flex bd-highlight">
-                <div className="user_info">
-                  <span>Youtube, a video-sharing website..</span>
-                  <p>10 Aug 2022</p>
-                </div>
-                <div className="ms-auto">
-                  <Link to="#" className="btn btn-primary btn-xs sharp me-1">
-                    <i className="fas fa-pencil-alt"></i>
-                  </Link>
-                  <Link to="#" className="btn btn-danger btn-xs sharp">
-                    <i className="fa fa-trash"></i>
-                  </Link>
-                </div>
-              </div>
-            </li>
-            <li>
-              <div className="d-flex bd-highlight">
-                <div className="user_info">
-                  <span>john just buy your product..</span>
-                  <p>10 Aug 2022</p>
-                </div>
-                <div className="ms-auto">
-                  <Link to="#" className="btn btn-primary btn-xs sharp me-1">
-                    <i className="fas fa-pencil-alt"></i>
-                  </Link>
-                  <Link to="#" className="btn btn-danger btn-xs sharp">
-                    <i className="fa fa-trash"></i>
-                  </Link>
-                </div>
-              </div>
-            </li>
-            <li>
-              <div className="d-flex bd-highlight">
-                <div className="user_info">
-                  <span>Athan Jacoby</span>
-                  <p>10 Aug 2022</p>
-                </div>
-                <div className="ms-auto">
-                  <Link to="#" className="btn btn-primary btn-xs sharp me-1">
-                    <i className="fas fa-pencil-alt"></i>
-                  </Link>
-                  <Link to="#" className="btn btn-danger btn-xs sharp">
-                    <i className="fa fa-trash"></i>
-                  </Link>
-                </div>
-              </div>
-            </li>
+            {notes.length === 0 ? (
+              <li className="p-3 text-muted text-center">No notes yet. Click + to add one.</li>
+            ) : (
+              notes.map((note) => (
+                <li key={note.id} className={editingId === note.id ? "active" : ""}>
+                  <div className="d-flex bd-highlight">
+                    <div className="user_info">
+                      <span>{note.content}</span>
+                      <p>{new Date(note.updatedAt).toLocaleDateString()}</p>
+                    </div>
+                    <div className="ms-auto">
+                      <Link
+                        to="#"
+                        className="btn btn-primary btn-xs sharp me-1"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          onEdit(note);
+                        }}
+                      >
+                        <i className="fas fa-pencil-alt"></i>
+                      </Link>
+                      <Link
+                        to="#"
+                        className="btn btn-danger btn-xs sharp"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          onDelete(note.id);
+                        }}
+                      >
+                        <i className="fa fa-trash"></i>
+                      </Link>
+                    </div>
+                  </div>
+                </li>
+              ))
+            )}
           </ul>
         </div>
       </div>

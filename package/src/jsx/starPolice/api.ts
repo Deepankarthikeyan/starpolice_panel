@@ -1,4 +1,12 @@
-import type { AuthUser, ChatMessage, DashboardStats, UploadedFile } from "./types";
+import type {
+  AcademyAlert,
+  AppNotification,
+  AuthUser,
+  ChatMessage,
+  DashboardStats,
+  Note,
+  UploadedFile,
+} from "./types";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
@@ -82,5 +90,66 @@ export const api = {
 
   getDashboardStats() {
     return request<DashboardStats>("/api/dashboard/stats");
+  },
+
+  getNotes() {
+    return request<Note[]>("/api/notes");
+  },
+
+  createNote(content: string) {
+    return request<Note>("/api/notes", {
+      method: "POST",
+      body: JSON.stringify({ content }),
+    });
+  },
+
+  updateNote(id: string, content: string) {
+    return request<Note>(`/api/notes/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ content }),
+    });
+  },
+
+  deleteNote(id: string) {
+    return request<{ message: string }>(`/api/notes/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  getAlerts() {
+    return request<AcademyAlert[]>("/api/alerts");
+  },
+
+  createAlert(title: string, message: string, category?: AcademyAlert["category"]) {
+    return request<AcademyAlert>("/api/alerts", {
+      method: "POST",
+      body: JSON.stringify({ title, message, category }),
+    });
+  },
+
+  deleteAlert(id: string) {
+    return request<{ message: string }>(`/api/alerts/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  getNotifications() {
+    return request<AppNotification[]>("/api/notifications");
+  },
+
+  getUnreadNotificationCount() {
+    return request<{ count: number }>("/api/notifications/unread-count");
+  },
+
+  markNotificationRead(id: string) {
+    return request<AppNotification>(`/api/notifications/${id}/read`, {
+      method: "PATCH",
+    });
+  },
+
+  markAllNotificationsRead() {
+    return request<{ message: string }>("/api/notifications/read-all", {
+      method: "PATCH",
+    });
   },
 };

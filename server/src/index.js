@@ -7,6 +7,9 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import uploadRoutes from "./routes/uploads.js";
 import messageRoutes from "./routes/messages.js";
+import noteRoutes from "./routes/notes.js";
+import alertRoutes from "./routes/alerts.js";
+import notificationRoutes from "./routes/notifications.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import { uploadDir } from "./middleware/upload.js";
 
@@ -33,6 +36,9 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/notes", noteRoutes);
+app.use("/api/alerts", alertRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 app.use((error, _req, res, _next) => {

@@ -1,21 +1,52 @@
-import { useState } from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ThemeContext } from "../../../context/ThemeContext";
+import { api } from "../../starPolice/api";
+import type { ChatMessage } from "../../starPolice/types";
 
-// Define types for the props
 interface MsgBoxProps {
-  avatar1: string;
-  avatar2: string;
+  title: string;
   openMsg: boolean;
   offMsg: () => void;
+  messages: ChatMessage[];
+  onMessageSent: () => Promise<void>;
 }
 
 const MsgBox: React.FC<MsgBoxProps> = ({
-  avatar1,
-  avatar2,
+  title,
   openMsg,
   offMsg,
+  messages,
+  onMessageSent,
 }) => {
   const [toggle, setToggle] = useState<boolean>(false);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { auth } = useContext(ThemeContext);
+
+  useEffect(() => {
+    if (!openMsg) return;
+    const container = document.getElementById("DZ_W_Contacts_Body3");
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [messages, openMsg]);
+
+  const onSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!message.trim()) return;
+
+    setLoading(true);
+    try {
+      await api.sendMessage(message.trim());
+      setMessage("");
+      await onMessageSent();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -57,7 +88,7 @@ const MsgBox: React.FC<MsgBoxProps> = ({
           </svg>
         </Link>
         <div>
-          <h6 className="mb-1">Chat with Khelesh</h6>
+          <h6 className="mb-1">Chat with {title}</h6>
           <p className="mb-0 text-success">Online</p>
         </div>
         <div className="dropdown">
@@ -89,18 +120,7 @@ const MsgBox: React.FC<MsgBoxProps> = ({
             }`}
           >
             <li className="dropdown-item" onClick={() => setToggle(false)}>
-              <i className="fa fa-user-circle text-primary me-2"></i> View
-              profile
-            </li>
-            <li className="dropdown-item" onClick={() => setToggle(false)}>
-              <i className="fa fa-users text-primary me-2"></i> Add to close
-              friends
-            </li>
-            <li className="dropdown-item" onClick={() => setToggle(false)}>
-              <i className="fa fa-plus text-primary me-2"></i> Add to group
-            </li>
-            <li className="dropdown-item" onClick={() => setToggle(false)}>
-              <i className="fa fa-ban text-primary me-2"></i> Block
+              <i className="fa fa-user-circle text-primary me-2"></i> View profile
             </li>
           </ul>
         </div>
@@ -109,38 +129,56 @@ const MsgBox: React.FC<MsgBoxProps> = ({
         className={`card-body msg_card_body dlab-scroll ${openMsg ? "" : ""} `}
         id="DZ_W_Contacts_Body3"
       >
-        <div className="d-flex justify-content-start mb-4">
-          <div className="img_cont_msg">
-            <img src={avatar1} className="rounded-circle user_img_msg" alt="" />
-          </div>
-          <div className="msg_cotainer">
-            Hi, how are you samim?
-            <span className="msg_time">8:40 AM, Today</span>
-          </div>
-        </div>
-        <div className="d-flex justify-content-end mb-4">
-          <div className="msg_cotainer_send">
-            Hi Khalid i am good tnx how about you?
-            <span className="msg_time_send">8:55 AM, Today</span>
-          </div>
-          <div className="img_cont_msg">
-            <img src={avatar2} className="rounded-circle user_img_msg" alt="" />
-          </div>
-        </div>
-        {/* Repeat message blocks as necessary */}
+        {messages.length === 0 ? (
+          <p className="text-muted text-center mt-3">No messages yet. Start the conversation.</p>
+        ) : (
+          messages.map((item) => {
+            const isMine = item.senderRole === auth?.role;
+            return (
+              <div
+                key={item.id}
+                className={`d-flex mb-4 ${isMine ? "justify-content-end" : "justify-content-start"}`}
+              >
+                {!isMine && (
+                  <div className="img_cont_msg">
+                    <div className="rounded-circle user_img_msg d-flex align-items-center justify-content-center bg-secondary text-white small">
+                      {item.senderName.slice(0, 2).toUpperCase()}
+                    </div>
+                  </div>
+                )}
+                <div className={isMine ? "msg_cotainer_send" : "msg_cotainer"}>
+                  <strong className="d-block small mb-1">{item.senderName}</strong>
+                  {item.message}
+                  <span className={isMine ? "msg_time_send" : "msg_time"}>
+                    {new Date(item.createdAt).toLocaleString()}
+                  </span>
+                </div>
+                {isMine && (
+                  <div className="img_cont_msg">
+                    <div className="rounded-circle user_img_msg d-flex align-items-center justify-content-center bg-primary text-white small">
+                      {item.senderName.slice(0, 2).toUpperCase()}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
       <div className="card-footer type_msg">
-        <div className="input-group">
+        <form onSubmit={onSubmit} className="input-group">
           <textarea
             className="form-control"
             placeholder="Type your message..."
-          ></textarea>
+            value={message}
+            onChange={(event) => setMessage(event.target.value)}
+          />
           <div className="input-group-append">
-            <button type="button" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary" disabled={loading}>
               <i className="fa fa-location-arrow"></i>
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

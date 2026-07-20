@@ -1,5 +1,8 @@
-import React from "react";
+import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ThemeContext } from "../../../context/ThemeContext";
+import { api } from "../../starPolice/api";
+import type { AcademyAlert } from "../../starPolice/types";
 
 type AlertsProps = {
   toggleTab: string;
@@ -7,7 +10,69 @@ type AlertsProps = {
   toggle?: string;
 };
 
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+const categoryLabel: Record<AcademyAlert["category"], string> = {
+  general: "GENERAL",
+  server: "SERVER STATUS",
+  social: "SOCIAL",
+};
+
 const Alerts: React.FC<AlertsProps> = ({ toggleTab, toggleChatBox }) => {
+  const [alerts, setAlerts] = useState<AcademyAlert[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { auth } = useContext(ThemeContext);
+  const isAdmin = auth?.role === "admin";
+
+  const loadAlerts = async () => {
+    if (!auth?.token) return;
+    const data = await api.getAlerts();
+    setAlerts(data);
+  };
+
+  useEffect(() => {
+    loadAlerts().catch(console.error);
+    const interval = setInterval(() => {
+      loadAlerts().catch(console.error);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [auth?.token]);
+
+  const onSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!title.trim() || !message.trim()) return;
+
+    setLoading(true);
+    try {
+      await api.createAlert(title.trim(), message.trim());
+      setTitle("");
+      setMessage("");
+      setShowForm(false);
+      await loadAlerts();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const groupedAlerts = alerts.reduce<Record<string, AcademyAlert[]>>((groups, alert) => {
+    const key = categoryLabel[alert.category] || "GENERAL";
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(alert);
+    return groups;
+  }, {});
+
   return (
     <div
       className={`tab-pane fade ${toggleTab === "alerts" ? "active show" : ""}`}
@@ -16,7 +81,13 @@ const Alerts: React.FC<AlertsProps> = ({ toggleTab, toggleChatBox }) => {
     >
       <div className="card mb-sm-3 mb-md-0 contacts_card">
         <div className="card-header chat-list-header text-center">
-          <Link to="#">
+          <Link
+            to="#"
+            onClick={(event) => {
+              event.preventDefault();
+              if (isAdmin) setShowForm((value) => !value);
+            }}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -34,10 +105,10 @@ const Alerts: React.FC<AlertsProps> = ({ toggleTab, toggleChatBox }) => {
             </svg>
           </Link>
           <div>
-            <h6 className="mb-1">Notications</h6>
-            <p className="mb-0">Show All</p>
+            <h6 className="mb-1">Alerts</h6>
+            <p className="mb-0">{isAdmin ? "Post Academy Alert" : "Academy Alerts"}</p>
           </div>
-          <Link to="#">
+          <Link to="#" onClick={(event) => event.preventDefault()}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -63,6 +134,30 @@ const Alerts: React.FC<AlertsProps> = ({ toggleTab, toggleChatBox }) => {
             </svg>
           </Link>
         </div>
+
+        {showForm && isAdmin && (
+          <div className="card-body border-bottom p-3">
+            <form onSubmit={onSubmit}>
+              <input
+                className="form-control mb-2"
+                placeholder="Alert title"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+              />
+              <textarea
+                className="form-control mb-2"
+                rows={2}
+                placeholder="Alert message"
+                value={message}
+                onChange={(event) => setMessage(event.target.value)}
+              />
+              <button type="submit" className="btn btn-primary btn-sm" disabled={loading}>
+                Post Alert
+              </button>
+            </form>
+          </div>
+        )}
+
         <div
           className={`card-body contacts_body p-0 dlab-scroll ${
             toggleChatBox ? "ps ps--active-y" : ""
@@ -70,45 +165,26 @@ const Alerts: React.FC<AlertsProps> = ({ toggleTab, toggleChatBox }) => {
           id="DZ_W_Contacts_Body1"
         >
           <ul className="contacts">
-            <li className="name-first-letter">SEVER STATUS</li>
-            <li className="active">
-              <div className="d-flex bd-highlight">
-                <div className="img_cont primary">KK</div>
-                <div className="user_info">
-                  <span>David Nester Birthday</span>
-                  <p className="text-primary">Today</p>
-                </div>
-              </div>
-            </li>
-            <li className="name-first-letter">SOCIAL</li>
-            <li>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont success">RU</div>
-                <div className="user_info">
-                  <span>Perfection Simplified</span>
-                  <p>Jame Smith commented on your status</p>
-                </div>
-              </div>
-            </li>
-            <li className="name-first-letter">SEVER STATUS</li>
-            <li>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont primary">AU</div>
-                <div className="user_info">
-                  <span>AharlieKane</span>
-                  <p>Sami is online</p>
-                </div>
-              </div>
-            </li>
-            <li>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont info">MO</div>
-                <div className="user_info">
-                  <span>Athan Jacoby</span>
-                  <p>Nargis left 30 mins ago</p>
-                </div>
-              </div>
-            </li>
+            {alerts.length === 0 ? (
+              <li className="p-3 text-muted text-center">No alerts yet.</li>
+            ) : (
+              Object.entries(groupedAlerts).map(([group, items]) => (
+                <React.Fragment key={group}>
+                  <li className="name-first-letter">{group}</li>
+                  {items.map((alert) => (
+                    <li key={alert.id}>
+                      <div className="d-flex bd-highlight">
+                        <div className="img_cont primary">{getInitials(alert.createdByName)}</div>
+                        <div className="user_info">
+                          <span>{alert.title}</span>
+                          <p>{alert.message}</p>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </React.Fragment>
+              ))
+            )}
           </ul>
         </div>
         <div className="card-footer"></div>

@@ -1,12 +1,8 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
-/// Images
-import avatar1 from "../../../assets/images/avatar/1.jpg";
-import avatar2 from "../../../assets/images/avatar/2.jpg";
-import avatar3 from "../../../assets/images/avatar/3.jpg";
-import avatar4 from "../../../assets/images/avatar/4.jpg";
-import avatar5 from "../../../assets/images/avatar/5.jpg";
+import { ThemeContext } from "../../../context/ThemeContext";
+import { api } from "../../starPolice/api";
+import type { ChatMessage } from "../../starPolice/types";
 import MsgBox from "./MsgBox";
 
 type ChatProps = {
@@ -17,6 +13,30 @@ type ChatProps = {
 
 const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab }) => {
   const [openMsg, setOpenMsg] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { auth } = useContext(ThemeContext);
+
+  const loadMessages = async () => {
+    if (!auth?.token) return;
+    const data = await api.getMessages();
+    setMessages(data);
+  };
+
+  useEffect(() => {
+    loadMessages().catch(console.error);
+    const interval = setInterval(() => {
+      loadMessages().catch(console.error);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [auth?.token]);
+
+  const chatTitle =
+    auth?.role === "admin" ? "Students" : "Star Police Admin";
+  const lastMessage = messages[messages.length - 1];
+  const preview = lastMessage
+    ? `${lastMessage.senderName}: ${lastMessage.message.slice(0, 40)}`
+    : "No messages yet";
+
   return (
     <div
       className={`tab-pane fade  ${toggleTab === "chat" ? "active show" : ""}`}
@@ -39,14 +59,7 @@ const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab }) => {
               version="1.1"
             >
               <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                <rect
-                  fill="#000000"
-                  x="4"
-                  y="11"
-                  width="16"
-                  height="2"
-                  rx="1"
-                />
+                <rect fill="#000000" x="4" y="11" width="16" height="2" rx="1" />
                 <rect
                   fill="#000000"
                   opacity="0.3"
@@ -62,7 +75,7 @@ const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab }) => {
           </Link>
           <div>
             <h6 className="mb-1">Chat List</h6>
-            <p className="mb-0">Show All</p>
+            <p className="mb-0">Academy Messages</p>
           </div>
           <Link to="#">
             <svg
@@ -89,251 +102,20 @@ const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab }) => {
           id="DZ_W_Contacts_Body"
         >
           <ul className="contacts">
-            <li className="name-first-letter">A</li>
             <li
               className="active dlab-chat-user"
               onClick={() => setOpenMsg(true)}
             >
               <div className="d-flex bd-highlight">
                 <div className="img_cont">
-                  <img
-                    src={avatar1}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
+                  <div className="rounded-circle user_img d-flex align-items-center justify-content-center bg-primary text-white fw-bold">
+                    {auth?.role === "admin" ? "ST" : "AD"}
+                  </div>
                   <span className="online_icon"></span>
                 </div>
                 <div className="user_info">
-                  <span>Archie Parker</span>
-                  <p>Kalid is online</p>
-                </div>
-              </div>
-            </li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar2}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon offline"></span>
-                </div>
-                <div className="user_info">
-                  <span>Alfie Mason</span>
-                  <p>Taherah left 7 mins ago</p>
-                </div>
-              </div>
-            </li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar3}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon"></span>
-                </div>
-                <div className="user_info">
-                  <span>AharlieKane</span>
-                  <p>Sami is online</p>
-                </div>
-              </div>
-            </li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar4}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon offline"></span>
-                </div>
-                <div className="user_info">
-                  <span>Athan Jacoby</span>
-                  <p>Nargis left 30 mins ago</p>
-                </div>
-              </div>
-            </li>
-            <li className="name-first-letter">B</li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar5}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon offline"></span>
-                </div>
-                <div className="user_info">
-                  <span>Bashid Samim</span>
-                  <p>Rashid left 50 mins ago</p>
-                </div>
-              </div>
-            </li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar1}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon"></span>
-                </div>
-                <div className="user_info">
-                  <span>Breddie Ronan</span>
-                  <p>Kalid is online</p>
-                </div>
-              </div>
-            </li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar2}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon offline"></span>
-                </div>
-                <div className="user_info">
-                  <span>Ceorge Carson</span>
-                  <p>Taherah left 7 mins ago</p>
-                </div>
-              </div>
-            </li>
-            <li className="name-first-letter">D</li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar3}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon"></span>
-                </div>
-                <div className="user_info">
-                  <span>Darry Parker</span>
-                  <p>Sami is online</p>
-                </div>
-              </div>
-            </li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar4}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon offline"></span>
-                </div>
-                <div className="user_info">
-                  <span>Denry Hunter</span>
-                  <p>Nargis left 30 mins ago</p>
-                </div>
-              </div>
-            </li>
-            <li className="name-first-letter">J</li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar5}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon offline"></span>
-                </div>
-                <div className="user_info">
-                  <span>Jack Ronan</span>
-                  <p>Rashid left 50 mins ago</p>
-                </div>
-              </div>
-            </li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar1}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon"></span>
-                </div>
-                <div className="user_info">
-                  <span>Jacob Tucker</span>
-                  <p>Kalid is online</p>
-                </div>
-              </div>
-            </li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar2}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon offline"></span>
-                </div>
-                <div className="user_info">
-                  <span>James Logan</span>
-                  <p>Taherah left 7 mins ago</p>
-                </div>
-              </div>
-            </li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar3}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon"></span>
-                </div>
-                <div className="user_info">
-                  <span>Joshua Weston</span>
-                  <p>Sami is online</p>
-                </div>
-              </div>
-            </li>
-            <li className="name-first-letter">O</li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar4}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon offline"></span>
-                </div>
-                <div className="user_info">
-                  <span>Oliver Acker</span>
-                  <p>Nargis left 30 mins ago</p>
-                </div>
-              </div>
-            </li>
-            <li className="dlab-chat-user" onClick={() => setOpenMsg(true)}>
-              <div className="d-flex bd-highlight">
-                <div className="img_cont">
-                  <img
-                    src={avatar5}
-                    className="rounded-circle user_img"
-                    alt=""
-                  />
-                  <span className="online_icon offline"></span>
-                </div>
-                <div className="user_info">
-                  <span>Oscar Weston</span>
-                  <p>Rashid left 50 mins ago</p>
+                  <span>{chatTitle}</span>
+                  <p>{preview}</p>
                 </div>
               </div>
             </li>
@@ -341,10 +123,11 @@ const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab }) => {
         </div>
       </div>
       <MsgBox
-        avatar1={avatar1}
-        avatar2={avatar2}
+        title={chatTitle}
         openMsg={openMsg}
         offMsg={() => setOpenMsg(false)}
+        messages={messages}
+        onMessageSent={loadMessages}
       />
     </div>
   );
