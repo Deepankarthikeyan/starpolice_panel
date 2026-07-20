@@ -85,8 +85,7 @@ const Login: React.FC<Props> = ({ setAuth }) => {
                     <div className="text-center my-5">
                       <Link to={"#"}>
                         <img
-                          className="logo-abbr dark-logo"
-                          width="280"
+                          className="logo-abbr dark-logo star-police-login-logo"
                           src={logo}
                           alt="Star Police Academy"
                         />

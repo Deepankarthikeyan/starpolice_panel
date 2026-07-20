@@ -1,0 +1,26 @@
+.nav-header .brand-logo .star-police-logo {
+  max-width: 17rem !important;
+  width: auto !important;
+  max-height: 5.5rem !important;
+  height: auto !important;
+}
+
+@media only screen and (max-width: 87.5rem) {
+  .nav-header .brand-logo .star-police-logo {
+    max-width: 14rem !important;
+    max-height: 4.5rem !important;
+  }
+}
+
+@media only screen and (max-width: 63.9375rem) {
+  .nav-header .brand-logo .star-police-logo {
+    max-width: 4.5rem !important;
+    max-height: 4.5rem !important;
+  }
+}
+
+.sign-bg .star-police-login-logo {
+  width: 100% !important;
+  max-width: 32rem !important;
+  height: auto !important;
+}

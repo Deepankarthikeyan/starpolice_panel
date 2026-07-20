@@ -2,6 +2,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "nouislider/distribute/nouislider.css";
 import "ckeditor5/ckeditor5.css";
 import "./assets/css/style.css";
+import "./assets/css/star-police-brand.css";
 
 import { Fragment, Suspense, useContext, useEffect } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";

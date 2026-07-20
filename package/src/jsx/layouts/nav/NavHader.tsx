@@ -13,10 +13,9 @@ const NavHader = () => {
     <div className="nav-header">
       <Link to={homePath} className="brand-logo">
         <img
-          className="logo-abbr"
+          className="logo-abbr star-police-logo"
           src={logo}
           alt="Star Police Academy"
-          style={{ maxHeight: 48, width: "auto" }}
         />
       </Link>
 
