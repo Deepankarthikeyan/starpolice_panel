@@ -1,11 +1,8 @@
-import { useState, useEffect, useContext, type MouseEvent } from "react";
+import { useState, useEffect } from "react";
 
 import { Link } from "react-router-dom";
 /// Scroll
 import { Dropdown } from "react-bootstrap";
-import { ThemeContext } from "../../../context/ThemeContext";
-import { api } from "../../starPolice/api";
-import type { AppNotification } from "../../starPolice/types";
 
 import LogoutPage from "./Logout";
 
@@ -38,45 +35,6 @@ interface propType {
 }
 
 const Header = ({ onNote }: propType) => {
-  const { auth } = useContext(ThemeContext);
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  const loadNotifications = async () => {
-    if (!auth?.token) return;
-    const [items, unread] = await Promise.all([
-      api.getNotifications(),
-      api.getUnreadNotificationCount(),
-    ]);
-    setNotifications(items);
-    setUnreadCount(unread.count);
-  };
-
-  useEffect(() => {
-    loadNotifications().catch(console.error);
-    const interval = setInterval(() => {
-      loadNotifications().catch(console.error);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [auth?.token]);
-
-  const notificationIconClass = (type: AppNotification["type"]) => {
-    if (type === "message") return "media-info";
-    if (type === "upload") return "media-success";
-    if (type === "alert") return "media-danger";
-    return "media-primary";
-  };
-
-  const markAllRead = async (event: MouseEvent) => {
-    event.preventDefault();
-    try {
-      await api.markAllNotificationsRead();
-      await loadNotifications();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   //For header fixed
   const [headerFix, setheaderFix] = useState(false);
   useEffect(() => {
@@ -377,11 +335,6 @@ const Header = ({ onNote }: propType) => {
                       fill="#A098AE"
                     />
                   </svg>
-                  {unreadCount > 0 && (
-                    <span className="badge light text-white bg-primary rounded-circle position-absolute top-0 end-0">
-                      {unreadCount}
-                    </span>
-                  )}
                 </Dropdown.Toggle>
                 <Dropdown.Menu
                   align="end"
@@ -399,39 +352,89 @@ const Header = ({ onNote }: propType) => {
                     style={{ height: "380px" }}
                   >
                     <ul className="timeline">
-                      {notifications.length === 0 ? (
-                        <li className="p-3 text-muted text-center">No notifications yet.</li>
-                      ) : (
-                        notifications.map((item) => (
-                          <li key={item.id}>
-                            <div className="timeline-panel">
-                              <div
-                                className={`media me-2 ${notificationIconClass(item.type)}`}
-                              >
-                                {item.type === "upload" ? (
-                                  <i className="fa fa-file" />
-                                ) : item.type === "message" ? (
-                                  <i className="fa fa-comment" />
-                                ) : (
-                                  <i className="fa fa-bell" />
-                                )}
-                              </div>
-                              <div className="media-body">
-                                <h6 className="mb-1">{item.title}</h6>
-                                <p className="mb-1 small">{item.message}</p>
-                                <small className="d-block">
-                                  {new Date(item.createdAt).toLocaleString()}
-                                </small>
-                              </div>
-                            </div>
-                          </li>
-                        ))
-                      )}
+                      <li>
+                        <div className="timeline-panel">
+                          <div className="media me-2">
+                            <img alt="images" width={50} src={avatar} />
+                          </div>
+                          <div className="media-body">
+                            <h6 className="mb-1">Dr sultads Send you Photo</h6>
+                            <small className="d-block">
+                              29 July 2022 - 02:26 PM
+                            </small>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div className="timeline-panel">
+                          <div className="media me-2 media-info">KG</div>
+                          <div className="media-body">
+                            <h6 className="mb-1">
+                              Resport created successfully
+                            </h6>
+                            <small className="d-block">
+                              29 July 2022 - 02:26 PM
+                            </small>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div className="timeline-panel">
+                          <div className="media me-2 media-success">
+                            <i className="fa fa-home" />
+                          </div>
+                          <div className="media-body">
+                            <h6 className="mb-1">Reminder : Treatment Time!</h6>
+                            <small className="d-block">
+                              29 July 2022 - 02:26 PM
+                            </small>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div className="timeline-panel">
+                          <div className="media me-2">
+                            <img alt="" width={50} src={avatar} />
+                          </div>
+                          <div className="media-body">
+                            <h6 className="mb-1">Dr sultads Send you Photo</h6>
+                            <small className="d-block">
+                              29 July 2022 - 02:26 PM
+                            </small>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div className="timeline-panel">
+                          <div className="media me-2 media-danger">KG</div>
+                          <div className="media-body">
+                            <h6 className="mb-1">
+                              Resport created successfully
+                            </h6>
+                            <small className="d-block">
+                              29 July 2022 - 02:26 PM
+                            </small>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div className="timeline-panel">
+                          <div className="media me-2 media-primary">
+                            <i className="fa fa-home" />
+                          </div>
+                          <div className="media-body">
+                            <h6 className="mb-1">Reminder : Treatment Time!</h6>
+                            <small className="d-block">
+                              29 July 2022 - 02:26 PM
+                            </small>
+                          </div>
+                        </div>
+                      </li>
                     </ul>
                   </div>
 
-                  <Link className="all-notification" to="#" onClick={markAllRead}>
-                    Mark all as read <i className="ti-arrow-right" />
+                  <Link className="all-notification" to="#">
+                    See all notifications <i className="ti-arrow-right" />
                   </Link>
                 </Dropdown.Menu>
               </Dropdown>
