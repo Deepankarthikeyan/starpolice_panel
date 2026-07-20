@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../../assets/images/star-police-academy-logo.png";
+import logo from "../../assets/images/star-police-academy-logo-white.png";
 import pol from "../../assets/images/pol.jpg";
 import BgImage from "../../assets/images/bg1.png";
 import { DEMO_USERS } from "../starPolice/constants";
