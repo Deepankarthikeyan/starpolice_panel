@@ -1,31 +1,72 @@
-.star-police-logo,
 .star-police-login-logo {
   background: transparent !important;
-}
-
-.nav-header .brand-logo .star-police-logo {
-  max-width: 17rem !important;
-  width: auto !important;
-  max-height: 5.5rem !important;
-  height: auto !important;
-}
-
-@media only screen and (max-width: 87.5rem) {
-  .nav-header .brand-logo .star-police-logo {
-    max-width: 14rem !important;
-    max-height: 4.5rem !important;
-  }
-}
-
-@media only screen and (max-width: 63.9375rem) {
-  .nav-header .brand-logo .star-police-logo {
-    max-width: 4.5rem !important;
-    max-height: 4.5rem !important;
-  }
 }
 
 .sign-bg .star-police-login-logo {
   width: 100% !important;
   max-width: 32rem !important;
   height: auto !important;
+}
+
+.nav-header .star-police-brand-logo {
+  align-items: center !important;
+  justify-content: flex-start !important;
+  overflow: hidden;
+}
+
+.nav-header .star-police-brand-logo .star-police-logo-icon {
+  display: none;
+  width: 3rem;
+  height: 3rem;
+  max-width: 3rem !important;
+  object-fit: contain;
+}
+
+.nav-header .star-police-brand-logo .star-police-logo-full {
+  display: block;
+  width: auto;
+  max-width: 15.5rem !important;
+  max-height: 4.5rem !important;
+  height: auto;
+  object-fit: contain;
+  margin: 0 !important;
+}
+
+#main-wrapper.menu-toggle .nav-header .star-police-brand-logo {
+  justify-content: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+#main-wrapper.menu-toggle .nav-header .star-police-brand-logo .star-police-logo-full,
+.menu-toggle .nav-header .star-police-brand-logo .star-police-logo-full {
+  display: none !important;
+}
+
+#main-wrapper.menu-toggle .nav-header .star-police-brand-logo .star-police-logo-icon,
+.menu-toggle .nav-header .star-police-brand-logo .star-police-logo-icon {
+  display: block !important;
+}
+
+@media only screen and (max-width: 87.5rem) {
+  .nav-header .star-police-brand-logo .star-police-logo-full {
+    max-width: 13rem !important;
+    max-height: 3.75rem !important;
+  }
+}
+
+@media only screen and (max-width: 63.9375rem) {
+  .nav-header .star-police-brand-logo {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .nav-header .star-police-brand-logo .star-police-logo-full {
+    display: none !important;
+  }
+
+  .nav-header .star-police-brand-logo .star-police-logo-icon {
+    display: block !important;
+  }
 }

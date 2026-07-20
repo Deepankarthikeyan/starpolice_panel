@@ -2,7 +2,8 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../../context/ThemeContext";
-import logo from "../../../assets/images/star-police-academy-logo-white.png";
+import fullLogo from "../../../assets/images/star-police-academy-logo-white.png";
+import emblemLogo from "../../../assets/images/star-police-academy-emblem.png";
 
 const NavHader = () => {
   const { auth, openMenuToggle, setOpenMenuToggle } = useContext(ThemeContext);
@@ -11,10 +12,15 @@ const NavHader = () => {
 
   return (
     <div className="nav-header">
-      <Link to={homePath} className="brand-logo">
+      <Link to={homePath} className="brand-logo star-police-brand-logo">
         <img
-          className="logo-abbr star-police-logo"
-          src={logo}
+          className="logo-abbr star-police-logo-icon"
+          src={emblemLogo}
+          alt="Star Police Academy"
+        />
+        <img
+          className="brand-title star-police-logo-full"
+          src={fullLogo}
           alt="Star Police Academy"
         />
       </Link>
