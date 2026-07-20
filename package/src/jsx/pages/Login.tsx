@@ -3,31 +3,19 @@ import { Link, useNavigate } from "react-router-dom";
 import logo from "../../assets/images/star-police-academy-logo-white.png";
 import pol from "../../assets/images/pol.jpg";
 import BgImage from "../../assets/images/bg1.png";
-import { DEMO_USERS } from "../starPolice/constants";
 import { api } from "../starPolice/api";
-import type { AuthUser, UserRole } from "../starPolice/types";
+import type { AuthUser } from "../starPolice/types";
 
 interface Props {
   setAuth: (auth: AuthUser) => void;
 }
 
 const Login: React.FC<Props> = ({ setAuth }) => {
-  const [role, setRole] = useState<UserRole>("admin");
   const [email, setEmail] = useState("admin@starpolice.academy");
   const [password, setPassword] = useState("admin123");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const onRoleChange = (nextRole: UserRole) => {
-    setRole(nextRole);
-    const demoUser = DEMO_USERS.find((user) => user.role === nextRole);
-    if (demoUser) {
-      setEmail(demoUser.email);
-      setPassword(demoUser.password);
-    }
-    setError("");
-  };
 
   const onLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,10 +23,13 @@ const Login: React.FC<Props> = ({ setAuth }) => {
     setError("");
 
     try {
-      const user = await api.login(email, password, role);
+      const user = await api.login(email, password, "admin");
+      if (user.role !== "admin") {
+        throw new Error("Only admin accounts can sign in.");
+      }
       localStorage.setItem("AUTH", JSON.stringify(user));
       setAuth(user);
-      navigate(role === "admin" ? "/admin-dashboard" : "/student-dashboard");
+      navigate("/admin-dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -75,37 +66,13 @@ const Login: React.FC<Props> = ({ setAuth }) => {
                 </div>
                 <div className="col-xl-6 col-md-6">
                   <div className="sign-in-your px-2">
-                    <h4 className="fs-20">Sign in your account</h4>
+                    <h4 className="fs-20">Admin Sign In</h4>
                     <span>
-                      Welcome to Star Police Academy. Choose your panel and sign
-                      in.
+                      Welcome to Star Police Academy Admin Panel.
                     </span>
 
-                    <div className="btn-group w-100 my-4" role="group">
-                      <button
-                        type="button"
-                        className={`btn ${
-                          role === "admin" ? "btn-primary" : "btn-outline-primary"
-                        }`}
-                        onClick={() => onRoleChange("admin")}
-                      >
-                        Admin Panel
-                      </button>
-                      <button
-                        type="button"
-                        className={`btn ${
-                          role === "student"
-                            ? "btn-primary"
-                            : "btn-outline-primary"
-                        }`}
-                        onClick={() => onRoleChange("student")}
-                      >
-                        Student Panel
-                      </button>
-                    </div>
-
-                    {error && <div className="alert alert-danger py-2">{error}</div>}
-                    <form onSubmit={onLogin}>
+                    {error && <div className="alert alert-danger py-2 mt-3">{error}</div>}
+                    <form onSubmit={onLogin} className="mt-4">
                       <div className="mb-3">
                         <label className="mb-1">
                           <strong>Email</strong>

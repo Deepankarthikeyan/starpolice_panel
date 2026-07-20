@@ -40,13 +40,18 @@ function App() {
     const data = localStorage.getItem("AUTH");
     if (data) {
       const parsedData = JSON.parse(data) as AuthUser;
-      setAuth(parsedData);
+      if (parsedData.role === "admin") {
+        setAuth(parsedData);
+      } else {
+        localStorage.removeItem("AUTH");
+        navigate("/login");
+      }
     } else {
       navigate("/login");
     }
   }, [navigate, setAuth]);
 
-  if (auth?.email && auth?.token && auth?.role) {
+  if (auth?.email && auth?.token && auth?.role === "admin") {
     return (
       <Fragment>
         <Suspense

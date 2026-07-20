@@ -35,8 +35,8 @@ const initialState: State = {
 
 const SideBar: React.FC = () => {
   const [state, setState] = useReducer(reducer, initialState);
-  const { auth, setIconhover } = useContext(ThemeContext);
-  const menuList = getMenuList(auth?.role);
+  const { setIconhover } = useContext(ThemeContext);
+  const menuList = getMenuList();
 
   useEffect(() => {
     const btn = document.querySelector(".nav-control") as HTMLDivElement | null;

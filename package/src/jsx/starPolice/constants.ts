@@ -15,12 +15,6 @@ export const DEMO_USERS: Array<{
     role: "admin",
     name: "Academy Admin",
   },
-  {
-    email: "student@starpolice.academy",
-    password: "student123",
-    role: "student",
-    name: "Student User",
-  },
 ];
 
 export const FILE_CATEGORY_LABELS = {

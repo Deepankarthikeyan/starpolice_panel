@@ -6,9 +6,8 @@ import fullLogo from "../../../assets/images/star-police-academy-logo-white.png"
 import emblemLogo from "../../../assets/images/star-police-academy-emblem.png";
 
 const NavHader = () => {
-  const { auth, openMenuToggle, setOpenMenuToggle } = useContext(ThemeContext);
-  const homePath =
-    auth?.role === "student" ? "/student-dashboard" : "/admin-dashboard";
+  const { openMenuToggle, setOpenMenuToggle } = useContext(ThemeContext);
+  const homePath = "/admin-dashboard";
 
   return (
     <div className="nav-header">

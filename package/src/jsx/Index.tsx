@@ -19,10 +19,6 @@ import AdminDashboard from "./starPolice/admin/AdminDashboard";
 import DaywiseUpload from "./starPolice/admin/DaywiseUpload";
 import AdminStudentInteraction from "./starPolice/admin/StudentInteraction";
 import MonthlyCalendar from "./starPolice/admin/MonthlyCalendar";
-import StudentDashboard from "./starPolice/student/StudentDashboard";
-import StudentMaterials from "./starPolice/student/StudentMaterials";
-import StudentInteraction from "./starPolice/student/StudentInteraction";
-import StudentCalendar from "./starPolice/student/StudentCalendar";
 
 /// Dashboard
 
@@ -142,19 +138,13 @@ interface routerType {
   component: ReactNode;
 }
 const Markup = () => {
-  const { auth } = useContext(ThemeContext);
-  const defaultRoute =
-    auth?.role === "student" ? "/student-dashboard" : "/admin-dashboard";
+  const defaultRoute = "/admin-dashboard";
 
   const routhPath: routerType[] = [
     { url: "admin-dashboard", component: <AdminDashboard /> },
     { url: "admin-daywise-upload", component: <DaywiseUpload /> },
     { url: "admin-student-interaction", component: <AdminStudentInteraction /> },
     { url: "admin-monthly-calendar", component: <MonthlyCalendar /> },
-    { url: "student-dashboard", component: <StudentDashboard /> },
-    { url: "student-materials", component: <StudentMaterials /> },
-    { url: "student-interaction", component: <StudentInteraction /> },
-    { url: "student-calendar", component: <StudentCalendar /> },
     { url: "finance", component: <Finance /> },
     { url: "student", component: <Students /> },
     { url: "student-detail", component: <StudentDetails /> },
