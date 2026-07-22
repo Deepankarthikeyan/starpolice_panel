@@ -59,8 +59,8 @@ const UserManagement = () => {
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Access</th>
-            {canManage && <th>Actions</th>}
+            {canManage && <th>Action</th>}
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -77,11 +77,6 @@ const UserManagement = () => {
                 <td>{user.email}</td>
                 <td>
                   <span className="badge bg-secondary text-uppercase">{user.role}</span>
-                </td>
-                <td>
-                  <span className={`badge ${user.isActive ? "bg-success" : "bg-warning"}`}>
-                    {user.isActive ? "Active" : "Pending"}
-                  </span>
                 </td>
                 {canManage && (
                   <td>
@@ -108,6 +103,11 @@ const UserManagement = () => {
                     )}
                   </td>
                 )}
+                <td>
+                  <span className={`badge ${user.isActive ? "bg-success" : "bg-warning"}`}>
+                    {user.isActive ? "Active" : "Pending"}
+                  </span>
+                </td>
               </tr>
             ))
           )}
