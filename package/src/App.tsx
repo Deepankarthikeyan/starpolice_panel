@@ -11,6 +11,9 @@ import StudentDashboard from "./jsx/starPolice/student/StudentDashboard";
 import StudentMaterials from "./jsx/starPolice/student/StudentMaterials";
 import StudentInteraction from "./jsx/starPolice/student/StudentInteraction";
 import StudentCalendar from "./jsx/starPolice/student/StudentCalendar";
+import PanelProfile from "./jsx/starPolice/shared/PanelProfile";
+import PanelSettings from "./jsx/starPolice/shared/PanelSettings";
+import Inbox from "./jsx/components/AppsMenu/Email/Inbox/Inbox";
 import AdminLogin from "./jsx/pages/auth/AdminLogin";
 import AdminSignup from "./jsx/pages/auth/AdminSignup";
 import StudentLogin from "./jsx/pages/auth/StudentLogin";
@@ -89,6 +92,9 @@ function App() {
             <Route path="student-interaction" element={<AdminStudentInteraction />} />
             <Route path="monthly-calendar" element={<MonthlyCalendar />} />
             <Route path="user-management" element={<UserManagement />} />
+            <Route path="profile" element={<PanelProfile />} />
+            <Route path="inbox" element={<Inbox />} />
+            <Route path="settings" element={<PanelSettings />} />
           </Route>
 
           <Route path="/student" element={<StudentLayout />}>
@@ -97,6 +103,9 @@ function App() {
             <Route path="materials" element={<StudentMaterials />} />
             <Route path="interaction" element={<StudentInteraction />} />
             <Route path="calendar" element={<StudentCalendar />} />
+            <Route path="profile" element={<PanelProfile />} />
+            <Route path="inbox" element={<Inbox />} />
+            <Route path="settings" element={<PanelSettings />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/admin/login" replace />} />
