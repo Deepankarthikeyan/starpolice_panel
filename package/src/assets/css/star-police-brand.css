@@ -378,3 +378,44 @@
   width: 100%;
   justify-content: center;
 }
+
+.spa-interaction-card {
+  height: calc(100vh - 11.5rem);
+  min-height: 28rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.spa-interaction-card .card-body.spa-interaction-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 1rem;
+}
+
+.spa-interaction-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.spa-interaction-bubble {
+  max-width: 75%;
+}
+
+.spa-interaction-form {
+  flex-shrink: 0;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #edf1f5;
+}
+
+@media (max-width: 991px) {
+  .spa-interaction-card {
+    height: calc(100vh - 10rem);
+    min-height: 24rem;
+  }
+}
