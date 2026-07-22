@@ -333,3 +333,39 @@
 .daywise-upload-form .form-control {
   border-radius: 0.5rem;
 }
+
+.header-profile2 .dropdown-menu {
+  min-width: 17rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 0.75rem 2rem rgba(15, 23, 42, 0.12);
+}
+
+.spa-profile-dropdown .spa-profile-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.spa-profile-dropdown .spa-profile-menu-item {
+  display: flex;
+  align-items: center;
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.spa-profile-dropdown .spa-profile-menu-item:hover {
+  background: rgba(var(--primary-rgb, 18, 61, 115), 0.08);
+  color: var(--primary, #123d73);
+}
+
+.spa-profile-dropdown .card-footer .dropdown-item {
+  width: 100%;
+  justify-content: center;
+}

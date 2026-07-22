@@ -17,7 +17,7 @@ function LogoutPage() {
 
   return (
     <button
-      className="dropdown-item ai-icon btn btn-primary light"
+      className="dropdown-item ai-icon btn btn-primary light d-flex align-items-center justify-content-center w-100"
       onClick={handleLogout}
     >
       <svg
@@ -35,7 +35,7 @@ function LogoutPage() {
         <polyline points="16 17 21 12 16 7"></polyline>
         <line x1="21" y1="12" x2="9" y2="12"></line>
       </svg>
-      <span className="ms-2 text-primar">Logout </span>
+      <span className="ms-2 text-primary">Logout </span>
     </button>
   );
 }
