@@ -60,7 +60,7 @@ const UserManagement = () => {
             <th>Email</th>
             <th>Role</th>
             {canManage && <th>Action</th>}
-            <th>Access</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
