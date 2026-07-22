@@ -1,14 +1,12 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
+import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
-import type { AuthUser, ManagedUser } from "../types";
+import type { ManagedUser } from "../types";
 
-interface Props {
-  auth: AuthUser;
-}
-
-const UserManagement = ({ auth }: Props) => {
-  const isSuperAdmin = auth.role === "superadmin";
+const UserManagement = () => {
+  const { auth } = useContext(ThemeContext);
+  const isSuperAdmin = auth?.role === "superadmin";
   const [admins, setAdmins] = useState<ManagedUser[]>([]);
   const [students, setStudents] = useState<ManagedUser[]>([]);
   const [name, setName] = useState("");

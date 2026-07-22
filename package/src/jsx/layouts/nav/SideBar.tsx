@@ -1,6 +1,5 @@
 import { useReducer, useEffect, useState, useContext } from "react";
 import { Collapse } from "react-bootstrap";
-import { Link } from "react-router-dom";
 import { getMenuList } from "./Menu";
 import { useScrollPosition } from "@n8tb1t/use-scroll-position";
 import { ThemeContext } from "../../../context/ThemeContext";
@@ -77,8 +76,7 @@ const SideBar: React.FC<SideBarProps> = ({ basePath = "/admin", panel = "admin" 
     setState({ activeSubmenu: state.activeSubmenu === status ? "" : status });
   };
 
-  let path = window.location.pathname;
-  path = path.split("/").pop() || "";
+  const path = window.location.pathname.split("/").pop() || "";
 
   useEffect(() => {
     menuList.forEach((data: MenuItem) => {
@@ -107,6 +105,7 @@ const SideBar: React.FC<SideBarProps> = ({ basePath = "/admin", panel = "admin" 
       setIconhover(false);
     }
   }
+
   return (
     <div
       className={`dlabnav`}
@@ -123,109 +122,104 @@ const SideBar: React.FC<SideBarProps> = ({ basePath = "/admin", panel = "admin" 
                   {data.title}
                 </li>
               );
-            } else {
-              return (
-                <li
-                  className={`${
-                    state.active === data.title ? "mm-active" : ""
-                  }`}
-                  key={index}
-                >
-                  {data.content && data.content.length > 0 ? (
-                    <>
-                      <Link
-                        to="#"
-                        className="has-arrow"
-                        onClick={() => handleMenuActive(data.title)}
-                      >
-                        {data.iconStyle}
-                        <span className="nav-text">{data.title}</span>
-                        {data.update && (
-                          <span className="ms-1 badge badge-xs style-1 badge-danger">
-                            {data.update}
-                          </span>
-                        )}
-                      </Link>
-                      <Collapse in={state.active === data.title}>
-                        <ul
-                          className={`${
-                            menuClass === "mm-collapse" ? "mm-show" : ""
-                          }`}
-                        >
-                          {data.content.map((item, idx) => (
+            }
+
+            const itemPath = data.to ? `${basePath}/${data.to}` : "#";
+
+            return (
+              <li
+                className={`${state.active === data.title ? "mm-active" : ""}`}
+                key={index}
+              >
+                {data.content && data.content.length > 0 ? (
+                  <>
+                    <a
+                      href="#"
+                      className="has-arrow"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        handleMenuActive(data.title);
+                      }}
+                    >
+                      {data.iconStyle}
+                      <span className="nav-text">{data.title}</span>
+                      {data.update && (
+                        <span className="ms-1 badge badge-xs style-1 badge-danger">
+                          {data.update}
+                        </span>
+                      )}
+                    </a>
+                    <Collapse in={state.active === data.title}>
+                      <ul className={`${menuClass === "mm-collapse" ? "mm-show" : ""}`}>
+                        {data.content.map((item, idx) => {
+                          const subPath = item.to ? `${basePath}/${item.to}` : "#";
+                          return (
                             <li
                               key={idx}
                               className={`${
-                                state.activeSubmenu === item.title
-                                  ? "mm-active"
-                                  : ""
+                                state.activeSubmenu === item.title ? "mm-active" : ""
                               }`}
                             >
                               {item.content && item.content.length > 0 ? (
                                 <>
-                                  <Link
-                                    to={item.to ? `${basePath}/${item.to}` : "#"}
+                                  <a
+                                    href={subPath}
                                     className={item.hasMenu ? "has-arrow" : ""}
-                                    onClick={() =>
-                                      handleSubmenuActive(item.title)
-                                    }
+                                    onClick={() => handleSubmenuActive(item.title)}
                                   >
                                     {item.title}
-                                  </Link>
-                                  <Collapse
-                                    in={state.activeSubmenu === item.title}
-                                  >
+                                  </a>
+                                  <Collapse in={state.activeSubmenu === item.title}>
                                     <ul
                                       className={`${
-                                        menuClass === "mm-collapse"
-                                          ? "mm-show"
-                                          : ""
+                                        menuClass === "mm-collapse" ? "mm-show" : ""
                                       }`}
                                     >
-                                      {item.content.map((subItem, subIdx) => (
-                                        <li key={subIdx}>
-                                          <Link
-                                            className={`${
-                                              path === subItem.to
-                                                ? "mm-active"
-                                                : ""
-                                            }`}
-                                            to={subItem.to ? `${basePath}/${subItem.to}` : "#"}
-                                          >
-                                            {subItem.title}
-                                          </Link>
-                                        </li>
-                                      ))}
+                                      {item.content.map((subItem, subIdx) => {
+                                        const nestedPath = subItem.to
+                                          ? `${basePath}/${subItem.to}`
+                                          : "#";
+                                        return (
+                                          <li key={subIdx}>
+                                            <a
+                                              className={`${
+                                                path === subItem.to ? "mm-active" : ""
+                                              }`}
+                                              href={nestedPath}
+                                            >
+                                              {subItem.title}
+                                            </a>
+                                          </li>
+                                        );
+                                      })}
                                     </ul>
                                   </Collapse>
                                 </>
                               ) : (
-                                <Link
-                                  to={item.to ? `${basePath}/${item.to}` : "#"}
-                                  className={`${
-                                    path === item.to ? "mm-active" : ""
-                                  }`}
+                                <a
+                                  href={subPath}
+                                  className={`${path === item.to ? "mm-active" : ""}`}
                                 >
                                   {item.title}
-                                </Link>
+                                </a>
                               )}
                             </li>
-                          ))}
-                        </ul>
-                      </Collapse>
-                    </>
-                  ) : (
-                    <Link
-                      to={data.to ? `${basePath}/${data.to}` : "#"}
-                      className={`${path === data.to ? "mm-active" : ""}`}
-                    >
-                      {data.iconStyle}
-                      <span className="nav-text">{data.title}</span>
-                    </Link>
-                  )}
-                </li>
-              );
-            }
+                          );
+                        })}
+                      </ul>
+                    </Collapse>
+                  </>
+                ) : (
+                  <a
+                    href={itemPath}
+                    className={`${path === data.to ? "mm-active" : ""}`}
+                  >
+                    {data.iconStyle}
+                    <span className="nav-text">{data.title}</span>
+                  </a>
+                )}
+              </li>
+            );
           })}
         </ul>
 

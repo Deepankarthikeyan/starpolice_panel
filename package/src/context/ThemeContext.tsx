@@ -5,7 +5,17 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
-import type { AuthUser } from "../jsx/starPolice/types";
+import { getStoredAuth } from "../jsx/starPolice/api";
+import type { AuthUser, PanelType } from "../jsx/starPolice/types";
+
+function resolveAuthForPath(pathname: string): AuthUser | null {
+  const panel: PanelType = pathname.startsWith("/student") ? "student" : "admin";
+  const stored = getStoredAuth(panel);
+  if (!stored) return null;
+  if (panel === "admin" && ["superadmin", "admin"].includes(stored.role)) return stored;
+  if (panel === "student" && stored.role === "student") return stored;
+  return null;
+}
 
 interface AppContextValue {
   openMenuToggle: boolean;
@@ -35,7 +45,9 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({
   children,
 }) => {
   const [openMenuToggle, setOpenMenuToggle] = useState<boolean>(false);
-  const [auth, setAuth] = useState<AuthUser | null>(null);
+  const [auth, setAuth] = useState<AuthUser | null>(() =>
+    typeof window !== "undefined" ? resolveAuthForPath(window.location.pathname) : null
+  );
   const [iconhover, setIconhover] = useState<boolean>(false);
 
   return (

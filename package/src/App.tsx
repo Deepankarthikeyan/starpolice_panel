@@ -1,20 +1,21 @@
-import "react-datepicker/dist/react-datepicker.css";
-import "nouislider/distribute/nouislider.css";
-import "ckeditor5/ckeditor5.css";
-import "./assets/css/style.css";
-import "./assets/css/star-police-brand.css";
-
 import { Fragment, Suspense, useContext, useEffect } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
-import AdminPanel from "./jsx/AdminPanel";
-import StudentPanel from "./jsx/StudentPanel";
+import { AdminLayout, StudentLayout } from "./jsx/PanelLayouts";
+import AdminDashboard from "./jsx/starPolice/admin/AdminDashboard";
+import DaywiseUpload from "./jsx/starPolice/admin/DaywiseUpload";
+import AdminStudentInteraction from "./jsx/starPolice/admin/StudentInteraction";
+import MonthlyCalendar from "./jsx/starPolice/admin/MonthlyCalendar";
+import UserManagement from "./jsx/starPolice/admin/UserManagement";
+import StudentDashboard from "./jsx/starPolice/student/StudentDashboard";
+import StudentMaterials from "./jsx/starPolice/student/StudentMaterials";
+import StudentInteraction from "./jsx/starPolice/student/StudentInteraction";
+import StudentCalendar from "./jsx/starPolice/student/StudentCalendar";
 import AdminLogin from "./jsx/pages/auth/AdminLogin";
 import AdminSignup from "./jsx/pages/auth/AdminSignup";
 import StudentLogin from "./jsx/pages/auth/StudentLogin";
 import { ThemeContext } from "./context/ThemeContext";
-import { clearAuth, getStoredAuth } from "./jsx/starPolice/api";
-import type { AuthUser, PanelType } from "./jsx/starPolice/types";
+import type { AuthUser } from "./jsx/starPolice/types";
 
 function Preloader() {
   return (
@@ -30,39 +31,22 @@ function Preloader() {
 
 function App() {
   const { auth, setAuth } = useContext(ThemeContext);
-  const location = useLocation();
-
-  function resizeHandler() {
-    if (window.innerWidth <= 775) {
-      document.body.setAttribute("data-sidebar-style", "overlay");
-    } else if (window.innerWidth >= 1024) {
-      document.body.setAttribute("data-sidebar-style", "full");
-    } else {
-      document.body.setAttribute("data-sidebar-style", "mini");
-    }
-  }
 
   useEffect(() => {
+    function resizeHandler() {
+      if (window.innerWidth <= 775) {
+        document.body.setAttribute("data-sidebar-style", "overlay");
+      } else if (window.innerWidth >= 1024) {
+        document.body.setAttribute("data-sidebar-style", "full");
+      } else {
+        document.body.setAttribute("data-sidebar-style", "mini");
+      }
+    }
+
     setTimeout(() => resizeHandler(), 100);
     window.addEventListener("resize", resizeHandler);
     return () => window.removeEventListener("resize", resizeHandler);
   }, []);
-
-  useEffect(() => {
-    const panel: PanelType = location.pathname.startsWith("/student") ? "student" : "admin";
-    const stored = getStoredAuth(panel);
-    if (stored) {
-      if (
-        (panel === "admin" && ["superadmin", "admin"].includes(stored.role)) ||
-        (panel === "student" && stored.role === "student")
-      ) {
-        setAuth(stored);
-        return;
-      }
-      clearAuth(panel);
-    }
-    setAuth(null);
-  }, [location.pathname, setAuth]);
 
   const setPanelAuth = (user: AuthUser) => setAuth(user);
 
@@ -98,14 +82,22 @@ function App() {
             }
           />
 
-          <Route
-            path="/admin/*"
-            element={isAdminAuthed ? <AdminPanel /> : <Navigate to="/admin/login" replace />}
-          />
-          <Route
-            path="/student/*"
-            element={isStudentAuthed ? <StudentPanel /> : <Navigate to="/student/login" replace />}
-          />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="daywise-upload" element={<DaywiseUpload />} />
+            <Route path="student-interaction" element={<AdminStudentInteraction />} />
+            <Route path="monthly-calendar" element={<MonthlyCalendar />} />
+            <Route path="user-management" element={<UserManagement />} />
+          </Route>
+
+          <Route path="/student" element={<StudentLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<StudentDashboard />} />
+            <Route path="materials" element={<StudentMaterials />} />
+            <Route path="interaction" element={<StudentInteraction />} />
+            <Route path="calendar" element={<StudentCalendar />} />
+          </Route>
 
           <Route path="*" element={<Navigate to="/admin/login" replace />} />
         </Routes>
