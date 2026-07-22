@@ -21,7 +21,7 @@ const InteractionChat = ({
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
 
   const loadMessages = async () => {
     const data = await api.getMessages();
@@ -37,7 +37,15 @@ const InteractionChat = ({
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    document.body.classList.add("spa-interaction-active");
+    return () => document.body.classList.remove("spa-interaction-active");
+  }, []);
+
+  useEffect(() => {
+    const container = messagesRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
   }, [messages]);
 
   const onSubmit = async (event: FormEvent) => {
@@ -57,14 +65,14 @@ const InteractionChat = ({
   };
 
   return (
-    <>
+    <div className="spa-interaction-page">
       <PageTitle motherMenu={motherMenu} activeMenu={activeMenu} pageContent="" />
       <div className="card spa-interaction-card">
         <div className="card-header">
           <h4 className="card-title mb-0">{title}</h4>
         </div>
         <div className="card-body spa-interaction-body">
-          <div className="spa-interaction-messages">
+          <div ref={messagesRef} className="spa-interaction-messages">
             {messages.length === 0 ? (
               <p className="text-muted mb-0">{emptyText}</p>
             ) : (
@@ -85,7 +93,6 @@ const InteractionChat = ({
                 </div>
               ))
             )}
-            <div ref={messagesEndRef} />
           </div>
 
           <form onSubmit={onSubmit} className="spa-interaction-form row g-3">
@@ -106,7 +113,7 @@ const InteractionChat = ({
           </form>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

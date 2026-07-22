@@ -380,10 +380,45 @@
 }
 
 .spa-interaction-card {
-  height: calc(100vh - 11.5rem);
-  min-height: 28rem;
+  flex: 1;
+  min-height: 0;
+  height: auto;
   display: flex;
   flex-direction: column;
+  margin-bottom: 0;
+}
+
+body.spa-interaction-active {
+  overflow: hidden;
+}
+
+body.spa-interaction-active .content-body {
+  min-height: 0 !important;
+  height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+body.spa-interaction-active .content-body .container-fluid {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding-bottom: 1rem;
+}
+
+.spa-interaction-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.spa-interaction-page .page-titles {
+  flex-shrink: 0;
+  margin-bottom: 0.75rem;
 }
 
 .spa-interaction-card .card-body.spa-interaction-body {
@@ -411,11 +446,4 @@
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #edf1f5;
-}
-
-@media (max-width: 991px) {
-  .spa-interaction-card {
-    height: calc(100vh - 10rem);
-    min-height: 24rem;
-  }
 }
