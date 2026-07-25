@@ -19,6 +19,7 @@ const DaywiseUpload = () => {
   const [category, setCategory] = useState<FileCategory>("video");
   const [uploads, setUploads] = useState<UploadedFile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"all" | FileCategory>("all");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [titleError, setTitleError] = useState(false);
@@ -29,9 +30,14 @@ const DaywiseUpload = () => {
 
   const filteredUploads = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    if (!query) return uploads;
 
     return uploads.filter((upload) => {
+      if (typeFilter !== "all" && upload.category !== typeFilter) {
+        return false;
+      }
+
+      if (!query) return true;
+
       const typeLabel = FILE_CATEGORY_LABELS[upload.category].toLowerCase();
       return (
         upload.title?.toLowerCase().includes(query) ||
@@ -40,10 +46,13 @@ const DaywiseUpload = () => {
         typeLabel.includes(query)
       );
     });
-  }, [uploads, searchQuery]);
+  }, [uploads, searchQuery, typeFilter]);
+
+  const hasActiveFilters = searchQuery.trim().length > 0 || typeFilter !== "all";
 
   useEffect(() => {
     setSearchQuery("");
+    setTypeFilter("all");
   }, [dateKey]);
 
   useEffect(() => {
@@ -195,26 +204,43 @@ const DaywiseUpload = () => {
             <div className="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
               <h4 className="card-title mb-0">Uploads for {dateKey}</h4>
               <span className="badge bg-primary">
-                {searchQuery.trim()
+                {hasActiveFilters
                   ? `${filteredUploads.length} of ${uploads.length} files`
                   : `${uploads.length} files`}
               </span>
             </div>
             <div className="card-body">
               {uploads.length > 0 && (
-                <div className="d-flex gap-2 mb-3 daywise-upload-search">
+                <div className="d-flex flex-wrap gap-2 mb-3 daywise-upload-filters">
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-control flex-grow-1"
                     placeholder="Search by title, file name, or type..."
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                   />
-                  {searchQuery && (
+                  <select
+                    className="form-select daywise-upload-type-filter"
+                    value={typeFilter}
+                    onChange={(event) =>
+                      setTypeFilter(event.target.value as "all" | FileCategory)
+                    }
+                  >
+                    <option value="all">All File Types</option>
+                    {Object.entries(FILE_CATEGORY_LABELS).map(([key, label]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                  {hasActiveFilters && (
                     <button
                       type="button"
                       className="btn btn-outline-secondary"
-                      onClick={() => setSearchQuery("")}
+                      onClick={() => {
+                        setSearchQuery("");
+                        setTypeFilter("all");
+                      }}
                     >
                       Clear
                     </button>
@@ -224,7 +250,7 @@ const DaywiseUpload = () => {
               {uploads.length === 0 ? (
                 <p className="text-muted mb-0">No files uploaded for this date.</p>
               ) : filteredUploads.length === 0 ? (
-                <p className="text-muted mb-0">No uploads match your search.</p>
+                <p className="text-muted mb-0">No uploads match your search or filter.</p>
               ) : (
                 <div className="table-responsive">
                   <table className="table table-striped">
