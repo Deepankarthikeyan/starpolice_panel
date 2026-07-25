@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
+    // @ts-expect-error supported at runtime for Cloudflare tunnel previews
     allowedHosts: [".trycloudflare.com"],
     hmr: {
       clientPort: 443,

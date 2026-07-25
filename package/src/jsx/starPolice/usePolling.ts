@@ -13,7 +13,7 @@ export function usePolling(
 
     const run = () => {
       if (document.visibilityState !== "visible") return;
-      callbackRef.current().catch(console.error);
+      void Promise.resolve(callbackRef.current()).catch(console.error);
     };
 
     run();
