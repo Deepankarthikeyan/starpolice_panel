@@ -168,9 +168,10 @@ const UserManagement = () => {
                             type="button"
                             className="btn btn-sm btn-outline-primary spa-user-action-btn"
                             onClick={() => openEditPermissions(user)}
+                            title="Edit Access"
+                            aria-label="Edit Access"
                           >
                             <i className="material-symbols-outlined">manage_accounts</i>
-                            <span>Edit Access</span>
                           </button>
                         )}
                         <button
@@ -179,11 +180,12 @@ const UserManagement = () => {
                             user.isActive ? "btn-outline-warning" : "btn-outline-success"
                           }`}
                           onClick={() => toggleAccess(user)}
+                          title={user.isActive ? "Revoke Login" : "Grant Login"}
+                          aria-label={user.isActive ? "Revoke Login" : "Grant Login"}
                         >
                           <i className="material-symbols-outlined">
                             {user.isActive ? "block" : "login"}
                           </i>
-                          <span>{user.isActive ? "Revoke Login" : "Grant Login"}</span>
                         </button>
                         <button
                           type="button"
@@ -192,9 +194,10 @@ const UserManagement = () => {
                             await api.deleteUser(user.id);
                             await loadUsers();
                           }}
+                          title="Delete"
+                          aria-label="Delete"
                         >
                           <i className="material-symbols-outlined">delete</i>
-                          <span>Delete</span>
                         </button>
                       </div>
                     )}
