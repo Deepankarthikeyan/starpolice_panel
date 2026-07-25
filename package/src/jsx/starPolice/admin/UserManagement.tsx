@@ -160,34 +160,41 @@ const UserManagement = () => {
                   </span>
                 </td>
                 {canManage && (
-                  <td>
+                  <td className="spa-user-actions-cell">
                     {user.role !== "superadmin" && (
-                      <div className="d-flex flex-wrap gap-2">
+                      <div className="spa-user-actions">
                         {canEditPermissions && (
                           <button
                             type="button"
-                            className="btn btn-sm btn-outline-primary"
+                            className="btn btn-sm btn-outline-primary spa-user-action-btn"
                             onClick={() => openEditPermissions(user)}
                           >
-                            Edit Access
+                            <i className="material-symbols-outlined">manage_accounts</i>
+                            <span>Edit Access</span>
                           </button>
                         )}
                         <button
                           type="button"
-                          className={`btn btn-sm ${user.isActive ? "btn-outline-warning" : "btn-outline-success"}`}
+                          className={`btn btn-sm spa-user-action-btn ${
+                            user.isActive ? "btn-outline-warning" : "btn-outline-success"
+                          }`}
                           onClick={() => toggleAccess(user)}
                         >
-                          {user.isActive ? "Revoke Login" : "Grant Login"}
+                          <i className="material-symbols-outlined">
+                            {user.isActive ? "block" : "login"}
+                          </i>
+                          <span>{user.isActive ? "Revoke Login" : "Grant Login"}</span>
                         </button>
                         <button
                           type="button"
-                          className="btn btn-sm btn-outline-danger"
+                          className="btn btn-sm btn-outline-danger spa-user-action-btn"
                           onClick={async () => {
                             await api.deleteUser(user.id);
                             await loadUsers();
                           }}
                         >
-                          Delete
+                          <i className="material-symbols-outlined">delete</i>
+                          <span>Delete</span>
                         </button>
                       </div>
                     )}
