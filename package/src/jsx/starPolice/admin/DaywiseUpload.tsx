@@ -211,39 +211,45 @@ const DaywiseUpload = () => {
             </div>
             <div className="card-body">
               {uploads.length > 0 && (
-                <div className="d-flex flex-wrap gap-2 mb-3 daywise-upload-filters">
-                  <input
-                    type="text"
-                    className="form-control flex-grow-1"
-                    placeholder="Search by title, file name, or type..."
-                    value={searchQuery}
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                  />
-                  <select
-                    className="form-select daywise-upload-type-filter"
-                    value={typeFilter}
-                    onChange={(event) =>
-                      setTypeFilter(event.target.value as "all" | FileCategory)
-                    }
-                  >
-                    <option value="all">All File Types</option>
-                    {Object.entries(FILE_CATEGORY_LABELS).map(([key, label]) => (
-                      <option key={key} value={key}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                  {hasActiveFilters && (
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => {
-                        setSearchQuery("");
-                        setTypeFilter("all");
-                      }}
+                <div className="row g-2 align-items-center mb-3 daywise-upload-filters">
+                  <div className="col">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search by title, file name, or type..."
+                      value={searchQuery}
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                    />
+                  </div>
+                  <div className="col-auto">
+                    <select
+                      className="form-select daywise-upload-type-filter"
+                      value={typeFilter}
+                      onChange={(event) =>
+                        setTypeFilter(event.target.value as "all" | FileCategory)
+                      }
                     >
-                      Clear
-                    </button>
+                      <option value="all">All File Types</option>
+                      {Object.entries(FILE_CATEGORY_LABELS).map(([key, label]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {hasActiveFilters && (
+                    <div className="col-auto">
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => {
+                          setSearchQuery("");
+                          setTypeFilter("all");
+                        }}
+                      >
+                        Clear
+                      </button>
+                    </div>
                   )}
                 </div>
               )}

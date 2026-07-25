@@ -362,8 +362,9 @@
   border-radius: 0.5rem;
 }
 
-.daywise-upload-type-filter {
+.daywise-upload-filters .daywise-upload-type-filter {
   min-width: 11rem;
+  width: 11rem;
 }
 
 .upload-preview-modal .modal-body {
