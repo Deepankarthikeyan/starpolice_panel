@@ -8,19 +8,45 @@ dotenv.config();
 async function seed() {
   await connectDB(process.env.MONGODB_URI);
 
-  const password = await bcrypt.hash("superadmin123", 10);
-  await User.findOneAndUpdate(
-    { email: "superadmin@starpolice.academy" },
+  const users = [
     {
       name: "Super Admin",
       email: "superadmin@starpolice.academy",
-      password,
+      password: "superadmin123",
       role: "superadmin",
       isActive: true,
     },
-    { upsert: true, new: true, setDefaultsOnInsert: true }
-  );
-  console.log("Seeded superadmin: superadmin@starpolice.academy / superadmin123");
+    {
+      name: "Admin",
+      email: "admin@starpolice.academy",
+      password: "admin123",
+      role: "admin",
+      isActive: true,
+    },
+    {
+      name: "Student",
+      email: "student@starpolice.academy",
+      password: "student123",
+      role: "student",
+      isActive: true,
+    },
+  ];
+
+  for (const entry of users) {
+    const password = await bcrypt.hash(entry.password, 10);
+    await User.findOneAndUpdate(
+      { email: entry.email },
+      {
+        name: entry.name,
+        email: entry.email,
+        password,
+        role: entry.role,
+        isActive: entry.isActive,
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    console.log(`Seeded ${entry.role}: ${entry.email} / ${entry.password}`);
+  }
 
   process.exit(0);
 }
