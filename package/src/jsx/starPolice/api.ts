@@ -8,6 +8,7 @@ import type {
   Note,
   PanelType,
   SetupStatus,
+  StudentDashboardStats,
   UploadedFile,
 } from "./types";
 
@@ -162,6 +163,10 @@ export const api = {
     return request<DashboardStats>("/api/dashboard/stats");
   },
 
+  getStudentDashboardStats() {
+    return request<StudentDashboardStats>("/api/dashboard/student-stats");
+  },
+
   getNotes() {
     return request<Note[]>("/api/notes");
   },
@@ -201,6 +206,10 @@ export const api = {
     return request<{ message: string }>(`/api/alerts/${id}`, {
       method: "DELETE",
     });
+  },
+
+  getNotificationSummary() {
+    return request<{ items: AppNotification[]; unreadCount: number }>("/api/notifications/summary");
   },
 
   getNotifications() {

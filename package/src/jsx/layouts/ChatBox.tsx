@@ -42,9 +42,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClick, toggle }) => {
           ))}
         </ul>
         <div className="tab-content">
-          <Chat toggle={toggle} toggleTab={toggleTab} toggleChatBox={false} />
-          <Notes toggle={toggle} toggleTab={toggleTab} toggleChatBox={false} />
-          <Alerts toggle={toggle} toggleTab={toggleTab} toggleChatBox={false} />
+          <Chat toggle={toggle} toggleTab={toggleTab} toggleChatBox={toggle === "chatbox"} />
+          <Notes toggle={toggle} toggleTab={toggleTab} toggleChatBox={toggle === "chatbox"} />
+          <Alerts toggle={toggle} toggleTab={toggleTab} toggleChatBox={toggle === "chatbox"} />
         </div>
       </div>
     </div>

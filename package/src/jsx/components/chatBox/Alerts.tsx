@@ -1,7 +1,8 @@
-import React, { FormEvent, useContext, useEffect, useState } from "react";
+import React, { FormEvent, useContext, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../../starPolice/api";
+import { usePolling } from "../../starPolice/usePolling";
 import type { AcademyAlert } from "../../starPolice/types";
 
 type AlertsProps = {
@@ -25,7 +26,7 @@ const categoryLabel: Record<AcademyAlert["category"], string> = {
   social: "SOCIAL",
 };
 
-const Alerts: React.FC<AlertsProps> = ({ toggleTab, toggleChatBox }) => {
+const Alerts: React.FC<AlertsProps> = ({ toggleTab, toggleChatBox, toggle }) => {
   const [alerts, setAlerts] = useState<AcademyAlert[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
@@ -33,20 +34,15 @@ const Alerts: React.FC<AlertsProps> = ({ toggleTab, toggleChatBox }) => {
   const [loading, setLoading] = useState(false);
   const { auth } = useContext(ThemeContext);
   const isAdmin = auth?.role === "admin" || auth?.role === "superadmin";
+  const isActive = toggle === "chatbox" && toggleTab === "alerts";
 
-  const loadAlerts = async () => {
+  const loadAlerts = useCallback(async () => {
     if (!auth?.token) return;
     const data = await api.getAlerts();
     setAlerts(data);
-  };
-
-  useEffect(() => {
-    loadAlerts().catch(console.error);
-    const interval = setInterval(() => {
-      loadAlerts().catch(console.error);
-    }, 10000);
-    return () => clearInterval(interval);
   }, [auth?.token]);
+
+  usePolling(loadAlerts, 30000, Boolean(auth?.token) && isActive);
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();

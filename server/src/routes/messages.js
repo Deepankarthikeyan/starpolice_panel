@@ -28,7 +28,7 @@ router.get("/", authRequired, attachUser, (req, res, next) => {
   return res.status(403).json({ message: "You do not have permission to view messages." });
 }, async (_req, res) => {
   try {
-    const messages = await Message.find().sort({ createdAt: 1 });
+    const messages = await Message.find().sort({ createdAt: 1 }).limit(200);
     res.json(messages.map(mapMessage));
   } catch (error) {
     res.status(500).json({ message: error.message });

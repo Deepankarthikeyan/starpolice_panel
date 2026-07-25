@@ -56,7 +56,26 @@ export interface DashboardStats {
   studentMessages: number;
   adminReplies: number;
   categoryCounts: Record<string, number>;
-  recentUploads: Array<{ date: string; category: FileCategory }>;
+  recentUploads: Array<{
+    id: string;
+    date: string;
+    name: string;
+    title: string;
+    category: FileCategory;
+  }>;
+}
+
+export interface StudentDashboardStats {
+  materialCount: number;
+  studyDays: number;
+  adminMessages: number;
+  latestUploads: Array<{
+    id: string;
+    date: string;
+    name: string;
+    title: string;
+    category: FileCategory;
+  }>;
 }
 
 export interface Note {

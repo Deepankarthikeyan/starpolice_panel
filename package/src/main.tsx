@@ -6,8 +6,6 @@ import App from "./App.tsx";
 import "./assets/css/style.css";
 import "./assets/css/star-police-brand.css";
 import "react-datepicker/dist/react-datepicker.css";
-import "nouislider/distribute/nouislider.css";
-import "ckeditor5/ckeditor5.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

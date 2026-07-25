@@ -19,4 +19,6 @@ const uploadSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+uploadSchema.index({ date: 1, createdAt: -1 });
+
 export default mongoose.model("Upload", uploadSchema);

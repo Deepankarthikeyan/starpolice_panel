@@ -1,24 +1,26 @@
-import { Fragment, Suspense, useContext, useEffect } from "react";
+import { Fragment, Suspense, lazy, useContext, useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import { AdminLayout, StudentLayout } from "./jsx/PanelLayouts";
-import AdminDashboard from "./jsx/starPolice/admin/AdminDashboard";
-import DaywiseUpload from "./jsx/starPolice/admin/DaywiseUpload";
-import AdminStudentInteraction from "./jsx/starPolice/admin/StudentInteraction";
-import MonthlyCalendar from "./jsx/starPolice/admin/MonthlyCalendar";
-import UserManagement from "./jsx/starPolice/admin/UserManagement";
-import StudentDashboard from "./jsx/starPolice/student/StudentDashboard";
-import StudentMaterials from "./jsx/starPolice/student/StudentMaterials";
-import StudentInteraction from "./jsx/starPolice/student/StudentInteraction";
-import StudentCalendar from "./jsx/starPolice/student/StudentCalendar";
-import PanelProfile from "./jsx/starPolice/shared/PanelProfile";
-import PanelSettings from "./jsx/starPolice/shared/PanelSettings";
-import PanelInbox from "./jsx/starPolice/shared/PanelInbox";
-import AdminLogin from "./jsx/pages/auth/AdminLogin";
-import AdminSignup from "./jsx/pages/auth/AdminSignup";
-import StudentLogin from "./jsx/pages/auth/StudentLogin";
 import { ThemeContext } from "./context/ThemeContext";
 import type { AuthUser } from "./jsx/starPolice/types";
+
+const AdminLayout = lazy(() => import("./jsx/PanelLayouts").then((m) => ({ default: m.AdminLayout })));
+const StudentLayout = lazy(() => import("./jsx/PanelLayouts").then((m) => ({ default: m.StudentLayout })));
+const AdminDashboard = lazy(() => import("./jsx/starPolice/admin/AdminDashboard"));
+const DaywiseUpload = lazy(() => import("./jsx/starPolice/admin/DaywiseUpload"));
+const AdminStudentInteraction = lazy(() => import("./jsx/starPolice/admin/StudentInteraction"));
+const MonthlyCalendar = lazy(() => import("./jsx/starPolice/admin/MonthlyCalendar"));
+const UserManagement = lazy(() => import("./jsx/starPolice/admin/UserManagement"));
+const StudentDashboard = lazy(() => import("./jsx/starPolice/student/StudentDashboard"));
+const StudentMaterials = lazy(() => import("./jsx/starPolice/student/StudentMaterials"));
+const StudentInteraction = lazy(() => import("./jsx/starPolice/student/StudentInteraction"));
+const StudentCalendar = lazy(() => import("./jsx/starPolice/student/StudentCalendar"));
+const PanelProfile = lazy(() => import("./jsx/starPolice/shared/PanelProfile"));
+const PanelSettings = lazy(() => import("./jsx/starPolice/shared/PanelSettings"));
+const PanelInbox = lazy(() => import("./jsx/starPolice/shared/PanelInbox"));
+const AdminLogin = lazy(() => import("./jsx/pages/auth/AdminLogin"));
+const AdminSignup = lazy(() => import("./jsx/pages/auth/AdminSignup"));
+const StudentLogin = lazy(() => import("./jsx/pages/auth/StudentLogin"));
 
 function Preloader() {
   return (

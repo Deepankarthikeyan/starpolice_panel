@@ -15,4 +15,19 @@ export default defineConfig({
       "/uploads": "http://localhost:5000",
     },
   },
+  build: {
+    target: "es2020",
+    cssCodeSplit: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          bootstrap: ["react-bootstrap"],
+          calendar: ["@fullcalendar/react", "@fullcalendar/daygrid", "@fullcalendar/interaction"],
+          datepicker: ["react-datepicker"],
+        },
+      },
+    },
+  },
 });

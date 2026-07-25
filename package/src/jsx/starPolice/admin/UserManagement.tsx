@@ -68,12 +68,17 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(false);
 
   const loadUsers = async () => {
+    if (isSuperAdmin) {
+      const [studentData, adminData] = await Promise.all([
+        api.getUsers("student"),
+        api.getUsers("admin"),
+      ]);
+      setStudents(studentData);
+      setAdmins(adminData);
+      return;
+    }
     const studentData = await api.getUsers("student");
     setStudents(studentData);
-    if (isSuperAdmin) {
-      const adminData = await api.getUsers("admin");
-      setAdmins(adminData);
-    }
   };
 
   useEffect(() => {

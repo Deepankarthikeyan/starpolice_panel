@@ -15,11 +15,26 @@ function mapNotification(item) {
   };
 }
 
+router.get("/summary", authRequired, async (req, res) => {
+  try {
+    const [notifications, unreadCount] = await Promise.all([
+      Notification.find({ user: req.user.id }).sort({ createdAt: -1 }).limit(20),
+      Notification.countDocuments({ user: req.user.id, read: false }),
+    ]);
+    res.json({
+      items: notifications.map(mapNotification),
+      unreadCount,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get("/", authRequired, async (req, res) => {
   try {
-    const notifications = await Notification.find({ user: req.user.id }).sort({
-      createdAt: -1,
-    });
+    const notifications = await Notification.find({ user: req.user.id })
+      .sort({ createdAt: -1 })
+      .limit(50);
     res.json(notifications.map(mapNotification));
   } catch (error) {
     res.status(500).json({ message: error.message });

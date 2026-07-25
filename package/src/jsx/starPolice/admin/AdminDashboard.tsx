@@ -6,15 +6,9 @@ import type { DashboardStats } from "../types";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [uploads, setUploads] = useState<Awaited<ReturnType<typeof api.getUploads>>>([]);
 
   useEffect(() => {
-    Promise.all([api.getDashboardStats(), api.getUploads()])
-      .then(([dashboardStats, allUploads]) => {
-        setStats(dashboardStats);
-        setUploads(allUploads);
-      })
-      .catch(console.error);
+    api.getDashboardStats().then(setStats).catch(console.error);
   }, []);
 
   return (
@@ -77,10 +71,10 @@ const AdminDashboard = () => {
               <h4 className="card-title mb-0">Recent Uploads</h4>
             </div>
             <div className="card-body">
-              {uploads.length === 0 ? (
+              {!stats?.recentUploads?.length ? (
                 <p className="text-muted mb-0">No uploads yet. Use Daywise Upload to add materials.</p>
               ) : (
-                uploads.slice(0, 5).map((upload) => (
+                stats.recentUploads.map((upload) => (
                   <div key={upload.id} className="d-flex justify-content-between py-2 border-bottom">
                     <div>
                       <div className="fw-semibold">{upload.name}</div>

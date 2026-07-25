@@ -48,7 +48,7 @@ router.get("/", authRequired, attachUser, (req, res, next) => {
     const filter = {};
     if (req.query.date) filter.date = req.query.date;
 
-    const uploads = await Upload.find(filter).sort({ createdAt: -1 });
+    const uploads = await Upload.find(filter).sort({ createdAt: -1 }).limit(1000);
     res.json(uploads.map(mapUpload));
   } catch (error) {
     res.status(500).json({ message: error.message });

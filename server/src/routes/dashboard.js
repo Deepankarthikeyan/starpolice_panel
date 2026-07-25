@@ -5,34 +5,64 @@ import { authRequired, adminPanelOnly, attachUser, requirePermission } from "../
 
 const router = express.Router();
 
+function mapRecentUpload(item) {
+  return {
+    id: item._id.toString(),
+    date: item.date,
+    title: item.title || "",
+    name: item.name,
+    category: item.category,
+  };
+}
+
 router.get("/stats", authRequired, adminPanelOnly, attachUser, requirePermission("admin:dashboard"), async (_req, res) => {
   try {
-    const uploads = await Upload.find().select("date category createdAt");
-    const messages = await Message.find().select("senderRole createdAt");
+    const [totalUploads, activeDays, studentMessages, adminReplies, categoryGroups, recentUploads] =
+      await Promise.all([
+        Upload.countDocuments(),
+        Upload.distinct("date"),
+        Message.countDocuments({ senderRole: "student" }),
+        Message.countDocuments({ senderRole: { $in: ["admin", "superadmin"] } }),
+        Upload.aggregate([{ $group: { _id: "$category", count: { $sum: 1 } } }]),
+        Upload.find().sort({ createdAt: -1 }).limit(5).select("date title name category"),
+      ]);
 
-    const categoryCounts = uploads.reduce((acc, item) => {
-      acc[item.category] = (acc[item.category] ?? 0) + 1;
-      return acc;
-    }, {});
-
-    const calendarCounts = uploads.reduce((acc, item) => {
-      acc[item.date] = (acc[item.date] ?? 0) + 1;
+    const categoryCounts = categoryGroups.reduce((acc, item) => {
+      acc[item._id] = item.count;
       return acc;
     }, {});
 
     res.json({
-      totalUploads: uploads.length,
-      activeDays: Object.keys(calendarCounts).length,
-      studentMessages: messages.filter((item) => item.senderRole === "student").length,
-      adminReplies: messages.filter((item) => ["admin", "superadmin"].includes(item.senderRole)).length,
+      totalUploads,
+      activeDays: activeDays.length,
+      studentMessages,
+      adminReplies,
       categoryCounts,
-      recentUploads: uploads
-        .sort((a, b) => b.createdAt - a.createdAt)
-        .slice(0, 5)
-        .map((item) => ({
-          date: item.date,
-          category: item.category,
-        })),
+      recentUploads: recentUploads.map(mapRecentUpload),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get("/student-stats", authRequired, async (req, res) => {
+  try {
+    if (req.user.role !== "student") {
+      return res.status(403).json({ message: "Student panel access required." });
+    }
+
+    const [materialCount, studyDays, adminMessages, latestUploads] = await Promise.all([
+      Upload.countDocuments(),
+      Upload.distinct("date"),
+      Message.countDocuments({ senderRole: { $in: ["admin", "superadmin"] } }),
+      Upload.find().sort({ createdAt: -1 }).limit(6).select("date title name category"),
+    ]);
+
+    res.json({
+      materialCount,
+      studyDays: studyDays.length,
+      adminMessages,
+      latestUploads: latestUploads.map(mapRecentUpload),
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

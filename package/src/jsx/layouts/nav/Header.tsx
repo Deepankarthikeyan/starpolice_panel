@@ -1,10 +1,11 @@
-import { useState, useEffect, useContext, type MouseEvent } from "react";
+import { useState, useEffect, useContext, useCallback, type MouseEvent } from "react";
 
 import { Link } from "react-router-dom";
 /// Scroll
 import { Dropdown } from "react-bootstrap";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../../starPolice/api";
+import { usePolling } from "../../starPolice/usePolling";
 import type { AppNotification } from "../../starPolice/types";
 
 import ProfileDropdown from "./ProfileDropdown";
@@ -27,23 +28,14 @@ const Header = ({ onNote }: propType) => {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     if (!auth?.token) return;
-    const [items, unread] = await Promise.all([
-      api.getNotifications(),
-      api.getUnreadNotificationCount(),
-    ]);
-    setNotifications(items);
-    setUnreadCount(unread.count);
-  };
-
-  useEffect(() => {
-    loadNotifications().catch(console.error);
-    const interval = setInterval(() => {
-      loadNotifications().catch(console.error);
-    }, 10000);
-    return () => clearInterval(interval);
+    const summary = await api.getNotificationSummary();
+    setNotifications(summary.items);
+    setUnreadCount(summary.unreadCount);
   }, [auth?.token]);
+
+  usePolling(loadNotifications, 30000, Boolean(auth?.token));
 
   const notificationIconClass = (type: AppNotification["type"]) => {
     if (type === "message") return "media-info";
@@ -65,9 +57,9 @@ const Header = ({ onNote }: propType) => {
   //For header fixed
   const [headerFix, setheaderFix] = useState(false);
   useEffect(() => {
-    window.addEventListener("scroll", () => {
-      setheaderFix(window.scrollY > 50);
-    });
+    const onScroll = () => setheaderFix(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const [themeMode, setThemeMode] = useState<boolean>(false);

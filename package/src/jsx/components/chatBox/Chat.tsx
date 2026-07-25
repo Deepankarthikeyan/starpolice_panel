@@ -1,7 +1,8 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../../starPolice/api";
+import { usePolling } from "../../starPolice/usePolling";
 import type { ChatMessage } from "../../starPolice/types";
 import MsgBox from "./MsgBox";
 
@@ -11,24 +12,19 @@ type ChatProps = {
   toggle?: string;
 };
 
-const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab }) => {
+const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab, toggle }) => {
   const [openMsg, setOpenMsg] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const { auth } = useContext(ThemeContext);
+  const isActive = toggle === "chatbox" && toggleTab === "chat";
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     if (!auth?.token) return;
     const data = await api.getMessages();
     setMessages(data);
-  };
-
-  useEffect(() => {
-    loadMessages().catch(console.error);
-    const interval = setInterval(() => {
-      loadMessages().catch(console.error);
-    }, 5000);
-    return () => clearInterval(interval);
   }, [auth?.token]);
+
+  usePolling(loadMessages, 10000, Boolean(auth?.token) && isActive);
 
   const chatTitle =
     auth?.role === "admin" || auth?.role === "superadmin" ? "Students" : "Star Police Admin";
