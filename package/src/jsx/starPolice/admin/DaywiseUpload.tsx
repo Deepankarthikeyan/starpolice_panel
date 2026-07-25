@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import PageTitle from "../../layouts/PageTitle";
 import { api } from "../api";
@@ -20,8 +20,18 @@ const DaywiseUpload = () => {
   const [uploads, setUploads] = useState<UploadedFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [titleError, setTitleError] = useState(false);
+  const errorRef = useRef<HTMLDivElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const dateKey = useMemo(() => selectedDate.toISOString().slice(0, 10), [selectedDate]);
+
+  useEffect(() => {
+    if (!error) return;
+
+    errorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [error]);
 
   const loadUploads = async () => {
     const data = await api.getUploads(dateKey);
@@ -32,17 +42,21 @@ const DaywiseUpload = () => {
     loadUploads().catch(console.error);
   }, [dateKey]);
 
-  const handleFiles = async (files: FileList | null) => {
+  const handleFiles = async (files: FileList | null, input?: HTMLInputElement | null) => {
     if (!files?.length) return;
 
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
+      setTitleError(true);
       setError("Please enter a title before uploading.");
+      titleInputRef.current?.focus();
+      if (input) input.value = "";
       return;
     }
 
     setLoading(true);
     setError("");
+    setTitleError(false);
 
     try {
       await api.uploadFiles(dateKey, category, trimmedTitle, Array.from(files));
@@ -58,7 +72,11 @@ const DaywiseUpload = () => {
   return (
     <>
       <PageTitle motherMenu="Admin Panel" activeMenu="Daywise Upload" pageContent="" />
-      {error && <div className="alert alert-danger">{error}</div>}
+      {error && (
+        <div ref={errorRef} className="alert alert-danger">
+          {error}
+        </div>
+      )}
       <div className="row">
         <div className="col-xl-4">
           <div className="row g-3">
@@ -97,14 +115,24 @@ const DaywiseUpload = () => {
                     Title
                   </label>
                   <input
+                    ref={titleInputRef}
                     id="upload-title"
                     type="text"
-                    className="form-control mb-3"
+                    className={`form-control mb-3${titleError ? " is-invalid" : ""}`}
                     value={title}
-                    onChange={(event) => setTitle(event.target.value)}
+                    onChange={(event) => {
+                      setTitle(event.target.value);
+                      if (titleError) {
+                        setTitleError(false);
+                        setError("");
+                      }
+                    }}
                     placeholder="e.g. Morning Session Notes"
                     disabled={loading}
                   />
+                  {titleError && (
+                    <div className="invalid-feedback d-block mb-3">Title is required.</div>
+                  )}
 
                   <label className="form-label fw-semibold mb-1" htmlFor="upload-type">
                     File Type
@@ -133,7 +161,10 @@ const DaywiseUpload = () => {
                       accept={categoryAccept[category]}
                       multiple
                       disabled={loading}
-                      onChange={(event) => handleFiles(event.target.files)}
+                      onChange={(event) => {
+                        void handleFiles(event.target.files, event.target);
+                        event.target.value = "";
+                      }}
                     />
                   </div>
                 </div>
