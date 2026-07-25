@@ -135,7 +135,7 @@ const UserManagement = () => {
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Panel Access</th>
+            <th>Status</th>
             {canManage && <th>Actions</th>}
           </tr>
         </thead>
