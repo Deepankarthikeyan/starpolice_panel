@@ -2,8 +2,53 @@ import { FormEvent, useContext, useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
-import { hasPermission } from "../permissions";
+import {
+  ADMIN_PERMISSIONS,
+  STUDENT_PERMISSIONS,
+  defaultPermissionsForRole,
+  hasPermission,
+} from "../permissions";
 import type { ManagedUser } from "../types";
+
+function PermissionChecklist({
+  role,
+  selected,
+  onChange,
+}: {
+  role: "admin" | "student";
+  selected: string[];
+  onChange: (permissions: string[]) => void;
+}) {
+  const options = role === "admin" ? ADMIN_PERMISSIONS : STUDENT_PERMISSIONS;
+
+  const toggle = (key: string) => {
+    if (selected.includes(key)) {
+      const next = selected.filter((item) => item !== key);
+      onChange(next.length > 0 ? next : [key]);
+      return;
+    }
+    onChange([...selected, key]);
+  };
+
+  return (
+    <div className="spa-permission-list">
+      {options.map((option) => (
+        <label key={option.key} className="spa-permission-item">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            checked={selected.includes(option.key)}
+            onChange={() => toggle(option.key)}
+          />
+          <span>
+            <strong>{option.label}</strong>
+            <small className="d-block text-muted">{option.description}</small>
+          </span>
+        </label>
+      ))}
+    </div>
+  );
+}
 
 const UserManagement = () => {
   const { auth } = useContext(ThemeContext);
@@ -14,6 +59,11 @@ const UserManagement = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [createRole, setCreateRole] = useState<"admin" | "student">("student");
+  const [createPermissions, setCreatePermissions] = useState<string[]>(
+    defaultPermissionsForRole("student")
+  );
+  const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
+  const [editPermissions, setEditPermissions] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,15 +80,20 @@ const UserManagement = () => {
     loadUsers().catch(console.error);
   }, [isSuperAdmin]);
 
+  useEffect(() => {
+    setCreatePermissions(defaultPermissionsForRole(createRole));
+  }, [createRole]);
+
   const onCreate = async (event: FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setError("");
     try {
-      await api.createUser(name.trim(), email.trim(), password, createRole);
+      await api.createUser(name.trim(), email.trim(), password, createRole, createPermissions);
       setName("");
       setEmail("");
       setPassword("");
+      setCreatePermissions(defaultPermissionsForRole(createRole));
       await loadUsers();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create user");
@@ -52,7 +107,27 @@ const UserManagement = () => {
     await loadUsers();
   };
 
-  const renderTable = (users: ManagedUser[], canManage: boolean) => (
+  const openEditPermissions = (user: ManagedUser) => {
+    setEditingUser(user);
+    setEditPermissions(user.permissions);
+  };
+
+  const saveEditPermissions = async () => {
+    if (!editingUser) return;
+    setLoading(true);
+    setError("");
+    try {
+      await api.updateUserPermissions(editingUser.id, editPermissions);
+      setEditingUser(null);
+      await loadUsers();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update permissions");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderTable = (users: ManagedUser[], canManage: boolean, canEditPermissions: boolean) => (
     <div className="table-responsive">
       <table className="table table-striped align-middle">
         <thead>
@@ -88,6 +163,15 @@ const UserManagement = () => {
                   <td>
                     {user.role !== "superadmin" && (
                       <div className="d-flex flex-wrap gap-2">
+                        {canEditPermissions && (
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={() => openEditPermissions(user)}
+                          >
+                            Edit Access
+                          </button>
+                        )}
                         <button
                           type="button"
                           className={`btn btn-sm ${user.isActive ? "btn-outline-warning" : "btn-outline-success"}`}
@@ -124,90 +208,138 @@ const UserManagement = () => {
         <div className="alert alert-warning">You do not have permission to manage users.</div>
       ) : (
         <>
-          {error && <div className="alert alert-danger">{error}</div>}
+      {error && <div className="alert alert-danger">{error}</div>}
 
-          <div className="row">
-            <div className="col-xl-4">
-              <div className="card">
-                <div className="card-header">
-                  <h4 className="card-title mb-0">Create Account</h4>
-                </div>
-                <div className="card-body">
-                  <form onSubmit={onCreate}>
-                    {isSuperAdmin && (
-                      <div className="mb-3">
-                        <label className="form-label">Account Type</label>
-                        <select
-                          className="form-select"
-                          value={createRole}
-                          onChange={(e) => setCreateRole(e.target.value as "admin" | "student")}
-                        >
-                          <option value="student">Student (Student Panel)</option>
-                          <option value="admin">Admin (Admin Panel)</option>
-                        </select>
-                      </div>
-                    )}
-
-                    <div className="mb-3">
-                      <label className="form-label">Full Name</label>
-                      <input
-                        className="form-control"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Email</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label">Password</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <button type="submit" className="btn btn-primary w-100" disabled={loading}>
-                      {loading ? "Creating..." : "Create Account"}
-                    </button>
-                    <p className="text-muted small mt-2 mb-0">
-                      New accounts start with login access <strong>disabled</strong>. Use Grant Login
-                      when the account is ready.
-                    </p>
-                  </form>
-                </div>
-              </div>
+      <div className="row">
+        <div className="col-xl-5">
+          <div className="card">
+            <div className="card-header">
+              <h4 className="card-title mb-0">Create Account</h4>
             </div>
-
-            <div className="col-xl-8">
-              {isSuperAdmin && (
-                <div className="card mb-4">
-                  <div className="card-header">
-                    <h4 className="card-title mb-0">Admin Accounts</h4>
+            <div className="card-body">
+              <form onSubmit={onCreate}>
+                {isSuperAdmin && (
+                  <div className="mb-3">
+                    <label className="form-label">Account Type</label>
+                    <select
+                      className="form-select"
+                      value={createRole}
+                      onChange={(e) => setCreateRole(e.target.value as "admin" | "student")}
+                    >
+                      <option value="student">Student (Student Panel)</option>
+                      <option value="admin">Admin (Admin Panel)</option>
+                    </select>
                   </div>
-                  <div className="card-body">{renderTable(admins, true)}</div>
-                </div>
-              )}
+                )}
 
-              <div className="card">
-                <div className="card-header">
-                  <h4 className="card-title mb-0">Student Accounts</h4>
+                <div className="mb-3">
+                  <label className="form-label">Full Name</label>
+                  <input
+                    className="form-control"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
                 </div>
-                <div className="card-body">{renderTable(students, true)}</div>
+                <div className="mb-3">
+                  <label className="form-label">Email</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label">Panel Permissions</label>
+                  <p className="text-muted small mb-2">
+                    Choose which sections this account can access after login is granted.
+                  </p>
+                  <PermissionChecklist
+                    role={isSuperAdmin ? createRole : "student"}
+                    selected={createPermissions}
+                    onChange={setCreatePermissions}
+                  />
+                </div>
+
+                <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+                  {loading ? "Creating..." : "Create Account"}
+                </button>
+                <p className="text-muted small mt-2 mb-0">
+                  New accounts start with login access <strong>disabled</strong>. Use Grant Login
+                  after reviewing permissions.
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div className="col-xl-7">
+          {isSuperAdmin && (
+            <div className="card mb-4">
+              <div className="card-header">
+                <h4 className="card-title mb-0">Admin Accounts</h4>
+              </div>
+              <div className="card-body">{renderTable(admins, true, true)}</div>
+            </div>
+          )}
+
+          <div className="card">
+            <div className="card-header">
+              <h4 className="card-title mb-0">Student Accounts</h4>
+            </div>
+            <div className="card-body">{renderTable(students, true, true)}</div>
+          </div>
+        </div>
+      </div>
+
+      {editingUser && (
+        <div className="modal fade show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Edit Access — {editingUser.name}</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setEditingUser(null)}
+                  aria-label="Close"
+                />
+              </div>
+              <div className="modal-body">
+                <p className="text-muted small">
+                  Update which panel sections <strong>{editingUser.email}</strong> can use.
+                </p>
+                <PermissionChecklist
+                  role={editingUser.role === "admin" ? "admin" : "student"}
+                  selected={editPermissions}
+                  onChange={setEditPermissions}
+                />
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-outline-secondary" onClick={() => setEditingUser(null)}>
+                  Cancel
+                </button>
+                <button type="button" className="btn btn-primary" onClick={saveEditPermissions} disabled={loading}>
+                  {loading ? "Saving..." : "Save Permissions"}
+                </button>
               </div>
             </div>
           </div>
+        </div>
+      )}
         </>
       )}
     </>
