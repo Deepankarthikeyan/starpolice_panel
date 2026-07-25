@@ -86,10 +86,7 @@ const DaywiseUpload = () => {
                   <h4 className="card-title mb-0">Select Date</h4>
                 </div>
                 <div className="card-body daywise-upload-calendar">
-                  <label className="form-label fw-semibold mb-1">Upload Date</label>
-                  <p className="text-muted small mb-3">
-                    Click a date on the calendar — no typing needed.
-                  </p>
+                  <label className="form-label fw-semibold mb-3">Upload Date</label>
                   <div className="daywise-upload-calendar-picker">
                     <DatePicker
                       selected={selectedDate}
