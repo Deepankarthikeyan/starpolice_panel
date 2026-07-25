@@ -3,6 +3,7 @@ import DatePicker from "react-datepicker";
 import PageTitle from "../../layouts/PageTitle";
 import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
+import { UploadPreviewButton } from "../shared/UploadFilePreview";
 import type { FileCategory, UploadedFile } from "../types";
 
 const categoryAccept: Record<FileCategory, string> = {
@@ -171,22 +172,7 @@ const DaywiseUpload = () => {
                           <td>{FILE_CATEGORY_LABELS[upload.category]}</td>
                           <td>{new Date(upload.uploadedAt).toLocaleString()}</td>
                           <td>
-                            {upload.category === "image" && (
-                              <img src={upload.fileUrl} alt={upload.name} width={60} />
-                            )}
-                            {upload.category === "video" && (
-                              <video src={upload.fileUrl} width={120} controls />
-                            )}
-                            {(upload.category === "pdf" || upload.category === "document") && (
-                              <a
-                                href={upload.fileUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="btn btn-sm btn-outline-primary"
-                              >
-                                Download
-                              </a>
-                            )}
+                            <UploadPreviewButton upload={upload} />
                           </td>
                           <td>
                             <button

@@ -3,6 +3,7 @@ import DatePicker from "react-datepicker";
 import PageTitle from "../../layouts/PageTitle";
 import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
+import { UploadPreviewButton } from "../shared/UploadFilePreview";
 import type { UploadedFile } from "../types";
 
 const StudentMaterials = () => {
@@ -54,23 +55,8 @@ const StudentMaterials = () => {
                         )}
                         <small className="text-muted">{FILE_CATEGORY_LABELS[upload.category]}</small>
                       </div>
+                      <UploadPreviewButton upload={upload} />
                     </div>
-                    {upload.category === "image" && (
-                      <img src={upload.fileUrl} alt={upload.name} className="img-fluid rounded" />
-                    )}
-                    {upload.category === "video" && (
-                      <video src={upload.fileUrl} controls className="w-100 rounded" />
-                    )}
-                    {(upload.category === "pdf" || upload.category === "document") && (
-                      <a
-                        href={upload.fileUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="btn btn-sm btn-primary"
-                      >
-                        Download {upload.name}
-                      </a>
-                    )}
                   </div>
                 ))
               )}

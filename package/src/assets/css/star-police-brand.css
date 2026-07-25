@@ -350,3 +350,41 @@
 .daywise-upload-form .form-control {
   border-radius: 0.5rem;
 }
+
+.upload-preview-modal .modal-body {
+  padding: 0;
+  background: #f8fafc;
+}
+
+.upload-preview-body {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-preview-image {
+  display: block;
+  max-width: 100%;
+  max-height: 75vh;
+  margin: 0 auto;
+}
+
+.upload-preview-video {
+  display: block;
+  width: 100%;
+  max-height: 75vh;
+  background: #000;
+}
+
+.upload-preview-frame {
+  width: 100%;
+  min-height: 70vh;
+  border: 0;
+  background: #fff;
+}
+
+.upload-preview-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
