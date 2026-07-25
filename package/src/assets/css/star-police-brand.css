@@ -266,8 +266,9 @@
   height: 2rem;
   border-radius: 0.375rem;
   background: rgba(var(--primary-rgb, 18, 61, 115), 0.1);
-  overflow: hidden;
-  text-indent: -999em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .daywise-upload-calendar .react-datepicker__navigation--previous {
@@ -279,15 +280,31 @@
 }
 
 .daywise-upload-calendar .react-datepicker__navigation-icon {
-  width: 0;
-  overflow: hidden;
+  position: relative;
+  top: 0;
   font-size: 0;
-  color: transparent;
+  width: 0.75rem;
+  height: 0.75rem;
+  overflow: visible;
 }
 
 .daywise-upload-calendar .react-datepicker__navigation-icon::before {
   border-color: var(--primary, #123d73);
   border-width: 2px 2px 0 0;
+  height: 8px;
+  width: 8px;
+  top: 50%;
+  left: 50%;
+  margin-top: -4px;
+  margin-left: -4px;
+}
+
+.daywise-upload-calendar .react-datepicker__navigation-icon--previous::before {
+  transform: rotate(225deg);
+}
+
+.daywise-upload-calendar .react-datepicker__navigation-icon--next::before {
+  transform: rotate(45deg);
 }
 
 .daywise-upload-calendar .react-datepicker__day-names,
