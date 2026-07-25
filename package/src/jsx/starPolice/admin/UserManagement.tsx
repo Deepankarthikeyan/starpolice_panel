@@ -171,7 +171,7 @@ const UserManagement = () => {
                             title="Edit Access"
                             aria-label="Edit Access"
                           >
-                            <i className="material-symbols-outlined">manage_accounts</i>
+                            <i className="fa fa-key" />
                           </button>
                         )}
                         <button
@@ -183,9 +183,7 @@ const UserManagement = () => {
                           title={user.isActive ? "Revoke Login" : "Grant Login"}
                           aria-label={user.isActive ? "Revoke Login" : "Grant Login"}
                         >
-                          <i className="material-symbols-outlined">
-                            {user.isActive ? "block" : "login"}
-                          </i>
+                          <i className={`fa ${user.isActive ? "fa-ban" : "fa-unlock"}`} />
                         </button>
                         <button
                           type="button"
@@ -197,7 +195,7 @@ const UserManagement = () => {
                           title="Delete"
                           aria-label="Delete"
                         >
-                          <i className="material-symbols-outlined">delete</i>
+                          <i className="fa fa-trash" />
                         </button>
                       </div>
                     )}
