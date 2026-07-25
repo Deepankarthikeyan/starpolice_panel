@@ -351,6 +351,11 @@
   border-radius: 0.5rem;
 }
 
+.daywise-upload-search .form-control,
+.daywise-upload-search .btn {
+  border-radius: 0.5rem;
+}
+
 .upload-preview-modal .modal-body {
   padding: 0;
   background: #f8fafc;

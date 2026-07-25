@@ -18,6 +18,7 @@ const DaywiseUpload = () => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<FileCategory>("video");
   const [uploads, setUploads] = useState<UploadedFile[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [titleError, setTitleError] = useState(false);
@@ -25,6 +26,25 @@ const DaywiseUpload = () => {
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   const dateKey = useMemo(() => selectedDate.toISOString().slice(0, 10), [selectedDate]);
+
+  const filteredUploads = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return uploads;
+
+    return uploads.filter((upload) => {
+      const typeLabel = FILE_CATEGORY_LABELS[upload.category].toLowerCase();
+      return (
+        upload.title?.toLowerCase().includes(query) ||
+        upload.name.toLowerCase().includes(query) ||
+        upload.category.toLowerCase().includes(query) ||
+        typeLabel.includes(query)
+      );
+    });
+  }, [uploads, searchQuery]);
+
+  useEffect(() => {
+    setSearchQuery("");
+  }, [dateKey]);
 
   useEffect(() => {
     if (!error) return;
@@ -172,13 +192,39 @@ const DaywiseUpload = () => {
 
         <div className="col-xl-8">
           <div className="card">
-            <div className="card-header d-flex justify-content-between align-items-center">
+            <div className="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
               <h4 className="card-title mb-0">Uploads for {dateKey}</h4>
-              <span className="badge bg-primary">{uploads.length} files</span>
+              <span className="badge bg-primary">
+                {searchQuery.trim()
+                  ? `${filteredUploads.length} of ${uploads.length} files`
+                  : `${uploads.length} files`}
+              </span>
             </div>
             <div className="card-body">
+              {uploads.length > 0 && (
+                <div className="d-flex gap-2 mb-3 daywise-upload-search">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search by title, file name, or type..."
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              )}
               {uploads.length === 0 ? (
                 <p className="text-muted mb-0">No files uploaded for this date.</p>
+              ) : filteredUploads.length === 0 ? (
+                <p className="text-muted mb-0">No uploads match your search.</p>
               ) : (
                 <div className="table-responsive">
                   <table className="table table-striped">
@@ -193,7 +239,7 @@ const DaywiseUpload = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {uploads.map((upload) => (
+                      {filteredUploads.map((upload) => (
                         <tr key={upload.id}>
                           <td className="fw-semibold">{upload.title || "—"}</td>
                           <td>{upload.name}</td>
