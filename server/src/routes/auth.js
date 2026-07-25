@@ -3,10 +3,18 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { authRequired } from "../middleware/auth.js";
+import { defaultPermissionsForRole } from "../permissions.js";
 
 const router = express.Router();
 
 function createToken(user, panel) {
+  const permissions =
+    user.role === "superadmin"
+      ? defaultPermissionsForRole("admin")
+      : user.permissions?.length
+        ? user.permissions
+        : defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
+
   return jwt.sign(
     {
       id: user._id.toString(),
@@ -15,6 +23,7 @@ function createToken(user, panel) {
       name: user.name,
       panel,
       isActive: user.role === "superadmin" ? true : user.isActive,
+      permissions,
     },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
@@ -22,12 +31,20 @@ function createToken(user, panel) {
 }
 
 function publicUser(user, token, panel) {
+  const permissions =
+    user.role === "superadmin"
+      ? defaultPermissionsForRole("admin")
+      : user.permissions?.length
+        ? user.permissions
+        : defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
+
   return {
     id: user._id.toString(),
     name: user.name,
     email: user.email,
     role: user.role,
     isActive: user.role === "superadmin" ? true : user.isActive,
+    permissions,
     panel,
     token,
   };
@@ -142,12 +159,21 @@ router.get("/me", authRequired, async (req, res) => {
   if (!user) {
     return res.status(404).json({ message: "User not found." });
   }
+
+  const permissions =
+    user.role === "superadmin"
+      ? defaultPermissionsForRole("admin")
+      : user.permissions?.length
+        ? user.permissions
+        : defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
+
   res.json({
     id: user._id.toString(),
     name: user.name,
     email: user.email,
     role: user.role,
     isActive: user.role === "superadmin" ? true : user.isActive,
+    permissions,
     panel: req.user.panel,
   });
 });

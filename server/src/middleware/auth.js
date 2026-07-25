@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { hasAnyPermission } from "../permissions.js";
 
 export function authRequired(req, res, next) {
   const header = req.headers.authorization;
@@ -40,7 +41,33 @@ export function studentPanelOnly(req, res, next) {
 
 export async function attachUser(req, res, next) {
   if (!req.user?.id) return next();
-  const user = await User.findById(req.user.id).select("-password");
-  req.currentUser = user;
-  next();
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(401).json({ message: "User not found." });
+    }
+    if (user.role !== "superadmin" && !user.isActive) {
+      return res.status(403).json({ message: "Your account access has been revoked." });
+    }
+    req.currentUser = user;
+    next();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export function requirePermission(...permissions) {
+  return (req, res, next) => {
+    const user = req.currentUser || req.user;
+    if (!user) {
+      return res.status(401).json({ message: "Authentication required." });
+    }
+    if (user.role === "superadmin") {
+      return next();
+    }
+    if (!hasAnyPermission(user, permissions)) {
+      return res.status(403).json({ message: "You do not have permission for this action." });
+    }
+    next();
+  };
 }

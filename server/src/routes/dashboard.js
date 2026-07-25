@@ -1,11 +1,11 @@
 import express from "express";
 import Upload from "../models/Upload.js";
 import Message from "../models/Message.js";
-import { authRequired, adminPanelOnly } from "../middleware/auth.js";
+import { authRequired, adminPanelOnly, attachUser, requirePermission } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/stats", authRequired, adminPanelOnly, async (_req, res) => {
+router.get("/stats", authRequired, adminPanelOnly, attachUser, requirePermission("admin:dashboard"), async (_req, res) => {
   try {
     const uploads = await Upload.find().select("date category createdAt");
     const messages = await Message.find().select("senderRole createdAt");

@@ -91,10 +91,23 @@ export const api = {
     return request<ManagedUser[]>(`/api/users?type=${type}`);
   },
 
-  createUser(name: string, email: string, password: string, role: "admin" | "student") {
+  createUser(
+    name: string,
+    email: string,
+    password: string,
+    role: "admin" | "student",
+    permissions?: string[]
+  ) {
     return request<ManagedUser>("/api/users", {
       method: "POST",
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password, role, permissions }),
+    });
+  },
+
+  updateUserPermissions(id: string, permissions: string[]) {
+    return request<ManagedUser>(`/api/users/${id}/permissions`, {
+      method: "PATCH",
+      body: JSON.stringify({ permissions }),
     });
   },
 

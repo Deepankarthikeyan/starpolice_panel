@@ -1,6 +1,7 @@
 import express from "express";
 import Message from "../models/Message.js";
-import { authRequired } from "../middleware/auth.js";
+import { authRequired, attachUser } from "../middleware/auth.js";
+import { hasAnyPermission } from "../permissions.js";
 import { notifyAllAdmins, notifyAllStudents } from "../utils/notifications.js";
 
 const router = express.Router();
@@ -16,7 +17,16 @@ function mapMessage(item) {
   };
 }
 
-router.get("/", authRequired, async (_req, res) => {
+router.get("/", authRequired, attachUser, (req, res, next) => {
+  const user = req.currentUser;
+  if (
+    user.role === "superadmin" ||
+    hasAnyPermission(user, ["admin:messages", "student:messages", "student:dashboard"])
+  ) {
+    return next();
+  }
+  return res.status(403).json({ message: "You do not have permission to view messages." });
+}, async (_req, res) => {
   try {
     const messages = await Message.find().sort({ createdAt: 1 });
     res.json(messages.map(mapMessage));
@@ -25,7 +35,14 @@ router.get("/", authRequired, async (_req, res) => {
   }
 });
 
-router.post("/", authRequired, async (req, res) => {
+router.post("/", authRequired, attachUser, (req, res, next) => {
+  const user = req.currentUser;
+  const panel = req.user.panel;
+  if (user.role === "superadmin") return next();
+  if (panel === "admin" && hasAnyPermission(user, ["admin:messages"])) return next();
+  if (panel === "student" && hasAnyPermission(user, ["student:messages"])) return next();
+  return res.status(403).json({ message: "You do not have permission to send messages." });
+}, async (req, res) => {
   try {
     const { message } = req.body;
     if (!message?.trim()) {

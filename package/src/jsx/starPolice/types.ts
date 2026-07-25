@@ -1,5 +1,6 @@
 export type UserRole = "superadmin" | "admin" | "student";
 export type PanelType = "admin" | "student";
+export type PermissionKey = string;
 
 export type FileCategory = "video" | "pdf" | "image" | "document";
 
@@ -9,6 +10,7 @@ export interface AuthUser {
   role: UserRole;
   name: string;
   isActive: boolean;
+  permissions: PermissionKey[];
   panel: PanelType;
   token: string;
 }
@@ -19,6 +21,7 @@ export interface ManagedUser {
   email: string;
   role: UserRole;
   isActive: boolean;
+  permissions: PermissionKey[];
   createdAt: string;
 }
 

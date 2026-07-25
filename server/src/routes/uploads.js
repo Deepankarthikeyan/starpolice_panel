@@ -1,6 +1,7 @@
 import express from "express";
 import Upload from "../models/Upload.js";
-import { authRequired, adminPanelOnly } from "../middleware/auth.js";
+import { authRequired, adminPanelOnly, attachUser, requirePermission } from "../middleware/auth.js";
+import { hasAnyPermission } from "../permissions.js";
 import { upload } from "../middleware/upload.js";
 import { notifyAllStudents } from "../utils/notifications.js";
 
@@ -27,7 +28,22 @@ function detectCategory(mimeType, originalName) {
   return "document";
 }
 
-router.get("/", authRequired, async (req, res) => {
+router.get("/", authRequired, attachUser, (req, res, next) => {
+  const user = req.currentUser;
+  if (
+    user.role === "superadmin" ||
+    hasAnyPermission(user, [
+      "admin:uploads",
+      "admin:calendar",
+      "student:materials",
+      "student:calendar",
+      "student:dashboard",
+    ])
+  ) {
+    return next();
+  }
+  return res.status(403).json({ message: "You do not have permission to view uploads." });
+}, async (req, res) => {
   try {
     const filter = {};
     if (req.query.date) filter.date = req.query.date;
@@ -39,7 +55,7 @@ router.get("/", authRequired, async (req, res) => {
   }
 });
 
-router.post("/", authRequired, adminPanelOnly, upload.array("files", 10), async (req, res) => {
+router.post("/", authRequired, adminPanelOnly, attachUser, requirePermission("admin:uploads"), upload.array("files", 10), async (req, res) => {
   try {
     const { date, category, title } = req.body;
     if (!date) {
@@ -79,7 +95,7 @@ router.post("/", authRequired, adminPanelOnly, upload.array("files", 10), async 
   }
 });
 
-router.delete("/:id", authRequired, adminPanelOnly, async (req, res) => {
+router.delete("/:id", authRequired, adminPanelOnly, attachUser, requirePermission("admin:uploads"), async (req, res) => {
   try {
     const deleted = await Upload.findByIdAndDelete(req.params.id);
     if (!deleted) {
