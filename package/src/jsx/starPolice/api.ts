@@ -116,10 +116,11 @@ export const api = {
     return request<UploadedFile[]>(`/api/uploads${query}`);
   },
 
-  uploadFiles(date: string, category: string, files: File[]) {
+  uploadFiles(date: string, category: string, title: string, files: File[]) {
     const formData = new FormData();
     formData.append("date", date);
     formData.append("category", category);
+    formData.append("title", title);
     files.forEach((file) => formData.append("files", file));
     return request<UploadedFile[]>("/api/uploads", {
       method: "POST",

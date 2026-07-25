@@ -225,3 +225,111 @@
     display: block !important;
   }
 }
+
+.daywise-upload-calendar .daywise-upload-calendar-picker {
+  width: 100%;
+}
+
+.daywise-upload-calendar .react-datepicker-wrapper {
+  display: block;
+  width: 100%;
+}
+
+.daywise-upload-calendar .react-datepicker {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+}
+
+.daywise-upload-calendar .react-datepicker__month-container {
+  float: none;
+  width: 100%;
+}
+
+.daywise-upload-calendar .react-datepicker__header {
+  background: transparent;
+  border-bottom: 0;
+  padding-top: 0.25rem;
+}
+
+.daywise-upload-calendar .react-datepicker__current-month {
+  margin: 0 2.75rem;
+  padding: 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.daywise-upload-calendar .react-datepicker__navigation {
+  top: 0.35rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  background: rgba(var(--primary-rgb, 18, 61, 115), 0.1);
+  overflow: hidden;
+  text-indent: -999em;
+}
+
+.daywise-upload-calendar .react-datepicker__navigation--previous {
+  left: 0;
+}
+
+.daywise-upload-calendar .react-datepicker__navigation--next {
+  right: 0;
+}
+
+.daywise-upload-calendar .react-datepicker__navigation-icon {
+  width: 0;
+  overflow: hidden;
+  font-size: 0;
+  color: transparent;
+}
+
+.daywise-upload-calendar .react-datepicker__navigation-icon::before {
+  border-color: var(--primary, #123d73);
+  border-width: 2px 2px 0 0;
+}
+
+.daywise-upload-calendar .react-datepicker__day-names,
+.daywise-upload-calendar .react-datepicker__week {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.daywise-upload-calendar .react-datepicker__day-name,
+.daywise-upload-calendar .react-datepicker__day {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  max-width: none;
+  height: 2.35rem;
+  line-height: 2.35rem;
+  margin: 0.1rem 0;
+  font-size: 0.8125rem;
+}
+
+.daywise-upload-calendar .react-datepicker__day-name {
+  color: var(--secondary, #6c757d);
+  font-weight: 600;
+}
+
+.daywise-upload-calendar .react-datepicker__day--selected,
+.daywise-upload-calendar .react-datepicker__day--keyboard-selected {
+  background: var(--primary, #123d73) !important;
+  color: #fff !important;
+  border-radius: 0.375rem;
+}
+
+.daywise-upload-form .daywise-upload-dropzone {
+  border: 1px dashed #d7dde5;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.daywise-upload-form .form-select,
+.daywise-upload-form .form-control {
+  border-radius: 0.5rem;
+}

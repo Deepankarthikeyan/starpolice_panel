@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const uploadSchema = new mongoose.Schema(
   {
     date: { type: String, required: true, index: true },
+    title: { type: String, default: "", trim: true },
     name: { type: String, required: true },
     category: {
       type: String,

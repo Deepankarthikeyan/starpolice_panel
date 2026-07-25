@@ -48,7 +48,10 @@ const StudentMaterials = () => {
                   <div key={upload.id} className="border rounded p-3 mb-3">
                     <div className="d-flex justify-content-between align-items-start mb-2">
                       <div>
-                        <div className="fw-semibold">{upload.name}</div>
+                        <div className="fw-semibold">{upload.title || upload.name}</div>
+                        {upload.title && (
+                          <small className="text-muted d-block">{upload.name}</small>
+                        )}
                         <small className="text-muted">{FILE_CATEGORY_LABELS[upload.category]}</small>
                       </div>
                     </div>

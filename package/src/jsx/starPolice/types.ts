@@ -29,6 +29,7 @@ export interface SetupStatus {
 export interface UploadedFile {
   id: string;
   date: string;
+  title: string;
   name: string;
   category: FileCategory;
   fileUrl: string;

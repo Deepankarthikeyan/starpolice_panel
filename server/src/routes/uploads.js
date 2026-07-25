@@ -10,6 +10,7 @@ function mapUpload(item) {
   return {
     id: item._id.toString(),
     date: item.date,
+    title: item.title || "",
     name: item.name,
     category: item.category,
     fileUrl: item.fileUrl,
@@ -40,15 +41,19 @@ router.get("/", authRequired, async (req, res) => {
 
 router.post("/", authRequired, adminPanelOnly, upload.array("files", 10), async (req, res) => {
   try {
-    const { date, category } = req.body;
+    const { date, category, title } = req.body;
     if (!date) {
       return res.status(400).json({ message: "Date is required." });
+    }
+    if (!title?.trim()) {
+      return res.status(400).json({ message: "Title is required." });
     }
 
     const saved = [];
     for (const file of req.files || []) {
       const entry = await Upload.create({
         date,
+        title: title.trim(),
         name: file.originalname,
         category: category || detectCategory(file.mimetype, file.originalname),
         fileName: file.filename,
