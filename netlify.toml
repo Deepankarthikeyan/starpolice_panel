@@ -10,13 +10,13 @@
 # API proxy — must be above the SPA catch-all
 [[redirects]]
   from = "/api/*"
-  to = "https://ext-delight-king-identifier.trycloudflare.com/api/:splat"
+  to = "https://starpolice-api.onrender.com/api/:splat"
   status = 200
   force = true
 
 [[redirects]]
   from = "/uploads/*"
-  to = "https://ext-delight-king-identifier.trycloudflare.com/uploads/:splat"
+  to = "https://starpolice-api.onrender.com/uploads/:splat"
   status = 200
   force = true
 
