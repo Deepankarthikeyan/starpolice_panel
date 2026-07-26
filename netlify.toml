@@ -6,6 +6,19 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# Proxy API through Netlify (same-origin, avoids CORS / blocked tunnel domains)
+[[redirects]]
+  from = "/api/*"
+  to = "https://whole-databases-successful-fastest.trycloudflare.com/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/uploads/*"
+  to = "https://whole-databases-successful-fastest.trycloudflare.com/uploads/:splat"
+  status = 200
+  force = true
+
 # SPA routing for React Router (/admin/dashboard, /student/login, etc.)
 [[redirects]]
   from = "/*"
