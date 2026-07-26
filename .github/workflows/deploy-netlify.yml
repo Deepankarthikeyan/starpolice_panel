@@ -24,7 +24,7 @@ jobs:
       - name: Install and build
         working-directory: package
         env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL != '' && secrets.VITE_API_URL || 'https://api.starpoliceacademy-panel.in' }}
+          VITE_API_URL: https://api.starpoliceacademy-panel.in
         run: |
           npm ci
           npm run build
