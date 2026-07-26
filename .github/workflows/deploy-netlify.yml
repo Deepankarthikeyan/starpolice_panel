@@ -29,6 +29,14 @@ jobs:
           npm ci
           npm run build
 
+      - name: Verify Netlify credentials
+        run: |
+          if [ -z "${{ secrets.NETLIFY_AUTH_TOKEN }}" ] || [ -z "${{ secrets.NETLIFY_SITE_ID }}" ]; then
+            echo "::error::NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID secrets are required."
+            echo "Add them at: https://github.com/Deepankarthikeyan/starpolice_panel/settings/secrets/actions"
+            exit 1
+          fi
+
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3.0
         with:
