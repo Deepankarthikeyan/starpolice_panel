@@ -1,13 +1,7 @@
 import { useMemo, useState } from "react";
 import { Modal } from "react-bootstrap";
+import { getAbsoluteFileUrl } from "../fileUrl";
 import type { UploadedFile } from "../types";
-
-function getAbsoluteFileUrl(fileUrl: string) {
-  if (fileUrl.startsWith("http")) {
-    return fileUrl;
-  }
-  return `${window.location.origin}${fileUrl}`;
-}
 
 function getPreviewKind(upload: UploadedFile) {
   const name = upload.name.toLowerCase();

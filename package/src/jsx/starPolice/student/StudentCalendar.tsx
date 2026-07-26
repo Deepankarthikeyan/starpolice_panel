@@ -6,6 +6,7 @@ import type { EventClickArg } from "@fullcalendar/core";
 import PageTitle from "../../layouts/PageTitle";
 import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
+import { getAbsoluteFileUrl } from "../fileUrl";
 import type { UploadedFile } from "../types";
 
 const StudentCalendar = () => {
@@ -70,7 +71,7 @@ const StudentCalendar = () => {
                     </small>
                     {(upload.category === "pdf" || upload.category === "document") && (
                       <a
-                        href={upload.fileUrl}
+                        href={getAbsoluteFileUrl(upload.fileUrl)}
                         target="_blank"
                         rel="noreferrer"
                         className="btn btn-sm btn-outline-primary"

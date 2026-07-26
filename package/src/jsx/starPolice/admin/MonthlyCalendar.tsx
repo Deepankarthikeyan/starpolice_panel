@@ -6,6 +6,7 @@ import type { EventClickArg } from "@fullcalendar/core";
 import PageTitle from "../../layouts/PageTitle";
 import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
+import { getAbsoluteFileUrl } from "../fileUrl";
 import type { UploadedFile } from "../types";
 
 const MonthlyCalendar = () => {
@@ -69,14 +70,14 @@ const MonthlyCalendar = () => {
                       {FILE_CATEGORY_LABELS[upload.category]}
                     </small>
                     {upload.category === "image" && (
-                      <img src={upload.fileUrl} alt={upload.name} className="img-fluid rounded" />
+                      <img src={getAbsoluteFileUrl(upload.fileUrl)} alt={upload.name} className="img-fluid rounded" />
                     )}
                     {upload.category === "video" && (
-                      <video src={upload.fileUrl} controls className="w-100 rounded" />
+                      <video src={getAbsoluteFileUrl(upload.fileUrl)} controls className="w-100 rounded" />
                     )}
                     {(upload.category === "pdf" || upload.category === "document") && (
                       <a
-                        href={upload.fileUrl}
+                        href={getAbsoluteFileUrl(upload.fileUrl)}
                         target="_blank"
                         rel="noreferrer"
                         className="btn btn-sm btn-outline-primary"
