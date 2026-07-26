@@ -1,5 +1,19 @@
 # Hosting
 
+## Live site
+
+| | URL |
+|---|---|
+| **Website** | https://starpolice-panel.netlify.app |
+| **Admin login** | https://starpolice-panel.netlify.app/admin/login |
+| **Student login** | https://starpolice-panel.netlify.app/student/login |
+
+**Login:** `superadmin@starpolice.academy` / `superadmin123`
+
+Netlify dashboard: https://app.netlify.com/projects/starpolice-panel
+
+---
+
 ## Deploy frontend to Netlify (one click)
 
 **Click here to deploy:**
