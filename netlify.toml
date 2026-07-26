@@ -6,6 +6,17 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# Production API for custom domain starpoliceacademy-panel.in
+[context.production.environment]
+  VITE_API_URL = "https://api.starpoliceacademy-panel.in"
+
+# Redirect www to apex
+[[redirects]]
+  from = "https://www.starpoliceacademy-panel.in/*"
+  to = "https://starpoliceacademy-panel.in/:splat"
+  status = 301
+  force = true
+
 # SPA routing for React Router (/admin/dashboard, /student/login, etc.)
 [[redirects]]
   from = "/*"

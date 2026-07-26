@@ -1,6 +1,9 @@
 # Live Hosting
 
-## Currently live (Cloudflare tunnels)
+**Target domain:** https://starpoliceacademy-panel.in  
+Full setup guide: **`DOMAIN_SETUP.md`**
+
+## Currently live (Cloudflare tunnels — temporary)
 
 | Service | URL |
 |---------|-----|
@@ -25,7 +28,7 @@ Add these **GitHub repository secrets** (Settings → Secrets → Actions):
 |--------|-------|
 | `NETLIFY_AUTH_TOKEN` | From [Netlify user settings](https://app.netlify.com/user/applications) |
 | `NETLIFY_SITE_ID` | From your Netlify site → Site configuration → General |
-| `VITE_API_URL` | Your Render API URL, e.g. `https://starpolice-api.onrender.com` |
+| `VITE_API_URL` | `https://api.starpoliceacademy-panel.in` |
 
 Then push to `master` — GitHub Actions deploys the frontend automatically.
 
