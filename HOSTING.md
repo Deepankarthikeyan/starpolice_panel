@@ -1,44 +1,37 @@
-# Live Hosting
+# Hosting
 
-**Target domain:** https://starpoliceacademy-panel.in  
-Full setup guide: **`DOMAIN_SETUP.md`**
+## Deploy frontend to Netlify (one click)
 
-## Currently live (Cloudflare tunnels — temporary)
+**Click here to deploy:**
 
-| Service | URL |
-|---------|-----|
-| **Website** | https://marcus-banana-dinner-almost.trycloudflare.com |
-| **API** | https://appeared-tariff-glory-flush.trycloudflare.com |
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/Deepankarthikeyan/starpolice_panel)
 
-**Login:** https://marcus-banana-dinner-almost.trycloudflare.com/admin/login
+Or open this link directly:
 
-| Role | Email | Password |
-|------|-------|----------|
-| Super Admin | superadmin@starpolice.academy | superadmin123 |
+**https://app.netlify.com/start/deploy?repository=https://github.com/Deepankarthikeyan/starpolice_panel**
 
-> These tunnel URLs stay live while the cloud agent / server is running. For permanent 24/7 hosting, use Netlify + Render + MongoDB Atlas (see `DEPLOYMENT.md`).
+After deploy, your site will be at:
+
+`https://<random-name>.netlify.app`
+
+You can change the site name in Netlify → **Site configuration** → **Domain management** → **Options** → **Edit site name** (e.g. `starpolice-panel.netlify.app`).
 
 ---
 
-## Permanent free hosting (one-time setup)
+## Connect the API (required for login)
 
-Add these **GitHub repository secrets** (Settings → Secrets → Actions):
+The frontend needs a backend. Deploy the API on Render:
 
-| Secret | Value |
-|--------|-------|
-| `NETLIFY_AUTH_TOKEN` | From [Netlify user settings](https://app.netlify.com/user/applications) |
-| `NETLIFY_SITE_ID` | From your Netlify site → Site configuration → General |
-| `VITE_API_URL` | `https://api.starpoliceacademy-panel.in` |
+**https://dashboard.render.com/deploy?repo=https://github.com/Deepankarthikeyan/starpolice_panel**
 
-Then push to `master` — GitHub Actions deploys the frontend automatically.
+Then in **Netlify → Environment variables**, add:
 
-For the API and database, deploy the `render.yaml` blueprint on [Render](https://dashboard.render.com/blueprints) and set `MONGODB_URI` (MongoDB Atlas free cluster).
+| Variable | Value |
+|----------|-------|
+| `VITE_API_URL` | Your Render API URL, e.g. `https://starpolice-api.onrender.com` |
 
----
+Redeploy the Netlify site after adding the variable.
 
-## Quick local live demo
+In **Render**, set `CLIENT_URL` to your Netlify URL (e.g. `https://starpolice-panel.netlify.app`).
 
-```bash
-chmod +x scripts/deploy-live.sh
-./scripts/deploy-live.sh
-```
+Run `npm run seed` in Render Shell, then log in at `/admin/login` with `superadmin@starpolice.academy` / `superadmin123`.
