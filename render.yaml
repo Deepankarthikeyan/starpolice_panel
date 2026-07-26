@@ -1,20 +1,14 @@
-# Render Blueprint — deploy the API on Render's free tier.
-# https://render.com/docs/blueprint-spec
+# Render Blueprint — permanent API with MongoDB in Docker
 services:
   - type: web
     name: starpolice-api
-    runtime: node
+    runtime: docker
     rootDir: server
     plan: free
-    buildCommand: npm install
-    startCommand: npm start
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
     envVars:
-      - key: NODE_VERSION
-        value: "20"
-      - key: MONGODB_URI
-        sync: false
+      - key: CLIENT_URL
+        value: https://starpolice-panel.netlify.app
       - key: JWT_SECRET
         generateValue: true
-      - key: CLIENT_URL
-        sync: false
