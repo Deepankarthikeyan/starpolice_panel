@@ -163,67 +163,102 @@
   height: auto !important;
 }
 
-.nav-header .star-police-brand-logo {
-  align-items: center !important;
-  justify-content: flex-start !important;
-  overflow: hidden;
+.star-police-nav-header {
+  display: flex;
+  align-items: center;
 }
 
-.nav-header .star-police-brand-logo .star-police-logo-icon {
+.dlabnav .spa-sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 5rem);
+}
+
+.dlabnav .spa-sidebar-menu {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.dlabnav .spa-sidebar-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: 1rem 1.25rem 1.25rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dlabnav .spa-sidebar-footer .copyright {
+  margin-top: 0.875rem;
+  padding: 0;
+}
+
+.dlabnav .star-police-sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-decoration: none;
+}
+
+.dlabnav .star-police-sidebar-logo .star-police-logo-icon {
   display: none;
   width: 3rem;
   height: 3rem;
-  max-width: 3rem !important;
+  max-width: 3rem;
   object-fit: contain;
 }
 
-.nav-header .star-police-brand-logo .star-police-logo-full {
+.dlabnav .star-police-sidebar-logo .star-police-logo-full {
   display: block;
-  width: auto;
-  max-width: 15.5rem !important;
-  max-height: 4.5rem !important;
+  width: 100%;
+  max-width: 12.5rem;
+  max-height: 4rem;
   height: auto;
   object-fit: contain;
-  margin: 0 !important;
+  margin: 0 auto;
 }
 
-#main-wrapper.menu-toggle .nav-header .star-police-brand-logo {
-  justify-content: center !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-#main-wrapper.menu-toggle .nav-header .star-police-brand-logo .star-police-logo-full,
-.menu-toggle .nav-header .star-police-brand-logo .star-police-logo-full {
+#main-wrapper.menu-toggle .dlabnav .star-police-sidebar-logo .star-police-logo-full,
+.menu-toggle .dlabnav .star-police-sidebar-logo .star-police-logo-full {
   display: none !important;
 }
 
-#main-wrapper.menu-toggle .nav-header .star-police-brand-logo .star-police-logo-icon,
-.menu-toggle .nav-header .star-police-brand-logo .star-police-logo-icon {
+#main-wrapper.menu-toggle .dlabnav .star-police-sidebar-logo .star-police-logo-icon,
+.menu-toggle .dlabnav .star-police-sidebar-logo .star-police-logo-icon {
   display: block !important;
 }
 
+#main-wrapper.menu-toggle .dlabnav .spa-sidebar-footer .copyright,
+.menu-toggle .dlabnav .spa-sidebar-footer .copyright {
+  display: none;
+}
+
 @media only screen and (max-width: 87.5rem) {
-  .nav-header .star-police-brand-logo .star-police-logo-full {
-    max-width: 13rem !important;
-    max-height: 3.75rem !important;
+  .dlabnav .star-police-sidebar-logo .star-police-logo-full {
+    max-width: 11rem;
+    max-height: 3.5rem;
   }
 }
 
 @media only screen and (max-width: 63.9375rem) {
-  .nav-header .star-police-brand-logo {
-    justify-content: center !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  .nav-header .star-police-brand-logo .star-police-logo-full {
+  .dlabnav .star-police-sidebar-logo .star-police-logo-full {
     display: none !important;
   }
 
-  .nav-header .star-police-brand-logo .star-police-logo-icon {
+  .dlabnav .star-police-sidebar-logo .star-police-logo-icon {
     display: block !important;
   }
+}
+
+[data-sidebar-style="mini"] .dlabnav .star-police-sidebar-logo .star-police-logo-full {
+  display: none !important;
+}
+
+[data-sidebar-style="mini"] .dlabnav .star-police-sidebar-logo .star-police-logo-icon {
+  display: block !important;
+}
+
+[data-sidebar-style="mini"] .dlabnav .spa-sidebar-footer .copyright {
+  display: none;
 }
 
 .daywise-upload-calendar .daywise-upload-calendar-picker {

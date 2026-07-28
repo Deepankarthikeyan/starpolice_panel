@@ -1,6 +1,7 @@
 import { useReducer, useEffect, useState, useContext } from "react";
 import { Collapse } from "react-bootstrap";
 import { getMenuList } from "./Menu";
+import SidebarBrand from "./SidebarBrand";
 import { useScrollPosition } from "@n8tb1t/use-scroll-position";
 import { ThemeContext } from "../../../context/ThemeContext";
 import type { PanelType } from "../../starPolice/types";
@@ -112,7 +113,8 @@ const SideBar: React.FC<SideBarProps> = ({ basePath = "/admin", panel = "admin" 
       onMouseEnter={hoverHandler}
       onMouseLeave={() => setIconhover(false)}
     >
-      <div className="dlabnav-scroll">
+      <div className="dlabnav-scroll spa-sidebar-inner">
+        <div className="spa-sidebar-menu">
         <ul className="metismenu" id="menu">
           {menuList.map((data: MenuItem, index: number) => {
             const menuClass = data.classsChange;
@@ -222,12 +224,16 @@ const SideBar: React.FC<SideBarProps> = ({ basePath = "/admin", panel = "admin" 
             );
           })}
         </ul>
+        </div>
 
-        <div className="copyright">
-          <p>
-            <strong>Star Police Academy</strong>
-          </p>
-          <p className="fs-12">Vellore — No. 1 Police Academy in Tamil Nadu</p>
+        <div className="spa-sidebar-footer">
+          <SidebarBrand homePath={`${basePath}/dashboard`} />
+          <div className="copyright">
+            <p>
+              <strong>Star Police Academy</strong>
+            </p>
+            <p className="fs-12">Vellore — No. 1 Police Academy in Tamil Nadu</p>
+          </div>
         </div>
       </div>
     </div>

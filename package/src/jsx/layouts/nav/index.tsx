@@ -15,7 +15,7 @@ const NavBlog = ({ basePath = "/admin", panel = "admin" }: NavProps) => {
   const onClick = (name: string) => setToggle(toggle === name ? "" : name);
   return (
     <Fragment>
-      <NavHader basePath={basePath} />
+      <NavHader />
       <ChatBox onClick={() => onClick("chatbox")} toggle={toggle} />
       <Header onNote={() => onClick("chatbox")} toggle={toggle} />
       <SideBar basePath={basePath} panel={panel} />
