@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, FormEvent, ReactNode, SetStateAction } from "react";
+import { ChangeEvent, Dispatch, FormEvent, ReactNode, SetStateAction, useState } from "react";
 import {
   DOCUMENT_FIELDS,
   type DocumentField,
@@ -49,28 +49,28 @@ function Field({
 
 function Section({
   title,
-  id,
   children,
   defaultOpen = false,
 }: {
   title: string;
-  id: string;
   children: ReactNode;
   defaultOpen?: boolean;
 }) {
+  const [open, setOpen] = useState(defaultOpen);
+
   return (
     <div className="accordion-item">
       <h2 className="accordion-header">
         <button
-          className={`accordion-button ${defaultOpen ? "" : "collapsed"}`}
+          className={`accordion-button ${open ? "" : "collapsed"}`}
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target={`#${id}`}
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
         >
           {title}
         </button>
       </h2>
-      <div id={id} className={`accordion-collapse collapse ${defaultOpen ? "show" : ""}`}>
+      <div className={`accordion-collapse collapse ${open ? "show" : ""}`}>
         <div className="accordion-body">{children}</div>
       </div>
     </div>
@@ -146,7 +146,7 @@ export default function StudentOnboardingForm({
           {error && <div className="alert alert-danger">{error}</div>}
 
           <div className="accordion" id="studentOnboardingAccordion">
-            <Section title="1. Personal Information" id="section-personal" defaultOpen>
+            <Section title="1. Personal Information" defaultOpen>
               <div className="row">
                 <div className="col-md-4">
                   <Field label="Student ID">
@@ -241,7 +241,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="2. Contact Information" id="section-contact">
+            <Section title="2. Contact Information">
               <div className="row">
                 <div className="col-md-6">
                   <Field label="Mobile Number">
@@ -294,7 +294,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="3. Address" id="section-address">
+            <Section title="3. Address">
               <div className="row">
                 <div className="col-md-6">
                   <Field label="Address Line 1">
@@ -362,7 +362,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="4. Parent/Guardian Details" id="section-guardian">
+            <Section title="4. Parent/Guardian Details">
               <div className="row">
                 <div className="col-md-6">
                   <Field label="Father/Guardian Name">
@@ -430,7 +430,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="5. Academic Information" id="section-academic">
+            <Section title="5. Academic Information">
               <div className="row">
                 <div className="col-md-6">
                   <Field label="School/College Name">
@@ -489,7 +489,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="6. Course Details" id="section-course">
+            <Section title="6. Course Details">
               <div className="row">
                 <div className="col-md-4">
                   <Field label="Course">
@@ -573,7 +573,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="7. Identity Documents" id="section-documents">
+            <Section title="7. Identity Documents">
               <div className="row">
                 {DOCUMENT_FIELDS.filter((item) => item.key !== "profilePhoto").map((item) =>
                   renderFileField(
@@ -585,7 +585,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="8. Emergency Contact" id="section-emergency">
+            <Section title="8. Emergency Contact">
               <div className="row">
                 <div className="col-md-6">
                   <Field label="Emergency Contact Name">
@@ -626,7 +626,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="9. Login Credentials" id="section-login">
+            <Section title="9. Login Credentials">
               <div className="row">
                 <div className="col-md-4">
                   <Field label="Username">
@@ -693,7 +693,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="10. Payment Information" id="section-payment">
+            <Section title="10. Payment Information">
               <div className="row">
                 <div className="col-md-4">
                   <Field label="Registration Fee">
@@ -770,7 +770,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="11. Medical Information (Optional)" id="section-medical">
+            <Section title="11. Medical Information (Optional)">
               <div className="row">
                 <div className="col-md-6">
                   <Field label="Medical Conditions">
@@ -815,7 +815,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="12. Skills & Preferences" id="section-skills">
+            <Section title="12. Skills & Preferences">
               <div className="row">
                 <div className="col-md-6">
                   <Field label="Languages Known">
@@ -856,7 +856,7 @@ export default function StudentOnboardingForm({
               </div>
             </Section>
 
-            <Section title="13. Declaration" id="section-declaration">
+            <Section title="13. Declaration">
               <div className="row">
                 <div className="col-md-6">
                   <div className="form-check mb-3">
