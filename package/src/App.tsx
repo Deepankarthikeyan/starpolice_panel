@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { ThemeContext } from "./context/ThemeContext";
 import type { AuthUser } from "./jsx/starPolice/types";
+import { api, getStoredAuth } from "./jsx/starPolice/api";
 
 const AdminLayout = lazy(() => import("./jsx/PanelLayouts").then((m) => ({ default: m.AdminLayout })));
 const StudentLayout = lazy(() => import("./jsx/PanelLayouts").then((m) => ({ default: m.StudentLayout })));
@@ -54,6 +55,17 @@ function App() {
     return () => window.removeEventListener("resize", resizeHandler);
   }, []);
 
+  useEffect(() => {
+    const panel = window.location.pathname.startsWith("/student") ? "student" : "admin";
+    const stored = getStoredAuth(panel);
+    if (!stored?.token) return;
+
+    api
+      .getMe(panel)
+      .then((user) => setAuth({ ...user, token: stored.token, panel }))
+      .catch(() => {});
+  }, [setAuth]);
+
   const setPanelAuth = (user: AuthUser) => setAuth(user);
 
   const isAdminAuthed = auth?.panel === "admin" && ["superadmin", "admin"].includes(auth.role);
@@ -101,6 +113,7 @@ function App() {
             <Route path="student-interaction" element={<AdminStudentInteraction />} />
             <Route path="monthly-calendar" element={<MonthlyCalendar />} />
             <Route path="user-management" element={<UserManagement />} />
+            <Route path="student-onboarding" element={<UserManagement />} />
             <Route path="profile" element={<PanelProfile />} />
             <Route path="inbox" element={<PanelInbox />} />
             <Route path="settings" element={<PanelSettings />} />

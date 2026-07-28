@@ -216,7 +216,7 @@ const UserManagement = () => {
 
   return (
     <>
-      <PageTitle motherMenu="Admin Panel" activeMenu="User Management" pageContent="" />
+      <PageTitle motherMenu="Admin Panel" activeMenu="Student Onboarding" pageContent="" />
       {!hasPermission(auth, "admin:users") ? (
         <div className="alert alert-warning">You do not have permission to manage users.</div>
       ) : (
@@ -227,7 +227,7 @@ const UserManagement = () => {
         <div className="col-xl-5">
           <div className="card">
             <div className="card-header">
-              <h4 className="card-title mb-0">Create Account</h4>
+              <h4 className="card-title mb-0">Onboard New Student</h4>
             </div>
             <div className="card-body">
               <form onSubmit={onCreate}>

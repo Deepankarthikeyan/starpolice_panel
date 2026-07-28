@@ -45,7 +45,7 @@ The script prints the live **Website** and **API** Cloudflare URLs. Then open:
 | Staff (admin role) | `staff@starpolice.academy` | `staff123` |
 | Student | `student@starpolice.academy` | `student123` |
 
-> If student login says **Invalid credentials**, the student account may not exist yet. Log in as super admin, create the student in **User Management**, and activate access. After deploying the latest API, `npm run seed` also creates the demo student automatically.
+> If student login says **Invalid credentials**, the student account may not exist yet. Log in as super admin, onboard the student in **Student Onboarding**, and activate access. After deploying the latest API, `npm run seed` also creates the demo student automatically.
 
 Netlify dashboard: https://app.netlify.com/projects/starpolice-panel
 

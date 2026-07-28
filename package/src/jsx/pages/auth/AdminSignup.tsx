@@ -52,7 +52,7 @@ const AdminSignup = ({ setAuth }: Props) => {
         }
       >
         <div className="alert alert-info">
-          Admin accounts are created by the super admin from User Management after login.
+          Admin accounts are created by the super admin from Student Onboarding after login.
         </div>
       </AuthLayout>
     );
