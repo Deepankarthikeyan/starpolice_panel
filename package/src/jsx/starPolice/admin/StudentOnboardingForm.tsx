@@ -6,7 +6,7 @@ import {
   getDocumentUrl,
 } from "../studentProfile";
 import { getAbsoluteFileUrl } from "../fileUrl";
-import { printStudentOnboarding } from "./printStudentOnboarding";
+import StudentOnboardingPrintModal from "./StudentOnboardingPrintModal";
 
 type FormState = {
   email: string;
@@ -89,6 +89,7 @@ export default function StudentOnboardingForm({
   onSubmit,
   onCancel,
 }: StudentOnboardingFormProps) {
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
   const updateProfile = (field: keyof StudentProfile, value: string | boolean) => {
     setForm((current) => ({
       ...current,
@@ -135,7 +136,19 @@ export default function StudentOnboardingForm({
   };
 
   return (
-    <form onSubmit={onSubmit}>
+    <>
+      {showPrintPreview && (
+        <StudentOnboardingPrintModal
+          data={{
+            email: form.email,
+            isActive: form.isActive,
+            profile: form.profile,
+          }}
+          onClose={() => setShowPrintPreview(false)}
+        />
+      )}
+
+      <form onSubmit={onSubmit}>
       <div className="card">
         <div className="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
           <h4 className="card-title mb-0">{editing ? "Edit Student" : "Add Student"}</h4>
@@ -143,13 +156,7 @@ export default function StudentOnboardingForm({
             <button
               type="button"
               className="btn btn-sm btn-outline-primary"
-              onClick={() =>
-                printStudentOnboarding({
-                  email: form.email,
-                  isActive: form.isActive,
-                  profile: form.profile,
-                })
-              }
+              onClick={() => setShowPrintPreview(true)}
             >
               <i className="fa fa-print me-1" />
               Print
@@ -945,5 +952,6 @@ export default function StudentOnboardingForm({
         </div>
       </div>
     </form>
+    </>
   );
 }

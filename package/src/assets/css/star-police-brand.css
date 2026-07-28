@@ -493,3 +493,102 @@
   font-size: 0.875rem;
   line-height: 1;
 }
+
+.spa-print-modal .modal-body {
+  background: #eef2f8;
+}
+
+.spa-print-modal-body {
+  padding: 1.25rem;
+}
+
+.spa-print-document {
+  background: #fff;
+  color: #111;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.spa-print-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 2px solid #1a3a6d;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.spa-print-header img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+.spa-print-header h1 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  color: #1a3a6d;
+}
+
+.spa-print-header p {
+  margin: 0;
+  color: #444;
+}
+
+.spa-print-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  font-size: 11px;
+}
+
+.spa-print-meta span {
+  background: #f5f7fb;
+  border: 1px solid #dde4f0;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+.spa-print-section {
+  margin-bottom: 18px;
+}
+
+.spa-print-section h2 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #1a3a6d;
+  border-left: 4px solid #1a3a6d;
+  padding-left: 8px;
+}
+
+.spa-print-section table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.spa-print-section th,
+.spa-print-section td {
+  border: 1px solid #d9dfea;
+  padding: 7px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.spa-print-section th {
+  width: 34%;
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.spa-print-footer {
+  margin-top: 24px;
+  padding-top: 12px;
+  border-top: 1px solid #d9dfea;
+  font-size: 10px;
+  color: #666;
+  text-align: center;
+}
