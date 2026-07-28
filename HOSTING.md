@@ -15,6 +15,8 @@
 | Admin | `superadmin@starpolice.academy` | `superadmin123` |
 | Student | `student@starpolice.academy` | `student123` |
 
+> If student login says **Invalid credentials**, the student account may not exist yet. Log in as super admin, create the student in **User Management**, and activate access. After deploying the latest API, `npm run seed` also creates the demo student automatically.
+
 Netlify dashboard: https://app.netlify.com/projects/starpolice-panel
 
 ---
