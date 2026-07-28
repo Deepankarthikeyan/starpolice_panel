@@ -19,9 +19,18 @@ export type PermissionKey = AdminPermissionKey | StudentPermissionKey;
 
 export const ALL_ADMIN_PERMISSION_KEYS = ADMIN_PERMISSIONS.map((item) => item.key);
 export const ALL_STUDENT_PERMISSION_KEYS = STUDENT_PERMISSIONS.map((item) => item.key);
+export const ADMIN_PANEL_ROLES = ["superadmin", "admin", "staff"] as const;
 
-export function defaultPermissionsForRole(role: "admin" | "student") {
-  return role === "admin" ? [...ALL_ADMIN_PERMISSION_KEYS] : [...ALL_STUDENT_PERMISSION_KEYS];
+export function isAdminPanelRole(role?: string) {
+  return ADMIN_PANEL_ROLES.includes(role as (typeof ADMIN_PANEL_ROLES)[number]);
+}
+
+export function defaultPermissionsForRole(role: "admin" | "staff" | "student") {
+  if (role === "admin") return [...ALL_ADMIN_PERMISSION_KEYS];
+  if (role === "staff") {
+    return ALL_ADMIN_PERMISSION_KEYS.filter((key) => key !== "admin:users");
+  }
+  return [...ALL_STUDENT_PERMISSION_KEYS];
 }
 
 export function hasPermission(

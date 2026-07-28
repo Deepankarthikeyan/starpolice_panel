@@ -1,4 +1,4 @@
-export type UserRole = "superadmin" | "admin" | "student";
+export type UserRole = "superadmin" | "admin" | "staff" | "student";
 export type PanelType = "admin" | "student";
 export type PermissionKey = string;
 

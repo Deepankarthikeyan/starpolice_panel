@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { api } from "../api";
+import { isAdminPanelRole } from "../permissions";
 import type { ChatMessage } from "../types";
 
 const StudentInteraction = () => {
@@ -53,7 +54,7 @@ const StudentInteraction = () => {
                 <div
                   key={item.id}
                   className={`p-3 mb-3 rounded ${
-                    item.senderRole === "admin" || item.senderRole === "superadmin"
+                    isAdminPanelRole(item.senderRole)
                       ? "bg-primary-subtle ms-auto"
                       : "bg-light"
                   }`}

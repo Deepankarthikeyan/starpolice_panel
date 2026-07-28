@@ -12,7 +12,7 @@ function resolveAuthForPath(pathname: string): AuthUser | null {
   const panel: PanelType = pathname.startsWith("/student") ? "student" : "admin";
   const stored = getStoredAuth(panel);
   if (!stored) return null;
-  if (panel === "admin" && ["superadmin", "admin"].includes(stored.role)) return stored;
+  if (panel === "admin" && ["superadmin", "admin", "staff"].includes(stored.role)) return stored;
   if (panel === "student" && stored.role === "student") return stored;
   return null;
 }

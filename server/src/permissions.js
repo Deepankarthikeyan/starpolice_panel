@@ -18,13 +18,16 @@ export const ALL_STUDENT_PERMISSION_KEYS = STUDENT_PERMISSIONS.map((item) => ite
 
 export function defaultPermissionsForRole(role) {
   if (role === "admin") return [...ALL_ADMIN_PERMISSION_KEYS];
+  if (role === "staff") {
+    return ALL_ADMIN_PERMISSION_KEYS.filter((key) => key !== "admin:users");
+  }
   if (role === "student") return [...ALL_STUDENT_PERMISSION_KEYS];
   return [];
 }
 
 export function sanitizePermissions(role, permissions) {
   const allowed =
-    role === "admin"
+    role === "admin" || role === "staff"
       ? ALL_ADMIN_PERMISSION_KEYS
       : role === "student"
         ? ALL_STUDENT_PERMISSION_KEYS

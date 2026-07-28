@@ -2,6 +2,7 @@ import React, { useContext, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../../starPolice/api";
+import { isAdminPanelRole } from "../../starPolice/permissions";
 import { usePolling } from "../../starPolice/usePolling";
 import type { ChatMessage } from "../../starPolice/types";
 import MsgBox from "./MsgBox";
@@ -26,8 +27,7 @@ const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab, toggle }) => {
 
   usePolling(loadMessages, 10000, Boolean(auth?.token) && isActive);
 
-  const chatTitle =
-    auth?.role === "admin" || auth?.role === "superadmin" ? "Students" : "Star Police Admin";
+  const chatTitle = isAdminPanelRole(auth?.role) ? "Students" : "Star Police Admin";
   const lastMessage = messages[messages.length - 1];
   const preview = lastMessage
     ? `${lastMessage.senderName}: ${lastMessage.message.slice(0, 40)}`
@@ -105,7 +105,7 @@ const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab, toggle }) => {
               <div className="d-flex bd-highlight">
                 <div className="img_cont">
                   <div className="rounded-circle user_img d-flex align-items-center justify-content-center bg-primary text-white fw-bold">
-                    {auth?.role === "admin" || auth?.role === "superadmin" ? "ST" : "AD"}
+                    {isAdminPanelRole(auth?.role) ? "ST" : "AD"}
                   </div>
                   <span className="online_icon"></span>
                 </div>

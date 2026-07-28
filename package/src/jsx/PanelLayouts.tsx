@@ -7,7 +7,7 @@ import { ThemeContext } from "../context/ThemeContext";
 export function AdminLayout() {
   const { openMenuToggle, auth } = useContext(ThemeContext);
 
-  if (!auth || auth.panel !== "admin" || !["superadmin", "admin"].includes(auth.role)) {
+  if (!auth || auth.panel !== "admin" || !["superadmin", "admin", "staff"].includes(auth.role)) {
     return <Navigate to="/admin/login" replace />;
   }
 
