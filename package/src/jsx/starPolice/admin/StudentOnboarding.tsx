@@ -268,7 +268,7 @@ const StudentOnboarding = () => {
               </button>
             </div>
           </div>
-          <div className="card-body">
+          <div className="card-body spa-onboarding-records-body">
             <div className="spa-print-only mb-3">
               <h3 className="mb-1">Star Police Academy</h3>
               <h4 className="mb-1">Student Onboarding Records</h4>
@@ -277,7 +277,7 @@ const StudentOnboarding = () => {
                 {filteredRecords.length === 1 ? "" : "s"}
               </p>
             </div>
-            <div className="mb-3 spa-no-print">
+            <div className="spa-onboarding-search spa-no-print">
               <input
                 type="search"
                 className="form-control"
@@ -286,35 +286,37 @@ const StudentOnboarding = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <div className="table-responsive">
-              <table className="table table-striped align-middle">
+            <div className="table-responsive spa-onboarding-table-wrap">
+              <table className="table table-striped table-hover align-middle mb-0 spa-onboarding-table">
                 <thead>
                   <tr>
-                    <th>Student ID</th>
-                    <th>Name</th>
-                    <th>Course</th>
-                    <th>Batch</th>
-                    <th>Email</th>
-                    <th className="spa-no-print">Actions</th>
+                    <th scope="col">Student ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Course</th>
+                    <th scope="col">Batch</th>
+                    <th scope="col">Email</th>
+                    <th scope="col" className="spa-onboarding-actions-col spa-no-print">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredRecords.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center text-muted">
+                      <td colSpan={6} className="spa-onboarding-empty">
                         No student onboarding records yet.
                       </td>
                     </tr>
                   ) : (
                     filteredRecords.map((record) => (
                       <tr key={record.id}>
-                        <td>{record.studentId}</td>
-                        <td>{fullName(record)}</td>
+                        <td className="spa-onboarding-id">{record.studentId}</td>
+                        <td className="spa-onboarding-name">{fullName(record)}</td>
                         <td>{record.course || "—"}</td>
                         <td>{record.batch || "—"}</td>
-                        <td>{record.loginEmail || record.email || "—"}</td>
-                        <td className="spa-no-print">
-                          <div className="d-flex gap-2">
+                        <td className="spa-onboarding-email">{record.loginEmail || record.email || "—"}</td>
+                        <td className="spa-onboarding-actions-col spa-no-print">
+                          <div className="spa-onboarding-actions">
                             <button
                               type="button"
                               className="btn btn-sm btn-outline-primary"

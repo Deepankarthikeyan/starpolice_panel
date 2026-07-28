@@ -478,6 +478,84 @@
   line-height: 1;
 }
 
+.spa-onboarding-records-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.spa-onboarding-search .form-control {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
+
+.spa-onboarding-table-wrap {
+  width: 100%;
+  margin: 0;
+  overflow-x: auto;
+}
+
+.spa-onboarding-table {
+  width: 100%;
+  min-width: 48rem;
+  margin-bottom: 0;
+  table-layout: auto;
+}
+
+.spa-onboarding-table thead th {
+  white-space: nowrap;
+  vertical-align: middle;
+  padding: 0.85rem 1rem;
+  font-weight: 600;
+  color: #303972;
+  background: #fff;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.spa-onboarding-table tbody td {
+  vertical-align: middle;
+  padding: 0.85rem 1rem;
+}
+
+.spa-onboarding-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.spa-onboarding-actions-col {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.spa-onboarding-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+}
+
+.spa-onboarding-id {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.spa-onboarding-name {
+  min-width: 10rem;
+}
+
+.spa-onboarding-email {
+  min-width: 12rem;
+  word-break: break-word;
+}
+
+.spa-onboarding-empty {
+  text-align: center;
+  color: #6c757d;
+  padding: 2.5rem 1rem !important;
+}
+
 .spa-print-only {
   display: none;
 }
