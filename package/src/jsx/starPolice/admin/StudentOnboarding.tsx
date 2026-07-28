@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { api } from "../api";
 import { hasPermission } from "../permissions";
@@ -103,7 +103,12 @@ function recordToForm(record: StudentOnboardingRecord): StudentOnboardingFormSta
   };
 }
 
+function fullName(record: StudentOnboardingRecord) {
+  return [record.firstName, record.middleName, record.lastName].filter(Boolean).join(" ");
+}
+
 const StudentOnboarding = () => {
+  const printRef = useRef<HTMLDivElement>(null);
   const { auth } = useContext(ThemeContext);
   const [records, setRecords] = useState<StudentOnboardingRecord[]>([]);
   const [form, setForm] = useState<StudentOnboardingFormState>(emptyStudentOnboardingForm());
@@ -193,8 +198,8 @@ const StudentOnboarding = () => {
   };
 
   const onDelete = async (record: StudentOnboardingRecord) => {
-    const fullName = `${record.firstName} ${record.lastName}`.trim();
-    if (!window.confirm(`Delete onboarding record for ${fullName} (${record.studentId})?`)) {
+    const name = fullName(record);
+    if (!window.confirm(`Delete onboarding record for ${name} (${record.studentId})?`)) {
       return;
     }
     setLoading(true);
@@ -210,6 +215,10 @@ const StudentOnboarding = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   const renderFileInput = (field: (typeof FILE_FIELDS)[number]) => (
@@ -245,16 +254,30 @@ const StudentOnboarding = () => {
       {error && <div className="alert alert-danger">{error}</div>}
 
       {!showForm ? (
-        <div className="card">
-          <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div className="card spa-onboarding-records-card" ref={printRef}>
+          <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 spa-no-print">
             <h4 className="card-title mb-0">Student Onboarding Records</h4>
-            <button type="button" className="btn btn-primary" onClick={startCreate}>
-              <i className="fa fa-plus me-2" />
-              Add Student
-            </button>
+            <div className="d-flex flex-wrap gap-2">
+              <button type="button" className="btn btn-outline-secondary" onClick={handlePrint}>
+                <i className="fa fa-print me-2" />
+                Print
+              </button>
+              <button type="button" className="btn btn-primary" onClick={startCreate}>
+                <i className="fa fa-plus me-2" />
+                Add Student
+              </button>
+            </div>
           </div>
           <div className="card-body">
-            <div className="mb-3">
+            <div className="spa-print-only mb-3">
+              <h3 className="mb-1">Star Police Academy</h3>
+              <h4 className="mb-1">Student Onboarding Records</h4>
+              <p className="text-muted mb-0">
+                Printed on {new Date().toLocaleString()} • {filteredRecords.length} record
+                {filteredRecords.length === 1 ? "" : "s"}
+              </p>
+            </div>
+            <div className="mb-3 spa-no-print">
               <input
                 type="search"
                 className="form-control"
@@ -272,7 +295,7 @@ const StudentOnboarding = () => {
                     <th>Course</th>
                     <th>Batch</th>
                     <th>Email</th>
-                    <th>Actions</th>
+                    <th className="spa-no-print">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -286,13 +309,11 @@ const StudentOnboarding = () => {
                     filteredRecords.map((record) => (
                       <tr key={record.id}>
                         <td>{record.studentId}</td>
-                        <td>
-                          {[record.firstName, record.middleName, record.lastName].filter(Boolean).join(" ")}
-                        </td>
+                        <td>{fullName(record)}</td>
                         <td>{record.course || "—"}</td>
                         <td>{record.batch || "—"}</td>
                         <td>{record.loginEmail || record.email || "—"}</td>
-                        <td>
+                        <td className="spa-no-print">
                           <div className="d-flex gap-2">
                             <button
                               type="button"

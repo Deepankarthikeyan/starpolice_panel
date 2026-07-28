@@ -477,3 +477,45 @@
   font-size: 0.875rem;
   line-height: 1;
 }
+
+.spa-print-only {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .spa-onboarding-records-card,
+  .spa-onboarding-records-card * {
+    visibility: visible;
+  }
+
+  .spa-onboarding-records-card {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .spa-no-print {
+    display: none !important;
+  }
+
+  .spa-print-only {
+    display: block !important;
+  }
+
+  .spa-onboarding-records-card .table {
+    font-size: 12px;
+  }
+
+  .spa-onboarding-records-card .table th,
+  .spa-onboarding-records-card .table td {
+    border: 1px solid #dee2e6 !important;
+    padding: 0.4rem !important;
+  }
+}
