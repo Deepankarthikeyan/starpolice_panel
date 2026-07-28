@@ -12,7 +12,10 @@ export function AdminLayout() {
   }
 
   return (
-    <div id="main-wrapper" className={`show ${openMenuToggle ? "menu-toggle" : ""}`}>
+    <div
+      id="main-wrapper"
+      className={`show spa-modern-sidebar-shell ${openMenuToggle ? "menu-toggle" : ""}`}
+    >
       <Nav basePath="/admin" />
       <div className="content-body" style={{ minHeight: window.screen.height + 20 }}>
         <div className="container-fluid">
@@ -32,7 +35,10 @@ export function StudentLayout() {
   }
 
   return (
-    <div id="main-wrapper" className={`show ${openMenuToggle ? "menu-toggle" : ""}`}>
+    <div
+      id="main-wrapper"
+      className={`show spa-modern-sidebar-shell ${openMenuToggle ? "menu-toggle" : ""}`}
+    >
       <Nav basePath="/student" panel="student" />
       <div className="content-body" style={{ minHeight: window.screen.height + 20 }}>
         <div className="container-fluid">

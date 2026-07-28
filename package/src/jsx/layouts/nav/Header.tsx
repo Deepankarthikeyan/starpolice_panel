@@ -24,7 +24,7 @@ interface propType {
 }
 
 const Header = ({ onNote }: propType) => {
-  const { auth } = useContext(ThemeContext);
+  const { auth, setOpenMenuToggle } = useContext(ThemeContext);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -115,6 +115,14 @@ const Header = ({ onNote }: propType) => {
         <nav className="navbar navbar-expand">
           <div className="collapse navbar-collapse justify-content-between">
             <div className="header-left">
+              <button
+                type="button"
+                className="spa-mobile-sidebar-toggle"
+                aria-label="Open sidebar menu"
+                onClick={() => setOpenMenuToggle((prev) => !prev)}
+              >
+                <span className="material-symbols-outlined">menu</span>
+              </button>
               <div
                 className="dashboard_bar"
                 style={{ textTransform: "capitalize" }}
