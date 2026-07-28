@@ -619,8 +619,11 @@
 
 .dlabnav .metismenu > li > a .nav-text {
   flex: 1;
-  min-width: 0;
   line-height: 1.35;
-  display: inline-block;
-  vertical-align: middle;
+  white-space: nowrap;
+}
+
+[data-sidebar-style="full"][data-layout="vertical"] .dlabnav .metismenu > li > a {
+  padding-left: 1.125rem;
+  padding-right: 1.125rem;
 }
