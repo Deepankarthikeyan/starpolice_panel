@@ -339,15 +339,30 @@
   max-width: 12rem;
 }
 
-/* Hide old top header — toggle moved into sidebar */
+/* Hide legacy template chrome when the new sidebar is active */
+#main-wrapper:has(.spa-sidebar) .nav-header,
+#main-wrapper:has(.spa-sidebar) .dlabnav,
+#main-wrapper:has(.spa-sidebar) .deznav {
+  display: none !important;
+}
+
 #main-wrapper .spa-nav-header-minimal {
   display: none !important;
 }
 
+#main-wrapper:has(.spa-sidebar) .content-body {
+  margin-left: var(--width, 17.5rem) !important;
+  transition: margin-left 0.2s ease;
+}
+
+#main-wrapper:has(.spa-sidebar).menu-toggle .content-body {
+  margin-left: 5.5rem !important;
+}
+
 #main-wrapper .header {
   left: 0 !important;
-  width: calc(100% - var(--width)) !important;
-  margin-left: var(--width) !important;
+  width: calc(100% - var(--width, 17.5rem)) !important;
+  margin-left: var(--width, 17.5rem) !important;
 }
 
 #main-wrapper.menu-toggle .header {

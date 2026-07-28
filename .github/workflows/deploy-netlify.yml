@@ -32,17 +32,26 @@ jobs:
       - name: Verify Netlify credentials
         id: netlify_creds
         run: |
-          if [ -z "${{ secrets.NETLIFY_AUTH_TOKEN }}" ] || [ -z "${{ secrets.NETLIFY_SITE_ID }}" ]; then
-            echo "::warning::NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID are not set. Skipping Netlify deploy."
-            echo "Add secrets at: https://github.com/Deepankarthikeyan/starpolice_panel/settings/secrets/actions"
-            echo "Or trigger a deploy from the Netlify dashboard for site starpolice-panel."
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-          else
+          if [ -n "${{ secrets.NETLIFY_BUILD_HOOK }}" ]; then
+            echo "mode=hook" >> "$GITHUB_OUTPUT"
             echo "ready=true" >> "$GITHUB_OUTPUT"
+          elif [ -n "${{ secrets.NETLIFY_AUTH_TOKEN }}" ] && [ -n "${{ secrets.NETLIFY_SITE_ID }}" ]; then
+            echo "mode=cli" >> "$GITHUB_OUTPUT"
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::No Netlify deploy credentials found. Skipping deploy."
+            echo "Add NETLIFY_BUILD_HOOK (recommended) or NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID."
+            echo "Or trigger a deploy from: https://app.netlify.com/projects/starpolice-panel"
+            echo "mode=none" >> "$GITHUB_OUTPUT"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Trigger Netlify build hook
+        if: steps.netlify_creds.outputs.ready == 'true' && steps.netlify_creds.outputs.mode == 'hook'
+        run: curl -fsS -X POST -d {} "${{ secrets.NETLIFY_BUILD_HOOK }}"
+
       - name: Deploy to Netlify
-        if: steps.netlify_creds.outputs.ready == 'true'
+        if: steps.netlify_creds.outputs.ready == 'true' && steps.netlify_creds.outputs.mode == 'cli'
         uses: nwtgck/actions-netlify@v3.0
         with:
           publish-dir: "./package/dist"
