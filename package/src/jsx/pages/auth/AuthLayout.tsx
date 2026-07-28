@@ -1,6 +1,5 @@
 import emblem from "../../../assets/images/star-police-academy-emblem.png";
 import adminVector from "../../../assets/images/svg/admin-panel.svg";
-import studentVector from "../../../assets/images/svg/student.svg";
 
 interface AuthLayoutProps {
   panel: "admin" | "student";
@@ -11,10 +10,10 @@ interface AuthLayoutProps {
 }
 
 const AuthLayout = ({ panel, title, subtitle, children, footer }: AuthLayoutProps) => {
-  const vectorImage = panel === "admin" ? adminVector : studentVector;
+  const vectorImage = adminVector;
 
   return (
-    <div className={`spa-auth-page spa-auth-${panel}`}>
+    <div className="spa-auth-page spa-auth-admin">
       <div className="spa-auth-overlay" />
       <div className="container spa-auth-container">
         <div className="row justify-content-center align-items-center min-vh-100">
