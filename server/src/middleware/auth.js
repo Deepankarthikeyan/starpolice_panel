@@ -19,7 +19,7 @@ export function authRequired(req, res, next) {
 }
 
 export function adminPanelOnly(req, res, next) {
-  if (!["superadmin", "admin"].includes(req.user?.role)) {
+  if (!["superadmin", "admin", "staff"].includes(req.user?.role)) {
     return res.status(403).json({ message: "Admin panel access required." });
   }
   next();

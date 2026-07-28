@@ -4,6 +4,7 @@ export const ADMIN_PERMISSIONS = [
   { key: "admin:messages", label: "Student Interaction", description: "Chat with students" },
   { key: "admin:calendar", label: "Monthly Calendar", description: "View the monthly calendar" },
   { key: "admin:users", label: "User Management", description: "Create and manage student accounts" },
+  { key: "admin:onboarding", label: "Student Onboarding", description: "Add and manage student profile details" },
 ] as const;
 
 export const STUDENT_PERMISSIONS = [
@@ -19,9 +20,18 @@ export type PermissionKey = AdminPermissionKey | StudentPermissionKey;
 
 export const ALL_ADMIN_PERMISSION_KEYS = ADMIN_PERMISSIONS.map((item) => item.key);
 export const ALL_STUDENT_PERMISSION_KEYS = STUDENT_PERMISSIONS.map((item) => item.key);
+export const ADMIN_PANEL_ROLES = ["superadmin", "admin", "staff"] as const;
 
-export function defaultPermissionsForRole(role: "admin" | "student") {
-  return role === "admin" ? [...ALL_ADMIN_PERMISSION_KEYS] : [...ALL_STUDENT_PERMISSION_KEYS];
+export function isAdminPanelRole(role?: string) {
+  return ADMIN_PANEL_ROLES.includes(role as (typeof ADMIN_PANEL_ROLES)[number]);
+}
+
+export function defaultPermissionsForRole(role: "admin" | "staff" | "student") {
+  if (role === "admin") return [...ALL_ADMIN_PERMISSION_KEYS];
+  if (role === "staff") {
+    return ALL_ADMIN_PERMISSION_KEYS.filter((key) => key !== "admin:users");
+  }
+  return [...ALL_STUDENT_PERMISSION_KEYS];
 }
 
 export function hasPermission(

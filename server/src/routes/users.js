@@ -12,7 +12,9 @@ function mapUser(user) {
       ? defaultPermissionsForRole("admin")
       : user.permissions?.length
         ? user.permissions
-        : defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
+        : defaultPermissionsForRole(
+            user.role === "student" ? "student" : user.role === "staff" ? "staff" : "admin"
+          );
 
   return {
     id: user._id.toString(),
@@ -50,7 +52,12 @@ router.get(
         return res.json(users.map(mapUser));
       }
 
-      return res.status(400).json({ message: "Query type must be admin or student." });
+      if (type === "staff") {
+        const users = await User.find({ role: "staff" }).select("-password").sort({ createdAt: -1 });
+        return res.json(users.map(mapUser));
+      }
+
+      return res.status(400).json({ message: "Query type must be admin, staff, or student." });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -78,6 +85,10 @@ router.post(
       if (role === "admin") {
         if (req.user.role !== "superadmin") {
           return res.status(403).json({ message: "Only super admin can create admin accounts." });
+        }
+      } else if (role === "staff") {
+        if (!["superadmin", "admin"].includes(req.user.role)) {
+          return res.status(403).json({ message: "Admin access required." });
         }
       } else if (role === "student") {
         if (!["superadmin", "admin"].includes(req.user.role)) {
@@ -135,6 +146,10 @@ router.patch(
         return res.status(403).json({ message: "Admin access required." });
       }
 
+      if (user.role === "staff" && !["superadmin", "admin"].includes(req.user.role)) {
+        return res.status(403).json({ message: "Admin access required." });
+      }
+
       user.isActive = isActive;
       await user.save();
 
@@ -175,6 +190,10 @@ router.patch(
         return res.status(403).json({ message: "Admin access required." });
       }
 
+      if (user.role === "staff" && !["superadmin", "admin"].includes(req.user.role)) {
+        return res.status(403).json({ message: "Admin access required." });
+      }
+
       user.permissions = sanitizePermissions(user.role, permissions);
       await user.save();
 
@@ -204,6 +223,10 @@ router.delete(
 
       if (user.role === "admin" && req.user.role !== "superadmin") {
         return res.status(403).json({ message: "Only super admin can delete admin accounts." });
+      }
+
+      if (user.role === "staff" && !["superadmin", "admin"].includes(req.user.role)) {
+        return res.status(403).json({ message: "Admin access required." });
       }
 
       await user.deleteOne();

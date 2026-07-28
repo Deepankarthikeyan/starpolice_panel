@@ -9,6 +9,8 @@ import type {
   PanelType,
   SetupStatus,
   StudentDashboardStats,
+  StudentRecord,
+  StudentProfileInput,
   UploadedFile,
 } from "./types";
 
@@ -88,7 +90,7 @@ export const api = {
     return request<Omit<AuthUser, "token">>("/api/auth/me", {}, panel);
   },
 
-  getUsers(type: "admin" | "student") {
+  getUsers(type: "admin" | "staff" | "student") {
     return request<ManagedUser[]>(`/api/users?type=${type}`);
   },
 
@@ -96,7 +98,7 @@ export const api = {
     name: string,
     email: string,
     password: string,
-    role: "admin" | "student",
+    role: "admin" | "staff" | "student",
     permissions?: string[]
   ) {
     return request<ManagedUser>("/api/users", {
@@ -121,6 +123,55 @@ export const api = {
 
   deleteUser(id: string) {
     return request<{ message: string }>(`/api/users/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  getStudents() {
+    return request<StudentRecord[]>("/api/students");
+  },
+
+  getStudent(id: string) {
+    return request<StudentRecord>(`/api/students/${id}`);
+  },
+
+  createStudent(email: string, password: string, profile: StudentProfileInput) {
+    return request<StudentRecord>("/api/students", {
+      method: "POST",
+      body: JSON.stringify({ email, password, profile }),
+    });
+  },
+
+  updateStudent(
+    id: string,
+    payload: {
+      email?: string;
+      password?: string;
+      isActive?: boolean;
+      profile?: Partial<StudentProfileInput>;
+    }
+  ) {
+    return request<StudentRecord>(`/api/students/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  uploadStudentFile(id: string, field: string, file: File) {
+    const formData = new FormData();
+    formData.append("field", field);
+    formData.append("file", file);
+    return request<{ field: string; fileUrl: string; profile: StudentProfileInput }>(
+      `/api/students/${id}/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+  },
+
+  deleteStudent(id: string) {
+    return request<{ message: string }>(`/api/students/${id}`, {
       method: "DELETE",
     });
   },

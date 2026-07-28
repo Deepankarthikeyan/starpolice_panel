@@ -4,6 +4,7 @@ export const ADMIN_PERMISSIONS = [
   { key: "admin:messages", label: "Student Interaction", description: "Chat with students" },
   { key: "admin:calendar", label: "Monthly Calendar", description: "View the monthly calendar" },
   { key: "admin:users", label: "User Management", description: "Create and manage student accounts" },
+  { key: "admin:onboarding", label: "Student Onboarding", description: "Add and manage student profile details" },
 ];
 
 export const STUDENT_PERMISSIONS = [
@@ -18,13 +19,16 @@ export const ALL_STUDENT_PERMISSION_KEYS = STUDENT_PERMISSIONS.map((item) => ite
 
 export function defaultPermissionsForRole(role) {
   if (role === "admin") return [...ALL_ADMIN_PERMISSION_KEYS];
+  if (role === "staff") {
+    return ALL_ADMIN_PERMISSION_KEYS.filter((key) => key !== "admin:users");
+  }
   if (role === "student") return [...ALL_STUDENT_PERMISSION_KEYS];
   return [];
 }
 
 export function sanitizePermissions(role, permissions) {
   const allowed =
-    role === "admin"
+    role === "admin" || role === "staff"
       ? ALL_ADMIN_PERMISSION_KEYS
       : role === "student"
         ? ALL_STUDENT_PERMISSION_KEYS

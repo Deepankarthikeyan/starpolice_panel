@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../../starPolice/api";
 import type { ChatMessage } from "../../starPolice/types";
+import { isAdminPanelRole } from "../../starPolice/permissions";
 
 interface MsgBoxProps {
   title: string;
@@ -135,8 +136,7 @@ const MsgBox: React.FC<MsgBoxProps> = ({
           messages.map((item) => {
             const isMine =
               item.senderRole === auth?.role ||
-              (["admin", "superadmin"].includes(item.senderRole) &&
-                ["admin", "superadmin"].includes(auth?.role || ""));
+              (isAdminPanelRole(item.senderRole) && isAdminPanelRole(auth?.role));
             return (
               <div
                 key={item.id}

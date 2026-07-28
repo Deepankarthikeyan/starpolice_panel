@@ -7,12 +7,15 @@ import { ThemeContext } from "../context/ThemeContext";
 export function AdminLayout() {
   const { openMenuToggle, auth } = useContext(ThemeContext);
 
-  if (!auth || auth.panel !== "admin" || !["superadmin", "admin"].includes(auth.role)) {
+  if (!auth || auth.panel !== "admin" || !["superadmin", "admin", "staff"].includes(auth.role)) {
     return <Navigate to="/admin/login" replace />;
   }
 
   return (
-    <div id="main-wrapper" className={`show ${openMenuToggle ? "menu-toggle" : ""}`}>
+    <div
+      id="main-wrapper"
+      className={`show spa-modern-sidebar-shell ${openMenuToggle ? "menu-toggle" : ""}`}
+    >
       <Nav basePath="/admin" />
       <div className="content-body" style={{ minHeight: window.screen.height + 20 }}>
         <div className="container-fluid">
@@ -32,7 +35,10 @@ export function StudentLayout() {
   }
 
   return (
-    <div id="main-wrapper" className={`show ${openMenuToggle ? "menu-toggle" : ""}`}>
+    <div
+      id="main-wrapper"
+      className={`show spa-modern-sidebar-shell ${openMenuToggle ? "menu-toggle" : ""}`}
+    >
       <Nav basePath="/student" panel="student" />
       <div className="content-body" style={{ minHeight: window.screen.height + 20 }}>
         <div className="container-fluid">

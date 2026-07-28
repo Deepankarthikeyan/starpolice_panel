@@ -11,6 +11,7 @@ const DaywiseUpload = lazy(() => import("./jsx/starPolice/admin/DaywiseUpload"))
 const AdminStudentInteraction = lazy(() => import("./jsx/starPolice/admin/StudentInteraction"));
 const MonthlyCalendar = lazy(() => import("./jsx/starPolice/admin/MonthlyCalendar"));
 const UserManagement = lazy(() => import("./jsx/starPolice/admin/UserManagement"));
+const StudentOnboarding = lazy(() => import("./jsx/starPolice/admin/StudentOnboarding"));
 const StudentDashboard = lazy(() => import("./jsx/starPolice/student/StudentDashboard"));
 const StudentMaterials = lazy(() => import("./jsx/starPolice/student/StudentMaterials"));
 const StudentInteraction = lazy(() => import("./jsx/starPolice/student/StudentInteraction"));
@@ -55,7 +56,8 @@ function App() {
 
   const setPanelAuth = (user: AuthUser) => setAuth(user);
 
-  const isAdminAuthed = auth?.panel === "admin" && ["superadmin", "admin"].includes(auth.role);
+  const isAdminAuthed =
+    auth?.panel === "admin" && ["superadmin", "admin", "staff"].includes(auth.role);
   const isStudentAuthed = auth?.panel === "student" && auth.role === "student";
 
   return (
@@ -93,6 +95,7 @@ function App() {
             <Route path="daywise-upload" element={<DaywiseUpload />} />
             <Route path="student-interaction" element={<AdminStudentInteraction />} />
             <Route path="monthly-calendar" element={<MonthlyCalendar />} />
+            <Route path="student-onboarding" element={<StudentOnboarding />} />
             <Route path="user-management" element={<UserManagement />} />
             <Route path="profile" element={<PanelProfile />} />
             <Route path="inbox" element={<PanelInbox />} />

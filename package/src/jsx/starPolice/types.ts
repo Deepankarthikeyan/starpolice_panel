@@ -1,4 +1,4 @@
-export type UserRole = "superadmin" | "admin" | "student";
+export type UserRole = "superadmin" | "admin" | "staff" | "student";
 export type PanelType = "admin" | "student";
 export type PermissionKey = string;
 
@@ -23,6 +23,22 @@ export interface ManagedUser {
   isActive: boolean;
   permissions: PermissionKey[];
   createdAt: string;
+}
+
+import type { StudentProfile } from "./studentProfile";
+export type { StudentProfile, StudentProfileInput, StudentDocuments, DocumentField } from "./studentProfile";
+export { emptyStudentProfile, buildFullName, DOCUMENT_FIELDS } from "./studentProfile";
+
+export interface StudentRecord {
+  id: string;
+  name: string;
+  email: string;
+  role: "student";
+  isActive: boolean;
+  permissions: PermissionKey[];
+  profile: StudentProfile;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface SetupStatus {
