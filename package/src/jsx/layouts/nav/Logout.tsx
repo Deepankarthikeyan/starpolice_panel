@@ -12,7 +12,13 @@ function LogoutPage() {
       clearAuth(auth.panel);
     }
     setAuth(null);
-    navigate(auth?.panel === "student" ? "/student/login" : "/admin/login");
+    navigate(
+      auth?.panel === "student"
+        ? "/student/login"
+        : auth?.role === "admin"
+          ? "/staff/login"
+          : "/admin/login"
+    );
   }
 
   return (

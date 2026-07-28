@@ -2,7 +2,7 @@ import emblem from "../../../assets/images/star-police-academy-emblem.png";
 import adminVector from "../../../assets/images/svg/admin-panel.svg";
 
 interface AuthLayoutProps {
-  panel: "admin" | "student";
+  panel: "admin" | "staff" | "student";
   title: string;
   subtitle: string;
   children: React.ReactNode;
@@ -24,9 +24,11 @@ const AuthLayout = ({ panel, title, subtitle, children, footer }: AuthLayoutProp
                   <img src={emblem} alt="Star Police Academy" className="spa-auth-logo-small" />
                   <h1>Star Police Academy</h1>
                   <p>
-                    {panel === "admin"
-                      ? "Command center for uploads, student access, and academy operations."
-                      : "Your study hub for materials, calendar, and admin interaction."}
+                    {panel === "student"
+                      ? "Your study hub for materials, calendar, and admin interaction."
+                      : panel === "staff"
+                        ? "Staff workspace for uploads, student support, and daily academy operations."
+                        : "Command center for uploads, student access, and academy operations."}
                   </p>
                   <img
                     src={vectorImage}

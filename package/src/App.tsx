@@ -20,6 +20,7 @@ const PanelSettings = lazy(() => import("./jsx/starPolice/shared/PanelSettings")
 const PanelInbox = lazy(() => import("./jsx/starPolice/shared/PanelInbox"));
 const AdminLogin = lazy(() => import("./jsx/pages/auth/AdminLogin"));
 const AdminSignup = lazy(() => import("./jsx/pages/auth/AdminSignup"));
+const StaffLogin = lazy(() => import("./jsx/pages/auth/StaffLogin"));
 const StudentLogin = lazy(() => import("./jsx/pages/auth/StudentLogin"));
 
 function Preloader() {
@@ -74,6 +75,12 @@ function App() {
             path="/admin/signup"
             element={
               isAdminAuthed ? <Navigate to="/admin/dashboard" replace /> : <AdminSignup setAuth={setPanelAuth} />
+            }
+          />
+          <Route
+            path="/staff/login"
+            element={
+              isAdminAuthed ? <Navigate to="/admin/dashboard" replace /> : <StaffLogin setAuth={setPanelAuth} />
             }
           />
           <Route

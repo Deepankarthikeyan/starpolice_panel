@@ -5,7 +5,8 @@
 | | URL |
 |---|---|
 | **Website** | https://starpolice-panel.netlify.app |
-| **Admin / Staff login** | https://starpolice-panel.netlify.app/admin/login |
+| **Admin login** | https://starpolice-panel.netlify.app/admin/login |
+| **Staff login** | https://starpolice-panel.netlify.app/staff/login |
 | **Student login** | https://starpolice-panel.netlify.app/student/login |
 
 ## Cloudflare quick tunnel links
@@ -15,10 +16,10 @@ Use these when running the app through a Cloudflare tunnel (temporary URL — ch
 | Panel | Path | Example |
 |-------|------|---------|
 | **Admin** | `/admin/login` | `https://<your-tunnel>.trycloudflare.com/admin/login` |
-| **Staff** | `/admin/login` | `https://<your-tunnel>.trycloudflare.com/admin/login` |
+| **Staff** | `/staff/login` | `https://<your-tunnel>.trycloudflare.com/staff/login` |
 | **Student** | `/student/login` | `https://<your-tunnel>.trycloudflare.com/student/login` |
 
-> **Note:** This project has **Admin** and **Student** panels only. **Staff** uses the same **Admin** login page (`/admin/login`) with an admin account created by the super admin.
+> **Note:** Staff and admin use the same backend panel after login. Staff sign in at `/staff/login` with an admin account; super admin uses `/admin/login`.
 
 ### Start a Cloudflare tunnel (local)
 
@@ -30,7 +31,8 @@ bash scripts/deploy-live.sh
 
 The script prints the live **Website** and **API** Cloudflare URLs. Then open:
 
-- Admin / Staff: `<website-url>/admin/login`
+- Admin: `<website-url>/admin/login`
+- Staff: `<website-url>/staff/login`
 - Student: `<website-url>/student/login`
 
 **API (Render — permanent):** https://starpolice-api.onrender.com
@@ -40,7 +42,7 @@ The script prints the live **Website** and **API** Cloudflare URLs. Then open:
 | Panel | Email | Password |
 |-------|-------|----------|
 | Admin / Super Admin | `superadmin@starpolice.academy` | `superadmin123` |
-| Staff (admin role) | Created by super admin in User Management | Set by super admin |
+| Staff (admin role) | `staff@starpolice.academy` | `staff123` |
 | Student | `student@starpolice.academy` | `student123` |
 
 > If student login says **Invalid credentials**, the student account may not exist yet. Log in as super admin, create the student in **User Management**, and activate access. After deploying the latest API, `npm run seed` also creates the demo student automatically.

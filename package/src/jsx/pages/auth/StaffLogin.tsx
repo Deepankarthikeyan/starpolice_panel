@@ -8,7 +8,7 @@ interface Props {
   setAuth: (auth: AuthUser) => void;
 }
 
-const AdminLogin = ({ setAuth }: Props) => {
+const StaffLogin = ({ setAuth }: Props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,6 +21,14 @@ const AdminLogin = ({ setAuth }: Props) => {
     setError("");
     try {
       const user = await api.login(email, password, "admin");
+      if (user.role === "superadmin") {
+        setError("Super admin accounts should sign in from the admin login page.");
+        return;
+      }
+      if (user.role !== "admin") {
+        setError("Staff access requires an admin account created by the super admin.");
+        return;
+      }
       storeAuth(user);
       setAuth(user);
       navigate("/admin/dashboard");
@@ -33,23 +41,22 @@ const AdminLogin = ({ setAuth }: Props) => {
 
   return (
     <AuthLayout
-      panel="admin"
-      title="Admin Sign In"
-      subtitle="Sign in to manage uploads, students, and academy access."
+      panel="staff"
+      title="Staff Sign In"
+      subtitle="Sign in to manage uploads, students, and academy operations."
       footer={
         <p className="text-center mt-3 mb-0">
-          First time setup?{" "}
-          <Link to="/admin/signup" className="spa-auth-link">
-            Create Super Admin
-          </Link>
-          {" · "}
-          <Link to="/staff/login" className="spa-auth-link">
-            Staff login
+          Super admin?{" "}
+          <Link to="/admin/login" className="spa-auth-link">
+            Admin login
           </Link>
         </p>
       }
     >
       {error && <div className="alert alert-danger py-2">{error}</div>}
+      <div className="alert alert-light border mb-3 small">
+        Staff accounts are created by the super admin. Contact your super admin if you need access.
+      </div>
       <form onSubmit={onSubmit}>
         <div className="mb-3">
           <label className="form-label">Email</label>
@@ -58,7 +65,7 @@ const AdminLogin = ({ setAuth }: Props) => {
             className="form-control spa-auth-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="admin@starpolice.academy"
+            placeholder="staff@starpolice.academy"
             required
           />
         </div>
@@ -74,11 +81,11 @@ const AdminLogin = ({ setAuth }: Props) => {
           />
         </div>
         <button type="submit" className="btn spa-auth-btn w-100" disabled={loading}>
-          {loading ? "Signing in..." : "Sign In to Admin Panel"}
+          {loading ? "Signing in..." : "Sign In to Staff Panel"}
         </button>
       </form>
     </AuthLayout>
   );
 };
 
-export default AdminLogin;
+export default StaffLogin;
