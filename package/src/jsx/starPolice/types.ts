@@ -25,22 +25,9 @@ export interface ManagedUser {
   createdAt: string;
 }
 
-export interface StudentProfile {
-  phone: string;
-  dateOfBirth: string;
-  gender: "" | "male" | "female" | "other";
-  address: string;
-  city: string;
-  state: string;
-  pincode: string;
-  guardianName: string;
-  guardianPhone: string;
-  enrollmentNumber: string;
-  batch: string;
-  course: string;
-  enrollmentDate: string;
-  remarks: string;
-}
+import type { StudentProfile } from "./studentProfile";
+export type { StudentProfile, StudentProfileInput, StudentDocuments, DocumentField } from "./studentProfile";
+export { emptyStudentProfile, buildFullName, DOCUMENT_FIELDS } from "./studentProfile";
 
 export interface StudentRecord {
   id: string;
@@ -53,8 +40,6 @@ export interface StudentRecord {
   createdAt: string;
   updatedAt: string;
 }
-
-export type StudentProfileInput = StudentProfile;
 
 export interface SetupStatus {
   needsSuperAdmin: boolean;

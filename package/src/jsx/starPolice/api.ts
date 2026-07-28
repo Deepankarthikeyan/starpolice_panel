@@ -135,22 +135,16 @@ export const api = {
     return request<StudentRecord>(`/api/students/${id}`);
   },
 
-  createStudent(
-    name: string,
-    email: string,
-    password: string,
-    profile: StudentProfileInput
-  ) {
+  createStudent(email: string, password: string, profile: StudentProfileInput) {
     return request<StudentRecord>("/api/students", {
       method: "POST",
-      body: JSON.stringify({ name, email, password, profile }),
+      body: JSON.stringify({ email, password, profile }),
     });
   },
 
   updateStudent(
     id: string,
     payload: {
-      name?: string;
       email?: string;
       password?: string;
       isActive?: boolean;
@@ -161,6 +155,19 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(payload),
     });
+  },
+
+  uploadStudentFile(id: string, field: string, file: File) {
+    const formData = new FormData();
+    formData.append("field", field);
+    formData.append("file", file);
+    return request<{ field: string; fileUrl: string; profile: StudentProfileInput }>(
+      `/api/students/${id}/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
   },
 
   deleteStudent(id: string) {

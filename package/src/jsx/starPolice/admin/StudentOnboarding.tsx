@@ -3,39 +3,28 @@ import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
 import { hasPermission } from "../permissions";
-import type { StudentProfile, StudentRecord } from "../types";
-
-const emptyProfile = (): StudentProfile => ({
-  phone: "",
-  dateOfBirth: "",
-  gender: "",
-  address: "",
-  city: "",
-  state: "",
-  pincode: "",
-  guardianName: "",
-  guardianPhone: "",
-  enrollmentNumber: "",
-  batch: "",
-  course: "",
-  enrollmentDate: "",
-  remarks: "",
-});
+import {
+  buildFullName,
+  emptyStudentProfile,
+  type DocumentField,
+} from "../studentProfile";
+import type { StudentRecord } from "../types";
+import StudentOnboardingForm from "./StudentOnboardingForm";
 
 type FormState = {
-  name: string;
   email: string;
   password: string;
+  confirmPassword: string;
   isActive: boolean;
-  profile: StudentProfile;
+  profile: ReturnType<typeof emptyStudentProfile>;
 };
 
 const emptyForm = (): FormState => ({
-  name: "",
   email: "",
   password: "",
+  confirmPassword: "",
   isActive: false,
-  profile: emptyProfile(),
+  profile: emptyStudentProfile(),
 });
 
 const StudentOnboarding = () => {
@@ -47,6 +36,7 @@ const StudentOnboarding = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingStudent, setEditingStudent] = useState<StudentRecord | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm());
+  const [pendingFiles, setPendingFiles] = useState<Partial<Record<DocumentField, File>>>({});
 
   const loadStudents = async () => {
     const data = await api.getStudents();
@@ -63,14 +53,14 @@ const StudentOnboarding = () => {
 
     return students.filter((student) => {
       const { profile } = student;
+      const fullName = buildFullName(profile).toLowerCase();
       return (
-        student.name.toLowerCase().includes(query) ||
+        fullName.includes(query) ||
         student.email.toLowerCase().includes(query) ||
-        profile.phone.toLowerCase().includes(query) ||
-        profile.enrollmentNumber.toLowerCase().includes(query) ||
+        profile.studentId.toLowerCase().includes(query) ||
+        profile.mobileNumber.toLowerCase().includes(query) ||
         profile.batch.toLowerCase().includes(query) ||
-        profile.course.toLowerCase().includes(query) ||
-        profile.guardianName.toLowerCase().includes(query)
+        profile.course.toLowerCase().includes(query)
       );
     });
   }, [students, search]);
@@ -78,6 +68,7 @@ const StudentOnboarding = () => {
   const openCreate = () => {
     setEditingStudent(null);
     setForm(emptyForm());
+    setPendingFiles({});
     setError("");
     setShowForm(true);
   };
@@ -85,12 +76,13 @@ const StudentOnboarding = () => {
   const openEdit = (student: StudentRecord) => {
     setEditingStudent(student);
     setForm({
-      name: student.name,
       email: student.email,
       password: "",
+      confirmPassword: "",
       isActive: student.isActive,
-      profile: { ...student.profile },
+      profile: { ...student.profile, documents: { ...student.profile.documents } },
     });
+    setPendingFiles({});
     setError("");
     setShowForm(true);
   };
@@ -99,14 +91,18 @@ const StudentOnboarding = () => {
     setShowForm(false);
     setEditingStudent(null);
     setForm(emptyForm());
+    setPendingFiles({});
     setError("");
   };
 
-  const updateProfile = (field: keyof StudentProfile, value: string) => {
-    setForm((current) => ({
-      ...current,
-      profile: { ...current.profile, [field]: value },
-    }));
+  const uploadPendingFiles = async (studentId: string) => {
+    const entries = Object.entries(pendingFiles).filter(([, file]) => Boolean(file)) as Array<
+      [DocumentField, File]
+    >;
+
+    for (const [field, file] of entries) {
+      await api.uploadStudentFile(studentId, field, file);
+    }
   };
 
   const onSubmit = async (event: FormEvent) => {
@@ -115,15 +111,33 @@ const StudentOnboarding = () => {
     setError("");
 
     try {
+      if (!form.profile.firstName.trim() || !form.profile.lastName.trim()) {
+        setError("First name and last name are required.");
+        setLoading(false);
+        return;
+      }
+
+      if (!editingStudent && form.password !== form.confirmPassword) {
+        setError("Password and confirm password do not match.");
+        setLoading(false);
+        return;
+      }
+
+      if (editingStudent && form.password && form.password !== form.confirmPassword) {
+        setError("Password and confirm password do not match.");
+        setLoading(false);
+        return;
+      }
+
+      let studentId = editingStudent?.id;
+
       if (editingStudent) {
         const payload: {
-          name: string;
           email: string;
           isActive: boolean;
-          profile: StudentProfile;
+          profile: typeof form.profile;
           password?: string;
         } = {
-          name: form.name.trim(),
           email: form.email.trim(),
           isActive: form.isActive,
           profile: form.profile,
@@ -135,18 +149,16 @@ const StudentOnboarding = () => {
 
         await api.updateStudent(editingStudent.id, payload);
       } else {
-        if (!form.password.trim()) {
-          setError("Password is required for new students.");
-          setLoading(false);
-          return;
-        }
-
-        await api.createStudent(
-          form.name.trim(),
+        const created = await api.createStudent(
           form.email.trim(),
           form.password.trim(),
           form.profile
         );
+        studentId = created.id;
+      }
+
+      if (studentId && Object.keys(pendingFiles).length > 0) {
+        await uploadPendingFiles(studentId);
       }
 
       await loadStudents();
@@ -159,7 +171,7 @@ const StudentOnboarding = () => {
   };
 
   const onDelete = async (student: StudentRecord) => {
-    if (!window.confirm(`Delete student ${student.name}? This cannot be undone.`)) {
+    if (!window.confirm(`Delete student ${buildFullName(student.profile)}? This cannot be undone.`)) {
       return;
     }
 
@@ -197,11 +209,40 @@ const StudentOnboarding = () => {
     );
   }
 
+  if (showForm) {
+    return (
+      <>
+        <PageTitle motherMenu="Admin Panel" activeMenu="Student Onboarding" pageContent="" />
+        <StudentOnboardingForm
+          form={form}
+          setForm={setForm}
+          editing={Boolean(editingStudent)}
+          loading={loading}
+          error={error}
+          pendingFiles={pendingFiles}
+          onPendingFile={(field, file) => {
+            setPendingFiles((current) => {
+              const next = { ...current };
+              if (file) {
+                next[field] = file;
+              } else {
+                delete next[field];
+              }
+              return next;
+            });
+          }}
+          onSubmit={onSubmit}
+          onCancel={closeForm}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <PageTitle motherMenu="Admin Panel" activeMenu="Student Onboarding" pageContent="" />
 
-      {error && !showForm && <div className="alert alert-danger">{error}</div>}
+      {error && <div className="alert alert-danger">{error}</div>}
 
       <div className="card">
         <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -210,10 +251,10 @@ const StudentOnboarding = () => {
             <input
               type="search"
               className="form-control form-control-sm"
-              placeholder="Search name, email, batch..."
+              placeholder="Search ID, name, email, batch..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ minWidth: 220 }}
+              style={{ minWidth: 240 }}
             />
             <button type="button" className="btn btn-sm btn-primary" onClick={openCreate}>
               <i className="fa fa-plus me-1" />
@@ -226,12 +267,12 @@ const StudentOnboarding = () => {
             <table className="table table-striped align-middle">
               <thead>
                 <tr>
+                  <th>Student ID</th>
                   <th>Name</th>
                   <th>Email</th>
-                  <th>Phone</th>
-                  <th>Enrollment No.</th>
-                  <th>Batch</th>
+                  <th>Mobile</th>
                   <th>Course</th>
+                  <th>Batch</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -246,12 +287,12 @@ const StudentOnboarding = () => {
                 ) : (
                   filteredStudents.map((student) => (
                     <tr key={student.id}>
-                      <td>{student.name}</td>
+                      <td>{student.profile.studentId || "—"}</td>
+                      <td>{buildFullName(student.profile)}</td>
                       <td>{student.email}</td>
-                      <td>{student.profile.phone || "—"}</td>
-                      <td>{student.profile.enrollmentNumber || "—"}</td>
-                      <td>{student.profile.batch || "—"}</td>
+                      <td>{student.profile.mobileNumber || "—"}</td>
                       <td>{student.profile.course || "—"}</td>
+                      <td>{student.profile.batch || "—"}</td>
                       <td>
                         <span className={`badge ${student.isActive ? "bg-success" : "bg-warning"}`}>
                           {student.isActive ? "Active" : "Pending"}
@@ -298,227 +339,6 @@ const StudentOnboarding = () => {
           </div>
         </div>
       </div>
-
-      {showForm && (
-        <div className="modal fade show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div className="modal-content">
-              <form onSubmit={onSubmit}>
-                <div className="modal-header">
-                  <h5 className="modal-title">
-                    {editingStudent ? `Edit Student — ${editingStudent.name}` : "Add Student"}
-                  </h5>
-                  <button type="button" className="btn-close" onClick={closeForm} aria-label="Close" />
-                </div>
-                <div className="modal-body">
-                  {error && <div className="alert alert-danger">{error}</div>}
-
-                  <h6 className="mb-3">Account Details</h6>
-                  <div className="row g-3 mb-4">
-                    <div className="col-md-6">
-                      <label className="form-label">Full Name</label>
-                      <input
-                        className="form-control"
-                        value={form.name}
-                        onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Email</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        value={form.email}
-                        onChange={(e) => setForm((current) => ({ ...current, email: e.target.value }))}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label">
-                        Password {editingStudent && <span className="text-muted">(leave blank to keep)</span>}
-                      </label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        value={form.password}
-                        onChange={(e) => setForm((current) => ({ ...current, password: e.target.value }))}
-                        required={!editingStudent}
-                      />
-                    </div>
-                    {editingStudent && (
-                      <div className="col-md-6 d-flex align-items-end">
-                        <div className="form-check">
-                          <input
-                            id="student-active"
-                            type="checkbox"
-                            className="form-check-input"
-                            checked={form.isActive}
-                            onChange={(e) =>
-                              setForm((current) => ({ ...current, isActive: e.target.checked }))
-                            }
-                          />
-                          <label className="form-check-label" htmlFor="student-active">
-                            Login access enabled
-                          </label>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <h6 className="mb-3">Personal Details</h6>
-                  <div className="row g-3 mb-4">
-                    <div className="col-md-4">
-                      <label className="form-label">Phone</label>
-                      <input
-                        className="form-control"
-                        value={form.profile.phone}
-                        onChange={(e) => updateProfile("phone", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label">Date of Birth</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={form.profile.dateOfBirth}
-                        onChange={(e) => updateProfile("dateOfBirth", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label">Gender</label>
-                      <select
-                        className="form-select"
-                        value={form.profile.gender}
-                        onChange={(e) => updateProfile("gender", e.target.value)}
-                      >
-                        <option value="">Select</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label">Address</label>
-                      <textarea
-                        className="form-control"
-                        rows={2}
-                        value={form.profile.address}
-                        onChange={(e) => updateProfile("address", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label">City</label>
-                      <input
-                        className="form-control"
-                        value={form.profile.city}
-                        onChange={(e) => updateProfile("city", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label">State</label>
-                      <input
-                        className="form-control"
-                        value={form.profile.state}
-                        onChange={(e) => updateProfile("state", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label">Pincode</label>
-                      <input
-                        className="form-control"
-                        value={form.profile.pincode}
-                        onChange={(e) => updateProfile("pincode", e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <h6 className="mb-3">Guardian Details</h6>
-                  <div className="row g-3 mb-4">
-                    <div className="col-md-6">
-                      <label className="form-label">Guardian Name</label>
-                      <input
-                        className="form-control"
-                        value={form.profile.guardianName}
-                        onChange={(e) => updateProfile("guardianName", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Guardian Phone</label>
-                      <input
-                        className="form-control"
-                        value={form.profile.guardianPhone}
-                        onChange={(e) => updateProfile("guardianPhone", e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <h6 className="mb-3">Academy Details</h6>
-                  <div className="row g-3">
-                    <div className="col-md-4">
-                      <label className="form-label">Enrollment Number</label>
-                      <input
-                        className="form-control"
-                        value={form.profile.enrollmentNumber}
-                        onChange={(e) => updateProfile("enrollmentNumber", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label">Batch</label>
-                      <input
-                        className="form-control"
-                        value={form.profile.batch}
-                        onChange={(e) => updateProfile("batch", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label">Course</label>
-                      <input
-                        className="form-control"
-                        value={form.profile.course}
-                        onChange={(e) => updateProfile("course", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Enrollment Date</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={form.profile.enrollmentDate}
-                        onChange={(e) => updateProfile("enrollmentDate", e.target.value)}
-                      />
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label">Remarks</label>
-                      <textarea
-                        className="form-control"
-                        rows={3}
-                        value={form.profile.remarks}
-                        onChange={(e) => updateProfile("remarks", e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  {!editingStudent && (
-                    <p className="text-muted small mt-3 mb-0">
-                      New students start with login access <strong>disabled</strong>. Grant access from
-                      the table after reviewing details.
-                    </p>
-                  )}
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-outline-secondary" onClick={closeForm}>
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary" disabled={loading}>
-                    {loading ? "Saving..." : editingStudent ? "Save Changes" : "Add Student"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
