@@ -22,7 +22,7 @@ router.get("/stats", authRequired, adminPanelOnly, attachUser, requirePermission
         Upload.countDocuments(),
         Upload.distinct("date"),
         Message.countDocuments({ senderRole: "student" }),
-        Message.countDocuments({ senderRole: { $in: ["admin", "superadmin"] } }),
+        Message.countDocuments({ senderRole: { $in: ["admin", "staff", "superadmin"] } }),
         Upload.aggregate([{ $group: { _id: "$category", count: { $sum: 1 } } }]),
         Upload.find().sort({ createdAt: -1 }).limit(5).select("date title name category"),
       ]);
@@ -54,7 +54,7 @@ router.get("/student-stats", authRequired, async (req, res) => {
     const [materialCount, studyDays, adminMessages, latestUploads] = await Promise.all([
       Upload.countDocuments(),
       Upload.distinct("date"),
-      Message.countDocuments({ senderRole: { $in: ["admin", "superadmin"] } }),
+      Message.countDocuments({ senderRole: { $in: ["admin", "staff", "superadmin"] } }),
       Upload.find().sort({ createdAt: -1 }).limit(6).select("date title name category"),
     ]);
 

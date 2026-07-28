@@ -13,7 +13,9 @@ function createToken(user, panel) {
       ? defaultPermissionsForRole("admin")
       : user.permissions?.length
         ? user.permissions
-        : defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
+        : defaultPermissionsForRole(
+            user.role === "student" ? "student" : user.role === "staff" ? "staff" : "admin"
+          );
 
   return jwt.sign(
     {
@@ -36,7 +38,9 @@ function publicUser(user, token, panel) {
       ? defaultPermissionsForRole("admin")
       : user.permissions?.length
         ? user.permissions
-        : defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
+        : defaultPermissionsForRole(
+            user.role === "student" ? "student" : user.role === "staff" ? "staff" : "admin"
+          );
 
   return {
     id: user._id.toString(),
@@ -51,7 +55,7 @@ function publicUser(user, token, panel) {
 }
 
 function canAccessAdminPanel(user) {
-  return ["superadmin", "admin"].includes(user.role) && (user.role === "superadmin" || user.isActive);
+  return ["superadmin", "admin", "staff"].includes(user.role) && (user.role === "superadmin" || user.isActive);
 }
 
 function canAccessStudentPanel(user) {
@@ -130,8 +134,8 @@ router.post("/login", async (req, res) => {
       if (!canAccessAdminPanel(user)) {
         return res.status(403).json({
           message:
-            user.role === "admin" && !user.isActive
-              ? "Your admin access has not been activated yet. Contact the super admin."
+            ["admin", "staff"].includes(user.role) && !user.isActive
+              ? "Your admin panel access has not been activated yet. Contact the super admin."
               : "You do not have admin panel access.",
         });
       }
@@ -165,7 +169,9 @@ router.get("/me", authRequired, async (req, res) => {
       ? defaultPermissionsForRole("admin")
       : user.permissions?.length
         ? user.permissions
-        : defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
+        : defaultPermissionsForRole(
+            user.role === "student" ? "student" : user.role === "staff" ? "staff" : "admin"
+          );
 
   res.json({
     id: user._id.toString(),

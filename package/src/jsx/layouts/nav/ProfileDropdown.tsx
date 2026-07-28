@@ -8,6 +8,7 @@ import profile from "../../../assets/images/user.jpg";
 function formatRole(role: UserRole) {
   if (role === "superadmin") return "Super Admin";
   if (role === "admin") return "Admin";
+  if (role === "staff") return "Staff";
   return "Student";
 }
 

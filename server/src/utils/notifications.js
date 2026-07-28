@@ -23,7 +23,7 @@ export async function notifyAllStudents(payload) {
 }
 
 export async function notifyAllAdmins(payload) {
-  const admins = await User.find({ role: { $in: ["superadmin", "admin"] } }).select("_id");
+  const admins = await User.find({ role: { $in: ["superadmin", "admin", "staff"] } }).select("_id");
   await notifyUsers(
     admins.map((admin) => admin._id),
     payload

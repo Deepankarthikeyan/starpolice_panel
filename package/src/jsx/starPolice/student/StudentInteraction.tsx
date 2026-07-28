@@ -53,9 +53,9 @@ const StudentInteraction = () => {
                 <div
                   key={item.id}
                   className={`p-3 mb-3 rounded ${
-                    item.senderRole === "admin" || item.senderRole === "superadmin"
-                      ? "bg-primary-subtle ms-auto"
-                      : "bg-light"
+                    item.senderRole === "student"
+                      ? "bg-light"
+                      : "bg-primary-subtle ms-auto"
                   }`}
                   style={{ maxWidth: "75%" }}
                 >

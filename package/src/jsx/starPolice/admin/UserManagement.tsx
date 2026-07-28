@@ -15,11 +15,11 @@ function PermissionChecklist({
   selected,
   onChange,
 }: {
-  role: "admin" | "student";
+  role: "admin" | "staff" | "student";
   selected: string[];
   onChange: (permissions: string[]) => void;
 }) {
-  const options = role === "admin" ? ADMIN_PERMISSIONS : STUDENT_PERMISSIONS;
+  const options = role === "student" ? STUDENT_PERMISSIONS : ADMIN_PERMISSIONS;
 
   const toggle = (key: string) => {
     if (selected.includes(key)) {
@@ -54,11 +54,12 @@ const UserManagement = () => {
   const { auth } = useContext(ThemeContext);
   const isSuperAdmin = auth?.role === "superadmin";
   const [admins, setAdmins] = useState<ManagedUser[]>([]);
+  const [staff, setStaff] = useState<ManagedUser[]>([]);
   const [students, setStudents] = useState<ManagedUser[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [createRole, setCreateRole] = useState<"admin" | "student">("student");
+  const [createRole, setCreateRole] = useState<"admin" | "staff" | "student">("student");
   const [createPermissions, setCreatePermissions] = useState<string[]>(
     defaultPermissionsForRole("student")
   );
@@ -69,16 +70,22 @@ const UserManagement = () => {
 
   const loadUsers = async () => {
     if (isSuperAdmin) {
-      const [studentData, adminData] = await Promise.all([
+      const [studentData, staffData, adminData] = await Promise.all([
         api.getUsers("student"),
+        api.getUsers("staff"),
         api.getUsers("admin"),
       ]);
       setStudents(studentData);
+      setStaff(staffData);
       setAdmins(adminData);
       return;
     }
-    const studentData = await api.getUsers("student");
+    const [studentData, staffData] = await Promise.all([
+      api.getUsers("student"),
+      api.getUsers("staff"),
+    ]);
     setStudents(studentData);
+    setStaff(staffData);
   };
 
   useEffect(() => {
@@ -231,16 +238,29 @@ const UserManagement = () => {
             </div>
             <div className="card-body">
               <form onSubmit={onCreate}>
-                {isSuperAdmin && (
+                {isSuperAdmin ? (
                   <div className="mb-3">
                     <label className="form-label">Account Type</label>
                     <select
                       className="form-select"
                       value={createRole}
-                      onChange={(e) => setCreateRole(e.target.value as "admin" | "student")}
+                      onChange={(e) => setCreateRole(e.target.value as "admin" | "staff" | "student")}
                     >
                       <option value="student">Student (Student Panel)</option>
+                      <option value="staff">Staff (Admin Panel)</option>
                       <option value="admin">Admin (Admin Panel)</option>
+                    </select>
+                  </div>
+                ) : (
+                  <div className="mb-3">
+                    <label className="form-label">Account Type</label>
+                    <select
+                      className="form-select"
+                      value={createRole}
+                      onChange={(e) => setCreateRole(e.target.value as "staff" | "student")}
+                    >
+                      <option value="student">Student (Student Panel)</option>
+                      <option value="staff">Staff (Admin Panel)</option>
                     </select>
                   </div>
                 )}
@@ -281,7 +301,7 @@ const UserManagement = () => {
                     Choose which sections this account can access after login is granted.
                   </p>
                   <PermissionChecklist
-                    role={isSuperAdmin ? createRole : "student"}
+                    role={isSuperAdmin ? createRole : createRole === "staff" ? "staff" : "student"}
                     selected={createPermissions}
                     onChange={setCreatePermissions}
                   />
@@ -308,6 +328,13 @@ const UserManagement = () => {
               <div className="card-body">{renderTable(admins, true, true)}</div>
             </div>
           )}
+
+          <div className="card mb-4">
+            <div className="card-header">
+              <h4 className="card-title mb-0">Staff Accounts</h4>
+            </div>
+            <div className="card-body">{renderTable(staff, true, true)}</div>
+          </div>
 
           <div className="card">
             <div className="card-header">
@@ -336,7 +363,13 @@ const UserManagement = () => {
                   Update which panel sections <strong>{editingUser.email}</strong> can use.
                 </p>
                 <PermissionChecklist
-                  role={editingUser.role === "admin" ? "admin" : "student"}
+                  role={
+                    editingUser.role === "student"
+                      ? "student"
+                      : editingUser.role === "staff"
+                        ? "staff"
+                        : "admin"
+                  }
                   selected={editPermissions}
                   onChange={setEditPermissions}
                 />
