@@ -5,7 +5,6 @@ import { AppContextProvider } from "./context/ThemeContext.tsx";
 import App from "./App.tsx";
 import "./assets/css/style.css";
 import "./assets/css/star-police-brand.css";
-import "./assets/css/spa-sidebar.css";
 import "react-datepicker/dist/react-datepicker.css";
 
 createRoot(document.getElementById("root")!).render(
