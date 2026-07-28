@@ -19,21 +19,20 @@ function panelLabel(panel: PanelType, role?: string) {
 
 const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
   const location = useLocation();
-  const { setIconhover, auth } = useContext(ThemeContext);
+  const { setIconhover, openMenuToggle, setOpenMenuToggle, auth } = useContext(ThemeContext);
   const menuList = getMenuList(panel, auth);
   const currentSlug = location.pathname.split("/").pop() || "";
 
   useEffect(() => {
-    const btn = document.querySelector(".nav-control") as HTMLDivElement | null;
     const mainWrapper = document.querySelector("#main-wrapper") as HTMLDivElement | null;
+    if (!mainWrapper) return;
 
-    function toggleFunc() {
-      mainWrapper?.classList.toggle("menu-toggle");
+    if (openMenuToggle) {
+      mainWrapper.classList.add("menu-toggle");
+    } else {
+      mainWrapper.classList.remove("menu-toggle");
     }
-
-    btn?.addEventListener("click", toggleFunc);
-    return () => btn?.removeEventListener("click", toggleFunc);
-  }, []);
+  }, [openMenuToggle]);
 
   function hoverHandler() {
     const sidebarStyle = document.body.getAttribute("data-sidebar-style");
@@ -41,14 +40,30 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
   }
 
   return (
-    <div
-      className={`dlabnav spa-sidebar spa-sidebar-${panel}`}
+    <aside
+      className={`spa-sidebar spa-sidebar-${panel}`}
       onMouseEnter={hoverHandler}
       onMouseLeave={() => setIconhover(false)}
     >
       <div className="spa-sidebar-inner">
+        <div className="spa-sidebar-toggle">
+          <button
+            type="button"
+            className="spa-sidebar-toggle-btn"
+            aria-label="Toggle sidebar"
+            onClick={() => setOpenMenuToggle(!openMenuToggle)}
+          >
+            <span className="line" />
+            <span className="line" />
+            <span className="line" />
+          </button>
+        </div>
+
         <div className="spa-sidebar-top">
-          <span className="spa-sidebar-badge">{panelLabel(panel, auth?.role)}</span>
+          <span className="spa-sidebar-badge">
+            <span className="spa-sidebar-badge-dot" />
+            {panelLabel(panel, auth?.role)}
+          </span>
           {auth?.name && (
             <div className="spa-sidebar-user">
               <span className="spa-sidebar-user-avatar">{auth.name.charAt(0).toUpperCase()}</span>
@@ -82,16 +97,12 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
         <div className="spa-sidebar-footer">
           <Link to={`${basePath}/dashboard`} className="spa-sidebar-brand">
             <img src={emblemLogo} alt="" className="spa-sidebar-brand-emblem" aria-hidden="true" />
-            <img
-              src={fullLogo}
-              alt="Star Police Academy"
-              className="spa-sidebar-brand-logo"
-            />
+            <img src={fullLogo} alt="Star Police Academy" className="spa-sidebar-brand-logo" />
             <p className="spa-sidebar-brand-tagline">Vellore — No. 1 Police Academy in Tamil Nadu</p>
           </Link>
         </div>
       </div>
-    </div>
+    </aside>
   );
 };
 
