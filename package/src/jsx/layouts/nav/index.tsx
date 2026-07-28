@@ -1,6 +1,5 @@
 import { Fragment, useState } from "react";
 import SideBar from "./SideBar";
-import NavHader from "./NavHader";
 import Header from "./Header";
 import ChatBox from "../ChatBox";
 import type { PanelType } from "../../starPolice/types";
@@ -15,7 +14,6 @@ const NavBlog = ({ basePath = "/admin", panel = "admin" }: NavProps) => {
   const onClick = (name: string) => setToggle(toggle === name ? "" : name);
   return (
     <Fragment>
-      <NavHader basePath={basePath} />
       <ChatBox onClick={() => onClick("chatbox")} toggle={toggle} />
       <Header onNote={() => onClick("chatbox")} toggle={toggle} />
       <SideBar basePath={basePath} panel={panel} />

@@ -30,14 +30,19 @@ jobs:
           npm run build
 
       - name: Verify Netlify credentials
+        id: netlify_creds
         run: |
           if [ -z "${{ secrets.NETLIFY_AUTH_TOKEN }}" ] || [ -z "${{ secrets.NETLIFY_SITE_ID }}" ]; then
-            echo "::error::NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID secrets are required."
-            echo "Add them at: https://github.com/Deepankarthikeyan/starpolice_panel/settings/secrets/actions"
-            exit 1
+            echo "::warning::NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID are not set. Skipping Netlify deploy."
+            echo "Add secrets at: https://github.com/Deepankarthikeyan/starpolice_panel/settings/secrets/actions"
+            echo "Or trigger a deploy from the Netlify dashboard for site starpolice-panel."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Deploy to Netlify
+        if: steps.netlify_creds.outputs.ready == 'true'
         uses: nwtgck/actions-netlify@v3.0
         with:
           publish-dir: "./package/dist"

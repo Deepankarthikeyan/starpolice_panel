@@ -4,6 +4,7 @@ import { getMenuList } from "./Menu";
 import { ThemeContext } from "../../../context/ThemeContext";
 import fullLogo from "../../../assets/images/star-police-academy-logo-white.png";
 import emblemLogo from "../../../assets/images/star-police-academy-emblem.png";
+import "../../../assets/css/spa-sidebar.css";
 import type { PanelType } from "../../starPolice/types";
 
 interface SideBarProps {
