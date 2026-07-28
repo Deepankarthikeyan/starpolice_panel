@@ -34,6 +34,21 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
     }
   }, [openMenuToggle]);
 
+  useEffect(() => {
+    let lastStyle = document.body.getAttribute("data-sidebar-style");
+
+    function handleLayoutChange() {
+      const style = document.body.getAttribute("data-sidebar-style");
+      if (lastStyle === "overlay" && (style === "full" || style === "mini")) {
+        setOpenMenuToggle(false);
+      }
+      lastStyle = style;
+    }
+
+    window.addEventListener("resize", handleLayoutChange);
+    return () => window.removeEventListener("resize", handleLayoutChange);
+  }, [setOpenMenuToggle]);
+
   function hoverHandler() {
     const sidebarStyle = document.body.getAttribute("data-sidebar-style");
     setIconhover(Boolean(sidebarStyle?.includes("icon-hover")));
