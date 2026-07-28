@@ -24,17 +24,11 @@ export function defaultPermissionsForRole(role: "admin" | "student") {
   return role === "admin" ? [...ALL_ADMIN_PERMISSION_KEYS] : [...ALL_STUDENT_PERMISSION_KEYS];
 }
 
-export function resolvePermissions(user: { role: string; permissions?: string[] }) {
-  if (user.role === "superadmin") return [...ALL_ADMIN_PERMISSION_KEYS];
-  if (user.permissions?.length) return user.permissions;
-  return defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
-}
-
 export function hasPermission(
   user: { role: string; permissions?: string[] } | null | undefined,
   permission: PermissionKey
 ) {
   if (!user) return false;
   if (user.role === "superadmin") return true;
-  return resolvePermissions(user).includes(permission);
+  return (user.permissions || []).includes(permission);
 }

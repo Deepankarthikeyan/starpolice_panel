@@ -28,9 +28,9 @@ const AdminMenuList = (auth?: AuthUser | null) => {
       permission: "admin:calendar" as const,
     },
     {
-      title: "Student Onboarding",
-      iconStyle: <i className="material-symbols-outlined">person_add</i>,
-      to: "student-onboarding",
+      title: "User Management",
+      iconStyle: <i className="material-symbols-outlined">manage_accounts</i>,
+      to: "user-management",
       permission: "admin:users" as const,
     },
   ];
