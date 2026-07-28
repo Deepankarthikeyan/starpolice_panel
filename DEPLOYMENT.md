@@ -64,7 +64,7 @@ Default logins:
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@starpolice.academy | admin123 |
+| Super Admin | superadmin@starpolice.academy | superadmin123 |
 | Student | student@starpolice.academy | student123 |
 
 > **Note:** Render’s free tier uses ephemeral disk. Uploaded files are lost on redeploy. For persistent uploads, use S3/Cloudinary later.

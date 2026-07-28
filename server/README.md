@@ -32,7 +32,7 @@ API runs at `http://localhost:5000`
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | admin@starpolice.academy | admin123 |
+| Super Admin | superadmin@starpolice.academy | superadmin123 |
 | Student | student@starpolice.academy | student123 |
 
 ## API endpoints

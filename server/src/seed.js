@@ -22,6 +22,20 @@ async function seed() {
   );
   console.log("Seeded superadmin: superadmin@starpolice.academy / superadmin123");
 
+  const studentPassword = await bcrypt.hash("student123", 10);
+  await User.findOneAndUpdate(
+    { email: "student@starpolice.academy" },
+    {
+      name: "Demo Student",
+      email: "student@starpolice.academy",
+      password: studentPassword,
+      role: "student",
+      isActive: true,
+    },
+    { upsert: true, new: true, setDefaultsOnInsert: true }
+  );
+  console.log("Seeded student: student@starpolice.academy / student123");
+
   process.exit(0);
 }
 

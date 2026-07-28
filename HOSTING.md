@@ -8,7 +8,12 @@
 | **Admin login** | https://starpolice-panel.netlify.app/admin/login |
 | **Student login** | https://starpolice-panel.netlify.app/student/login |
 
-**Login:** `superadmin@starpolice.academy` / `superadmin123`
+**Logins** (after running `npm run seed` on the API):
+
+| Panel | Email | Password |
+|-------|-------|----------|
+| Admin | `superadmin@starpolice.academy` | `superadmin123` |
+| Student | `student@starpolice.academy` | `student123` |
 
 Netlify dashboard: https://app.netlify.com/projects/starpolice-panel
 
@@ -48,4 +53,4 @@ Redeploy the Netlify site after adding the variable.
 
 In **Render**, set `CLIENT_URL` to your Netlify URL (e.g. `https://starpolice-panel.netlify.app`).
 
-Run `npm run seed` in Render Shell, then log in at `/admin/login` with `superadmin@starpolice.academy` / `superadmin123`.
+Run `npm run seed` in Render Shell, then log in at `/admin/login` or `/student/login` with the credentials above.
