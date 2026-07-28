@@ -1,18 +1,46 @@
 # Hosting
 
-## Live site
+## Live site (Netlify)
 
 | | URL |
 |---|---|
 | **Website** | https://starpolice-panel.netlify.app |
-| **Admin login** | https://starpolice-panel.netlify.app/admin/login |
+| **Admin / Staff login** | https://starpolice-panel.netlify.app/admin/login |
 | **Student login** | https://starpolice-panel.netlify.app/student/login |
+
+## Cloudflare quick tunnel links
+
+Use these when running the app through a Cloudflare tunnel (temporary URL — changes each time you restart the tunnel).
+
+| Panel | Path | Example |
+|-------|------|---------|
+| **Admin** | `/admin/login` | `https://<your-tunnel>.trycloudflare.com/admin/login` |
+| **Staff** | `/admin/login` | `https://<your-tunnel>.trycloudflare.com/admin/login` |
+| **Student** | `/student/login` | `https://<your-tunnel>.trycloudflare.com/student/login` |
+
+> **Note:** This project has **Admin** and **Student** panels only. **Staff** uses the same **Admin** login page (`/admin/login`) with an admin account created by the super admin.
+
+### Start a Cloudflare tunnel (local)
+
+From the project root:
+
+```bash
+bash scripts/deploy-live.sh
+```
+
+The script prints the live **Website** and **API** Cloudflare URLs. Then open:
+
+- Admin / Staff: `<website-url>/admin/login`
+- Student: `<website-url>/student/login`
+
+**API (Render — permanent):** https://starpolice-api.onrender.com
 
 **Logins** (after running `npm run seed` on the API):
 
 | Panel | Email | Password |
 |-------|-------|----------|
-| Admin | `superadmin@starpolice.academy` | `superadmin123` |
+| Admin / Super Admin | `superadmin@starpolice.academy` | `superadmin123` |
+| Staff (admin role) | Created by super admin in User Management | Set by super admin |
 | Student | `student@starpolice.academy` | `student123` |
 
 > If student login says **Invalid credentials**, the student account may not exist yet. Log in as super admin, create the student in **User Management**, and activate access. After deploying the latest API, `npm run seed` also creates the demo student automatically.
