@@ -177,6 +177,7 @@
 .dlabnav .spa-sidebar-menu {
   flex: 1 1 auto;
   min-height: 0;
+  padding-top: 0.5rem;
 }
 
 .dlabnav .spa-sidebar-footer {
@@ -187,34 +188,64 @@
 }
 
 .dlabnav .spa-sidebar-footer .copyright {
-  margin-top: 0.875rem;
-  padding: 0;
+  margin-top: 0.75rem !important;
+  margin-bottom: 0;
+  padding: 0 !important;
+  padding-left: calc(1.125rem + 1.5rem + 0.625rem) !important;
+}
+
+.dlabnav .spa-sidebar-footer .copyright p {
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.dlabnav .spa-sidebar-footer .copyright .fs-12 {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.dlabnav .spa-sidebar-footer .copyright strong {
+  white-space: normal;
 }
 
 .dlabnav .star-police-sidebar-logo {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
+  padding-left: 1.125rem;
   text-decoration: none;
 }
 
 .dlabnav .star-police-sidebar-logo .star-police-logo-icon {
   display: none;
-  width: 3rem;
-  height: 3rem;
-  max-width: 3rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  max-width: 2.5rem;
   object-fit: contain;
 }
 
 .dlabnav .star-police-sidebar-logo .star-police-logo-full {
   display: block;
-  width: 100%;
-  max-width: 12.5rem;
-  max-height: 4rem;
+  width: auto;
+  max-width: 100%;
+  max-height: 3.75rem;
   height: auto;
   object-fit: contain;
-  margin: 0 auto;
+  margin: 0;
+}
+
+#main-wrapper.menu-toggle .dlabnav .spa-sidebar-footer,
+.menu-toggle .dlabnav .spa-sidebar-footer {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+#main-wrapper.menu-toggle .dlabnav .star-police-sidebar-logo,
+.menu-toggle .dlabnav .star-police-sidebar-logo {
+  justify-content: center;
+  padding-left: 0;
 }
 
 #main-wrapper.menu-toggle .dlabnav .star-police-sidebar-logo .star-police-logo-full,
@@ -234,12 +265,21 @@
 
 @media only screen and (max-width: 87.5rem) {
   .dlabnav .star-police-sidebar-logo .star-police-logo-full {
-    max-width: 11rem;
-    max-height: 3.5rem;
+    max-height: 3.25rem;
   }
 }
 
 @media only screen and (max-width: 63.9375rem) {
+  .dlabnav .spa-sidebar-footer {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .dlabnav .star-police-sidebar-logo {
+    justify-content: center;
+    padding-left: 0;
+  }
+
   .dlabnav .star-police-sidebar-logo .star-police-logo-full {
     display: none !important;
   }
@@ -247,6 +287,16 @@
   .dlabnav .star-police-sidebar-logo .star-police-logo-icon {
     display: block !important;
   }
+}
+
+[data-sidebar-style="mini"] .dlabnav .spa-sidebar-footer {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+[data-sidebar-style="mini"] .dlabnav .star-police-sidebar-logo {
+  justify-content: center;
+  padding-left: 0;
 }
 
 [data-sidebar-style="mini"] .dlabnav .star-police-sidebar-logo .star-police-logo-full {
@@ -628,12 +678,19 @@
   text-align: center;
 }
 
-/* Sidebar menu: keep icon + label aligned (including multi-line labels) */
+/* Sidebar menu: keep icon + label aligned */
+.dlabnav .metismenu {
+  padding: 0;
+  margin: 0;
+}
+
 .dlabnav .metismenu > li > a {
   display: flex !important;
   align-items: center;
+  justify-content: flex-start;
   gap: 0.625rem;
   width: 100%;
+  line-height: 1.35;
 }
 
 .dlabnav .metismenu > li > a .material-symbols-outlined,
@@ -654,6 +711,7 @@
 
 .dlabnav .metismenu > li > a .nav-text {
   flex: 1;
+  min-width: 0;
   line-height: 1.35;
   white-space: nowrap;
 }
@@ -661,4 +719,12 @@
 [data-sidebar-style="full"][data-layout="vertical"] .dlabnav .metismenu > li > a {
   padding-left: 1.125rem;
   padding-right: 1.125rem;
+}
+
+#main-wrapper.menu-toggle .dlabnav .metismenu > li > a,
+.menu-toggle .dlabnav .metismenu > li > a,
+[data-sidebar-style="mini"] .dlabnav .metismenu > li > a {
+  justify-content: center;
+  padding-left: 0.925rem;
+  padding-right: 0.925rem;
 }

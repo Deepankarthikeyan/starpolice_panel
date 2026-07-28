@@ -115,7 +115,7 @@ const SideBar: React.FC<SideBarProps> = ({ basePath = "/admin", panel = "admin" 
     >
       <div className="dlabnav-scroll spa-sidebar-inner">
         <div className="spa-sidebar-menu">
-        <ul className="metismenu" id="menu">
+          <ul className="metismenu" id="menu">
           {menuList.map((data: MenuItem, index: number) => {
             const menuClass = data.classsChange;
             if (menuClass === "menu-title") {
