@@ -6,6 +6,7 @@ import {
   getDocumentUrl,
 } from "../studentProfile";
 import { getAbsoluteFileUrl } from "../fileUrl";
+import { printStudentOnboarding } from "./printStudentOnboarding";
 
 type FormState = {
   email: string;
@@ -136,11 +137,27 @@ export default function StudentOnboardingForm({
   return (
     <form onSubmit={onSubmit}>
       <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
+        <div className="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
           <h4 className="card-title mb-0">{editing ? "Edit Student" : "Add Student"}</h4>
-          <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onCancel}>
-            Back to list
-          </button>
+          <div className="d-flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-primary"
+              onClick={() =>
+                printStudentOnboarding({
+                  email: form.email,
+                  isActive: form.isActive,
+                  profile: form.profile,
+                })
+              }
+            >
+              <i className="fa fa-print me-1" />
+              Print
+            </button>
+            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onCancel}>
+              Back to list
+            </button>
+          </div>
         </div>
         <div className="card-body">
           {error && <div className="alert alert-danger">{error}</div>}
