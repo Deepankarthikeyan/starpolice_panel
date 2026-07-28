@@ -9,6 +9,8 @@ import type {
   PanelType,
   SetupStatus,
   StudentDashboardStats,
+  StudentRecord,
+  StudentProfileInput,
   UploadedFile,
 } from "./types";
 
@@ -121,6 +123,48 @@ export const api = {
 
   deleteUser(id: string) {
     return request<{ message: string }>(`/api/users/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  getStudents() {
+    return request<StudentRecord[]>("/api/students");
+  },
+
+  getStudent(id: string) {
+    return request<StudentRecord>(`/api/students/${id}`);
+  },
+
+  createStudent(
+    name: string,
+    email: string,
+    password: string,
+    profile: StudentProfileInput
+  ) {
+    return request<StudentRecord>("/api/students", {
+      method: "POST",
+      body: JSON.stringify({ name, email, password, profile }),
+    });
+  },
+
+  updateStudent(
+    id: string,
+    payload: {
+      name?: string;
+      email?: string;
+      password?: string;
+      isActive?: boolean;
+      profile?: Partial<StudentProfileInput>;
+    }
+  ) {
+    return request<StudentRecord>(`/api/students/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  deleteStudent(id: string) {
+    return request<{ message: string }>(`/api/students/${id}`, {
       method: "DELETE",
     });
   },

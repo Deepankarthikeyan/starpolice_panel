@@ -25,6 +25,37 @@ export interface ManagedUser {
   createdAt: string;
 }
 
+export interface StudentProfile {
+  phone: string;
+  dateOfBirth: string;
+  gender: "" | "male" | "female" | "other";
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  guardianName: string;
+  guardianPhone: string;
+  enrollmentNumber: string;
+  batch: string;
+  course: string;
+  enrollmentDate: string;
+  remarks: string;
+}
+
+export interface StudentRecord {
+  id: string;
+  name: string;
+  email: string;
+  role: "student";
+  isActive: boolean;
+  permissions: PermissionKey[];
+  profile: StudentProfile;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type StudentProfileInput = StudentProfile;
+
 export interface SetupStatus {
   needsSuperAdmin: boolean;
 }

@@ -4,6 +4,7 @@ export const ADMIN_PERMISSIONS = [
   { key: "admin:messages", label: "Student Interaction", description: "Chat with students" },
   { key: "admin:calendar", label: "Monthly Calendar", description: "View the monthly calendar" },
   { key: "admin:users", label: "User Management", description: "Create and manage student accounts" },
+  { key: "admin:onboarding", label: "Student Onboarding", description: "Add and manage student profile details" },
 ];
 
 export const STUDENT_PERMISSIONS = [
