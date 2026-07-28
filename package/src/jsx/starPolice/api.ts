@@ -11,6 +11,7 @@ import type {
   StudentDashboardStats,
   UploadedFile,
 } from "./types";
+import type { StudentOnboardingFormState, StudentOnboardingRecord } from "./admin/studentOnboardingDefaults";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
@@ -231,4 +232,130 @@ export const api = {
       method: "PATCH",
     });
   },
+
+  getStudentOnboardingRecords() {
+    return request<StudentOnboardingRecord[]>("/api/student-onboarding");
+  },
+
+  getStudentOnboardingRecord(id: string) {
+    return request<StudentOnboardingRecord>(`/api/student-onboarding/${id}`);
+  },
+
+  createStudentOnboarding(
+    form: StudentOnboardingFormState,
+    files: Partial<Record<string, File>>
+  ) {
+    return request<StudentOnboardingRecord>("/api/student-onboarding", {
+      method: "POST",
+      body: buildStudentOnboardingFormData(form, files),
+    });
+  },
+
+  updateStudentOnboarding(
+    id: string,
+    form: StudentOnboardingFormState,
+    files: Partial<Record<string, File>>
+  ) {
+    return request<StudentOnboardingRecord>(`/api/student-onboarding/${id}`, {
+      method: "PUT",
+      body: buildStudentOnboardingFormData(form, files),
+    });
+  },
+
+  deleteStudentOnboarding(id: string) {
+    return request<{ message: string }>(`/api/student-onboarding/${id}`, {
+      method: "DELETE",
+    });
+  },
 };
+
+const STUDENT_ONBOARDING_TEXT_FIELDS: Array<keyof StudentOnboardingFormState> = [
+  "firstName",
+  "middleName",
+  "lastName",
+  "dateOfBirth",
+  "gender",
+  "bloodGroup",
+  "nationality",
+  "aadhaarOrPassport",
+  "mobileNumber",
+  "alternateMobileNumber",
+  "email",
+  "parentMobileNumber",
+  "parentEmail",
+  "addressLine1",
+  "addressLine2",
+  "city",
+  "district",
+  "state",
+  "country",
+  "pinCode",
+  "fatherName",
+  "fatherOccupation",
+  "motherName",
+  "motherOccupation",
+  "guardianName",
+  "guardianRelationship",
+  "annualFamilyIncome",
+  "schoolName",
+  "previousQualification",
+  "boardUniversity",
+  "yearOfPassing",
+  "percentageCgpa",
+  "mediumOfInstruction",
+  "course",
+  "batch",
+  "branchCampus",
+  "section",
+  "admissionDate",
+  "modeOfLearning",
+  "duration",
+  "expectedCompletionDate",
+  "emergencyContactName",
+  "emergencyRelationship",
+  "emergencyMobile",
+  "emergencyAlternateNumber",
+  "username",
+  "loginEmail",
+  "registrationFee",
+  "courseFee",
+  "scholarship",
+  "discount",
+  "paymentMethod",
+  "paymentStatus",
+  "transactionId",
+  "receiptNumber",
+  "medicalConditions",
+  "allergies",
+  "disabilities",
+  "emergencyNotes",
+  "languagesKnown",
+  "computerSkills",
+  "careerGoal",
+  "preferredCommunicationLanguage",
+  "declarationDate",
+  "password",
+  "confirmPassword",
+];
+
+function buildStudentOnboardingFormData(
+  form: StudentOnboardingFormState,
+  files: Partial<Record<string, File>>
+) {
+  const formData = new FormData();
+  for (const key of STUDENT_ONBOARDING_TEXT_FIELDS) {
+    const value = form[key];
+    if (typeof value === "string" && value) {
+      formData.append(key, value);
+    }
+  }
+  formData.append("termsAccepted", String(form.termsAccepted));
+  formData.append("privacyAccepted", String(form.privacyAccepted));
+  formData.append("grantLogin", String(form.grantLogin));
+  Object.entries(files).forEach(([key, file]) => {
+    if (file) {
+      formData.append(key, file);
+    }
+  });
+  return formData;
+}

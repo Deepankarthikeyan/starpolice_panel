@@ -11,6 +11,7 @@ import noteRoutes from "./routes/notes.js";
 import alertRoutes from "./routes/alerts.js";
 import notificationRoutes from "./routes/notifications.js";
 import userRoutes from "./routes/users.js";
+import studentOnboardingRoutes from "./routes/studentOnboarding.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import { uploadDir } from "./middleware/upload.js";
 
@@ -41,6 +42,7 @@ app.use("/api/notes", noteRoutes);
 app.use("/api/alerts", alertRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/student-onboarding", studentOnboardingRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 app.use((error, _req, res, _next) => {
