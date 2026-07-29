@@ -3,6 +3,7 @@
   command = "npm ci && npm run build"
   publish = "dist"
   edge_functions = "netlify/edge-functions"
+  # Production deploys from master via Netlify GitHub integration
 
 [build.environment]
   NODE_VERSION = "20"
