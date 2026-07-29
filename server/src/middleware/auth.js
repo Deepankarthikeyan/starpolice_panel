@@ -44,7 +44,7 @@ export async function attachUser(req, res, next) {
   try {
     const user = await User.findById(req.user.id).select("-password");
     if (!user) {
-      return res.status(401).json({ message: "User not found." });
+      return res.status(401).json({ message: "Session expired. Please sign in again." });
     }
     if (user.role !== "superadmin" && !user.isActive) {
       return res.status(403).json({ message: "Your account access has been revoked." });

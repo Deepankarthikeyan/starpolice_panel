@@ -2,6 +2,7 @@ import { Fragment, Suspense, lazy, useContext, useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { ThemeContext } from "./context/ThemeContext";
+import { validateStoredSession } from "./jsx/starPolice/api";
 import type { AuthUser } from "./jsx/starPolice/types";
 
 const AdminLayout = lazy(() => import("./jsx/PanelLayouts").then((m) => ({ default: m.AdminLayout })));
@@ -39,6 +40,12 @@ function Preloader() {
 
 function App() {
   const { auth, setAuth } = useContext(ThemeContext);
+
+  useEffect(() => {
+    validateStoredSession().then((user) => {
+      setAuth(user);
+    });
+  }, [setAuth]);
 
   useEffect(() => {
     function resizeHandler() {

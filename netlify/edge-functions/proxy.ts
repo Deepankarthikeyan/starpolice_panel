@@ -1,4 +1,5 @@
-const BACKEND = Netlify.env.get("API_BACKEND_URL") || "https://breaks-naples-narrow-smart.trycloudflare.com";
+const BACKEND =
+  Netlify.env.get("API_BACKEND_URL") || "https://starpolice-api.onrender.com";
 
 export default async (request: Request) => {
   const url = new URL(request.url);

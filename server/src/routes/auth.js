@@ -180,7 +180,7 @@ router.post("/login", async (req, res) => {
 router.get("/me", authRequired, async (req, res) => {
   const user = await User.findById(req.user.id).select("-password");
   if (!user) {
-    return res.status(404).json({ message: "User not found." });
+    return res.status(401).json({ message: "Session expired. Please sign in again." });
   }
 
   const permissions = resolveRolePermissions(user);

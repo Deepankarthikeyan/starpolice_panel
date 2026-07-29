@@ -50,6 +50,46 @@ function getToken(panel?: PanelType) {
   return getStoredAuth(panel)?.token ?? null;
 }
 
+function getLoginPath(panel: PanelType) {
+  if (panel === "student") return "/student/login";
+  if (panel === "staff") return "/staff/login";
+  return "/admin/login";
+}
+
+function isSessionInvalid(status: number, message: string) {
+  return (
+    status === 401 &&
+    (message === "Session expired. Please sign in again." ||
+      message === "User not found." ||
+      message === "Invalid or expired token." ||
+      message === "Authentication required.")
+  );
+}
+
+export function handleInvalidSession(panel?: PanelType) {
+  const resolved = panel || resolvePanelFromPath(window.location.pathname);
+  clearAuth(resolved);
+  const loginPath = getLoginPath(resolved);
+  if (!window.location.pathname.includes("/login") && !window.location.pathname.includes("/signup")) {
+    window.location.replace(loginPath);
+  }
+}
+
+export async function validateStoredSession(panel?: PanelType): Promise<AuthUser | null> {
+  const resolved = panel || resolvePanelFromPath(window.location.pathname);
+  const stored = getStoredAuth(resolved);
+  if (!stored?.token) return null;
+
+  try {
+    const me = await request<Omit<AuthUser, "token">>("/api/auth/me", {}, resolved);
+    const refreshed: AuthUser = { ...stored, ...me, token: stored.token };
+    storeAuth(refreshed);
+    return refreshed;
+  } catch {
+    return null;
+  }
+}
+
 async function request<T>(path: string, options: RequestInit = {}, panel?: PanelType): Promise<T> {
   const token = getToken(panel);
   const headers = new Headers(options.headers);
@@ -68,7 +108,11 @@ async function request<T>(path: string, options: RequestInit = {}, panel?: Panel
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.message || "Request failed");
+    const message = data.message || "Request failed";
+    if (isSessionInvalid(response.status, message)) {
+      handleInvalidSession(panel);
+    }
+    throw new Error(message);
   }
   return data as T;
 }
