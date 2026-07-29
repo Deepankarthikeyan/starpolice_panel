@@ -15,7 +15,7 @@ function LogoutPage() {
     navigate(
       auth?.panel === "student"
         ? "/student/login"
-        : auth?.role === "admin"
+        : auth?.panel === "staff"
           ? "/staff/login"
           : "/admin/login"
     );

@@ -15,10 +15,17 @@ import type { StudentOnboardingFormState, StudentOnboardingRecord } from "./admi
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
+function resolvePanelFromPath(pathname: string): PanelType {
+  if (pathname.startsWith("/student")) return "student";
+  if (pathname.startsWith("/staff")) return "staff";
+  return "admin";
+}
+
 function getStorageKey(panel?: PanelType) {
-  const resolved =
-    panel || (window.location.pathname.startsWith("/student") ? "student" : "admin");
-  return resolved === "student" ? "AUTH_STUDENT" : "AUTH_ADMIN";
+  const resolved = panel || resolvePanelFromPath(window.location.pathname);
+  if (resolved === "student") return "AUTH_STUDENT";
+  if (resolved === "staff") return "AUTH_STAFF";
+  return "AUTH_ADMIN";
 }
 
 export function getStoredAuth(panel?: PanelType): AuthUser | null {

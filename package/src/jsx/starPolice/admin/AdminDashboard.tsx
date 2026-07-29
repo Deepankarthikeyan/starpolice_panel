@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
+import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
+import { getPanelMotherMenu } from "../panelLabels";
 import type { DashboardStats } from "../types";
 
 const AdminDashboard = () => {
+  const { auth } = useContext(ThemeContext);
   const [stats, setStats] = useState<DashboardStats | null>(null);
 
   useEffect(() => {
@@ -13,7 +16,7 @@ const AdminDashboard = () => {
 
   return (
     <>
-      <PageTitle motherMenu="Admin Panel" activeMenu="Dashboard" pageContent="" />
+      <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu="Dashboard" pageContent="" />
       <div className="row">
         <div className="col-xl-3 col-sm-6">
           <div className="card">

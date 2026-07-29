@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
+import { getPanelMotherMenu } from "../panelLabels";
 
 const PanelProfile = () => {
   const { auth } = useContext(ThemeContext);
@@ -8,7 +9,7 @@ const PanelProfile = () => {
   return (
     <>
       <PageTitle
-        motherMenu={auth?.panel === "student" ? "Student Panel" : "Admin Panel"}
+        motherMenu={getPanelMotherMenu(auth?.panel)}
         activeMenu="Profile"
         pageContent=""
       />
@@ -30,26 +31,24 @@ const PanelProfile = () => {
         <div className="col-xl-8">
           <div className="card">
             <div className="card-header">
-              <h4 className="card-title mb-0">Profile Details</h4>
+              <h4 className="card-title mb-0">Account Details</h4>
             </div>
             <div className="card-body">
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <label className="form-label text-muted">Full Name</label>
-                  <div className="fw-semibold">{auth?.name}</div>
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label text-muted">Email</label>
-                  <div className="fw-semibold">{auth?.email}</div>
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label text-muted">Role</label>
-                  <div className="fw-semibold text-capitalize">{auth?.role}</div>
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label text-muted">Panel</label>
-                  <div className="fw-semibold text-capitalize">{auth?.panel}</div>
-                </div>
+              <div className="row mb-3">
+                <div className="col-sm-4 text-muted">Full Name</div>
+                <div className="col-sm-8 fw-semibold">{auth?.name}</div>
+              </div>
+              <div className="row mb-3">
+                <div className="col-sm-4 text-muted">Email</div>
+                <div className="col-sm-8 fw-semibold">{auth?.email}</div>
+              </div>
+              <div className="row mb-3">
+                <div className="col-sm-4 text-muted">Role</div>
+                <div className="col-sm-8 fw-semibold text-capitalize">{auth?.role}</div>
+              </div>
+              <div className="row">
+                <div className="col-sm-4 text-muted">Panel</div>
+                <div className="col-sm-8 fw-semibold text-capitalize">{auth?.panel}</div>
               </div>
             </div>
           </div>

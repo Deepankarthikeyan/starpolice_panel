@@ -8,6 +8,7 @@ import {
   defaultPermissionsForRole,
   hasPermission,
 } from "../permissions";
+import { getPanelMotherMenu } from "../panelLabels";
 import type { ManagedUser } from "../types";
 
 function PermissionChecklist({
@@ -216,7 +217,7 @@ const UserManagement = () => {
 
   return (
     <>
-      <PageTitle motherMenu="Admin Panel" activeMenu="User Management" pageContent="" />
+      <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu="User Management" pageContent="" />
       {!hasPermission(auth, "admin:users") ? (
         <div className="alert alert-warning">You do not have permission to manage users.</div>
       ) : (

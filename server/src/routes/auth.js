@@ -51,7 +51,11 @@ function publicUser(user, token, panel) {
 }
 
 function canAccessAdminPanel(user) {
-  return ["superadmin", "admin"].includes(user.role) && (user.role === "superadmin" || user.isActive);
+  return user.role === "superadmin";
+}
+
+function canAccessStaffPanel(user) {
+  return user.role === "admin" && user.isActive;
 }
 
 function canAccessStudentPanel(user) {
@@ -130,9 +134,20 @@ router.post("/login", async (req, res) => {
       if (!canAccessAdminPanel(user)) {
         return res.status(403).json({
           message:
-            user.role === "admin" && !user.isActive
-              ? "Your admin access has not been activated yet. Contact the super admin."
+            user.role === "admin"
+              ? "Staff accounts should sign in from the staff login page."
               : "You do not have admin panel access.",
+        });
+      }
+    } else if (panel === "staff") {
+      if (!canAccessStaffPanel(user)) {
+        return res.status(403).json({
+          message:
+            user.role === "superadmin"
+              ? "Super admin accounts should sign in from the admin login page."
+              : user.role === "admin" && !user.isActive
+                ? "Your staff access has not been activated yet. Contact the super admin."
+                : "You do not have staff panel access.",
         });
       }
     } else if (panel === "student") {

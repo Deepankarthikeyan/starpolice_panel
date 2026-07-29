@@ -1,9 +1,9 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
+import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
 import { hasPermission } from "../permissions";
-import { useContext } from "react";
-import { ThemeContext } from "../../../context/ThemeContext";
+import { getPanelMotherMenu } from "../panelLabels";
 import {
   emptyStudentOnboardingForm,
   type StudentOnboardingFormState,
@@ -241,7 +241,7 @@ const StudentOnboarding = () => {
   if (!canManage) {
     return (
       <>
-        <PageTitle motherMenu="Admin Panel" activeMenu="Student Onboarding" pageContent="" />
+        <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu="Student Onboarding" pageContent="" />
         <div className="alert alert-warning">You do not have permission to manage student onboarding.</div>
       </>
     );
@@ -249,7 +249,7 @@ const StudentOnboarding = () => {
 
   return (
     <>
-      <PageTitle motherMenu="Admin Panel" activeMenu="Student Onboarding" pageContent="" />
+      <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu="Student Onboarding" pageContent="" />
 
       {error && <div className="alert alert-danger">{error}</div>}
 

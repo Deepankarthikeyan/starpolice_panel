@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
+import { getPanelMotherMenu } from "../panelLabels";
 
 const PanelSettings = () => {
   const { auth } = useContext(ThemeContext);
@@ -8,7 +9,7 @@ const PanelSettings = () => {
   return (
     <>
       <PageTitle
-        motherMenu={auth?.panel === "student" ? "Student Panel" : "Admin Panel"}
+        motherMenu={getPanelMotherMenu(auth?.panel)}
         activeMenu="Settings"
         pageContent=""
       />

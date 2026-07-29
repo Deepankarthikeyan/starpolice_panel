@@ -10,9 +10,13 @@
   --spa-collapsed: 5.5rem;
 }
 
-#main-wrapper:has(.spa-sidebar-student) {
-  --spa-accent: #3ecf8e;
-  --spa-accent-soft: rgba(62, 207, 142, 0.14);
+#main-wrapper:has(.spa-sidebar-staff) {
+  --spa-accent: #6ea8d8;
+  --spa-accent-soft: rgba(110, 168, 216, 0.16);
+}
+
+#main-wrapper .spa-sidebar-staff {
+  background: linear-gradient(175deg, #0a1a2e 0%, #12304f 45%, #1a4a73 100%) !important;
 }
 
 #main-wrapper .spa-sidebar {

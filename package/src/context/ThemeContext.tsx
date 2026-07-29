@@ -9,10 +9,15 @@ import { getStoredAuth } from "../jsx/starPolice/api";
 import type { AuthUser, PanelType } from "../jsx/starPolice/types";
 
 function resolveAuthForPath(pathname: string): AuthUser | null {
-  const panel: PanelType = pathname.startsWith("/student") ? "student" : "admin";
+  const panel: PanelType = pathname.startsWith("/student")
+    ? "student"
+    : pathname.startsWith("/staff")
+      ? "staff"
+      : "admin";
   const stored = getStoredAuth(panel);
   if (!stored) return null;
-  if (panel === "admin" && ["superadmin", "admin"].includes(stored.role)) return stored;
+  if (panel === "admin" && stored.role === "superadmin") return stored;
+  if (panel === "staff" && stored.role === "admin") return stored;
   if (panel === "student" && stored.role === "student") return stored;
   return null;
 }

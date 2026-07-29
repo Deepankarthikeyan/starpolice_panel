@@ -57,7 +57,8 @@ const InboxIcon = () => (
 
 const ProfileDropdown = () => {
   const { auth } = useContext(ThemeContext);
-  const basePath = auth?.panel === "student" ? "/student" : "/admin";
+  const basePath =
+    auth?.panel === "student" ? "/student" : auth?.panel === "staff" ? "/staff" : "/admin";
 
   const menuItems = [
     { label: "Profile", to: `${basePath}/profile`, icon: <ProfileIcon /> },

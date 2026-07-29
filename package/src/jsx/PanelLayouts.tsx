@@ -7,13 +7,33 @@ import { ThemeContext } from "../context/ThemeContext";
 export function AdminLayout() {
   const { openMenuToggle, auth } = useContext(ThemeContext);
 
-  if (!auth || auth.panel !== "admin" || !["superadmin", "admin"].includes(auth.role)) {
+  if (!auth || auth.panel !== "admin" || auth.role !== "superadmin") {
     return <Navigate to="/admin/login" replace />;
   }
 
   return (
     <div id="main-wrapper" className={`show ${openMenuToggle ? "menu-toggle" : ""}`}>
-      <Nav basePath="/admin" />
+      <Nav basePath="/admin" panel="admin" />
+      <div className="content-body" style={{ minHeight: window.screen.height + 20 }}>
+        <div className="container-fluid">
+          <Outlet />
+        </div>
+      </div>
+      <Footer changeFooter="out-footer style-2" />
+    </div>
+  );
+}
+
+export function StaffLayout() {
+  const { openMenuToggle, auth } = useContext(ThemeContext);
+
+  if (!auth || auth.panel !== "staff" || auth.role !== "admin") {
+    return <Navigate to="/staff/login" replace />;
+  }
+
+  return (
+    <div id="main-wrapper" className={`show ${openMenuToggle ? "menu-toggle" : ""}`}>
+      <Nav basePath="/staff" panel="staff" />
       <div className="content-body" style={{ minHeight: window.screen.height + 20 }}>
         <div className="container-fluid">
           <Outlet />

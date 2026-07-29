@@ -1,15 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import type { EventClickArg } from "@fullcalendar/core";
 import PageTitle from "../../layouts/PageTitle";
+import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
 import { getAbsoluteFileUrl } from "../fileUrl";
+import { getPanelMotherMenu } from "../panelLabels";
 import type { UploadedFile } from "../types";
 
 const MonthlyCalendar = () => {
+  const { auth } = useContext(ThemeContext);
   const [uploads, setUploads] = useState<UploadedFile[]>([]);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
@@ -34,7 +37,7 @@ const MonthlyCalendar = () => {
 
   return (
     <>
-      <PageTitle motherMenu="Admin Panel" activeMenu="Monthly Calendar" pageContent="" />
+      <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu="Monthly Calendar" pageContent="" />
       <div className="row">
         <div className="col-xl-8">
           <div className="card">

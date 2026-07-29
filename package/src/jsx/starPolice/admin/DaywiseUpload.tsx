@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import DatePicker from "react-datepicker";
 import PageTitle from "../../layouts/PageTitle";
+import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
+import { getPanelMotherMenu } from "../panelLabels";
 import { UploadPreviewButton } from "../shared/UploadFilePreview";
 import type { FileCategory, UploadedFile } from "../types";
 
@@ -14,6 +16,7 @@ const categoryAccept: Record<FileCategory, string> = {
 };
 
 const DaywiseUpload = () => {
+  const { auth } = useContext(ThemeContext);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<FileCategory>("video");
@@ -100,7 +103,7 @@ const DaywiseUpload = () => {
 
   return (
     <>
-      <PageTitle motherMenu="Admin Panel" activeMenu="Daywise Upload" pageContent="" />
+      <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu="Daywise Upload" pageContent="" />
       {error && (
         <div ref={errorRef} className="alert alert-danger">
           {error}

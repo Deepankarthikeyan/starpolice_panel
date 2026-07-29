@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
+import { getPanelMotherMenu } from "../panelLabels";
 import type { AppNotification } from "../types";
 
 const PanelInbox = () => {
@@ -31,7 +32,7 @@ const PanelInbox = () => {
   return (
     <>
       <PageTitle
-        motherMenu={auth?.panel === "student" ? "Student Panel" : "Admin Panel"}
+        motherMenu={getPanelMotherMenu(auth?.panel)}
         activeMenu="Inbox"
         pageContent=""
       />

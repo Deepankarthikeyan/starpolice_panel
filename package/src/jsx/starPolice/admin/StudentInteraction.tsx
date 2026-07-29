@@ -1,9 +1,12 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
+import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
+import { getPanelMotherMenu } from "../panelLabels";
 import type { ChatMessage } from "../types";
 
 const StudentInteraction = () => {
+  const { auth } = useContext(ThemeContext);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
@@ -39,7 +42,7 @@ const StudentInteraction = () => {
 
   return (
     <>
-      <PageTitle motherMenu="Admin Panel" activeMenu="Student Interaction" pageContent="" />
+      <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu="Student Interaction" pageContent="" />
       <div className="card">
         <div className="card-header">
           <h4 className="card-title mb-0">Admin & Student Interaction</h4>

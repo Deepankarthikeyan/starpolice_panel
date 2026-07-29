@@ -20,7 +20,7 @@ const StaffLogin = ({ setAuth }: Props) => {
     setLoading(true);
     setError("");
     try {
-      const user = await api.login(email, password, "admin");
+      const user = await api.login(email, password, "staff");
       if (user.role === "superadmin") {
         setError("Super admin accounts should sign in from the admin login page.");
         return;
@@ -31,7 +31,7 @@ const StaffLogin = ({ setAuth }: Props) => {
       }
       storeAuth(user);
       setAuth(user);
-      navigate("/admin/dashboard");
+      navigate("/staff/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

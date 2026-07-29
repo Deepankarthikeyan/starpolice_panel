@@ -1,4 +1,4 @@
-import type { AuthUser } from "../../starPolice/types";
+import type { AuthUser, PanelType } from "../../starPolice/types";
 import { hasPermission } from "../../starPolice/permissions";
 
 const AdminMenuList = (auth?: AuthUser | null) => {
@@ -75,7 +75,7 @@ const StudentMenuList = (auth?: AuthUser | null) => {
   return items.filter((item) => hasPermission(auth, item.permission));
 };
 
-export const getMenuList = (panel: "admin" | "student" = "admin", auth?: AuthUser | null) =>
+export const getMenuList = (panel: PanelType = "admin", auth?: AuthUser | null) =>
   panel === "student" ? StudentMenuList(auth) : AdminMenuList(auth);
 
 export const MenuList = AdminMenuList();

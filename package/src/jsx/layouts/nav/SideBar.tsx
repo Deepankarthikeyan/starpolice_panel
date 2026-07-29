@@ -11,9 +11,9 @@ interface SideBarProps {
   panel?: PanelType;
 }
 
-function panelLabel(panel: PanelType, role?: string) {
+function panelLabel(panel: PanelType) {
   if (panel === "student") return "Student Panel";
-  if (role === "admin") return "Staff Panel";
+  if (panel === "staff") return "Staff Panel";
   return "Admin Panel";
 }
 
@@ -91,7 +91,7 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
           </div>
 
           <div className="spa-sidebar-meta">
-            <span className="spa-sidebar-panel">{panelLabel(panel, auth?.role)}</span>
+            <span className="spa-sidebar-panel">{panelLabel(panel)}</span>
             {auth?.name && (
               <div className="spa-sidebar-user">
                 <span className="spa-sidebar-user-avatar">{auth.name.charAt(0).toUpperCase()}</span>
