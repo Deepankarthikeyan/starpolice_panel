@@ -56,7 +56,7 @@ const StudentInteraction = () => {
                 <div
                   key={item.id}
                   className={`p-3 mb-3 rounded ${
-                    item.senderRole === "admin" || item.senderRole === "superadmin"
+                    ["admin", "staff", "superadmin"].includes(item.senderRole)
                       ? "bg-primary-subtle ms-auto"
                       : "bg-light"
                   }`}

@@ -44,14 +44,24 @@ export function sanitizePermissions(role, permissions) {
   return filtered.length > 0 ? filtered : defaultPermissionsForRole(role);
 }
 
+export function getEffectivePermissions(user) {
+  if (!user) return [];
+  if (user.role === "superadmin") {
+    return defaultPermissionsForRole("admin");
+  }
+  if (user.permissions?.length) {
+    return user.permissions;
+  }
+  return defaultPermissionsForRole(user.role);
+}
+
 export function hasPermission(user, permission) {
   if (!user) return false;
   if (SUPERADMIN_ONLY_PERMISSIONS.includes(permission)) {
     return user.role === "superadmin";
   }
   if (user.role === "superadmin") return true;
-  const permissions = user.permissions || [];
-  return permissions.includes(permission);
+  return getEffectivePermissions(user).includes(permission);
 }
 
 export function hasAnyPermission(user, permissions) {
