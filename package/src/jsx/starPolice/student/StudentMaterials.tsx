@@ -23,16 +23,21 @@ const StudentMaterials = () => {
         <div className="col-xl-4">
           <div className="card">
             <div className="card-header">
-              <h4 className="card-title mb-0">Choose Date</h4>
+              <h4 className="card-title mb-0">Select Date</h4>
             </div>
-            <div className="card-body">
-              <DatePicker
-                selected={selectedDate}
-                onChange={(date) => date && setSelectedDate(date)}
-                className="form-control"
-                dateFormat="yyyy-MM-dd"
-                inline
-              />
+            <div className="card-body daywise-upload-calendar">
+              <label className="form-label fw-semibold mb-3">Study Date</label>
+              <div className="daywise-upload-calendar-picker">
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={(date) => date && setSelectedDate(date)}
+                  inline
+                  fixedHeight
+                />
+              </div>
+              <div className="alert alert-light py-2 mb-0 mt-3 text-center">
+                Selected: <strong>{dateKey}</strong>
+              </div>
             </div>
           </div>
         </div>
