@@ -2,13 +2,12 @@ import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../../context/ThemeContext";
 import type { UserRole } from "../../starPolice/types";
+import { formatAccountType } from "../../starPolice/panelLabels";
 import LogoutPage from "./Logout";
 import profile from "../../../assets/images/user.jpg";
 
 function formatRole(role: UserRole) {
-  if (role === "superadmin") return "Super Admin";
-  if (role === "admin") return "Admin";
-  return "Student";
+  return formatAccountType(role);
 }
 
 const ProfileIcon = () => (

@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
-import { getPanelMotherMenu } from "../panelLabels";
+import { getPanelMotherMenu, formatAccountType } from "../panelLabels";
 
 const PanelSettings = () => {
   const { auth } = useContext(ThemeContext);
@@ -33,7 +33,7 @@ const PanelSettings = () => {
                 <input
                   type="text"
                   className="form-control text-capitalize"
-                  value={auth?.role ?? ""}
+                  value={formatAccountType(auth?.role)}
                   readOnly
                 />
               </div>

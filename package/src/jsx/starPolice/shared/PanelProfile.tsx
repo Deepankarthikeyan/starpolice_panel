@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
-import { getPanelMotherMenu } from "../panelLabels";
+import { getPanelMotherMenu, formatAccountType } from "../panelLabels";
 
 const PanelProfile = () => {
   const { auth } = useContext(ThemeContext);
@@ -44,7 +44,7 @@ const PanelProfile = () => {
               </div>
               <div className="row mb-3">
                 <div className="col-sm-4 text-muted">Role</div>
-                <div className="col-sm-8 fw-semibold text-capitalize">{auth?.role}</div>
+                <div className="col-sm-8 fw-semibold">{formatAccountType(auth?.role)}</div>
               </div>
               <div className="row">
                 <div className="col-sm-4 text-muted">Panel</div>

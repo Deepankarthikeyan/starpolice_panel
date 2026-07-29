@@ -9,7 +9,7 @@ import {
   defaultPermissionsForRole,
   hasPermission,
 } from "../permissions";
-import { getPanelMotherMenu } from "../panelLabels";
+import { getPanelMotherMenu, formatAccountType } from "../panelLabels";
 import type { ManagedUser } from "../types";
 
 function PermissionChecklist({
@@ -79,7 +79,7 @@ const UserManagement = () => {
         api.getUsers("admin"),
       ]);
       setStudents(studentData);
-      setAdmins(adminData);
+      setAdmins(adminData.filter((user) => user.role === "admin"));
       return;
     }
     const studentData = await api.getUsers("student");
@@ -162,7 +162,7 @@ const UserManagement = () => {
                 <td>{user.name}</td>
                 <td>{user.email}</td>
                 <td>
-                  <span className="badge bg-secondary text-uppercase">{user.role}</span>
+                  <span className="badge bg-secondary">{formatAccountType(user.role)}</span>
                 </td>
                 <td>
                   <span className={`badge ${user.isActive ? "bg-success" : "bg-warning"}`}>
@@ -245,7 +245,7 @@ const UserManagement = () => {
                       onChange={(e) => setCreateRole(e.target.value as "admin" | "student")}
                     >
                       <option value="student">Student (Student Panel)</option>
-                      <option value="admin">Admin (Admin Panel)</option>
+                      <option value="admin">Staff (Staff Panel)</option>
                     </select>
                   </div>
                 )}
@@ -308,7 +308,7 @@ const UserManagement = () => {
           {isSuperAdmin && (
             <div className="card mb-4">
               <div className="card-header">
-                <h4 className="card-title mb-0">Admin Accounts</h4>
+                <h4 className="card-title mb-0">Staff Accounts</h4>
               </div>
               <div className="card-body">{renderTable(admins, true, true)}</div>
             </div>
