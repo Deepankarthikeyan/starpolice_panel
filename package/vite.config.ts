@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 
+const RENDER_API = "https://starpolice-api.onrender.com";
+
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -14,6 +16,16 @@ export default defineConfig({
     proxy: {
       "/api": "http://localhost:5000",
       "/uploads": "http://localhost:5000",
+    },
+  },
+  preview: {
+    host: "0.0.0.0",
+    port: 4173,
+    // @ts-expect-error supported at runtime for Cloudflare tunnel previews
+    allowedHosts: [".trycloudflare.com"],
+    proxy: {
+      "/api": RENDER_API,
+      "/uploads": RENDER_API,
     },
   },
   build: {
