@@ -15,6 +15,11 @@
   --spa-accent-soft: rgba(110, 168, 216, 0.16);
 }
 
+#main-wrapper:has(.spa-sidebar-student) {
+  --spa-accent: #3ecf8e;
+  --spa-accent-soft: rgba(62, 207, 142, 0.14);
+}
+
 #main-wrapper .spa-sidebar-staff {
   background: linear-gradient(175deg, #0a1a2e 0%, #12304f 45%, #1a4a73 100%) !important;
 }
@@ -67,16 +72,17 @@
   justify-content: space-between;
   gap: 0.5rem;
   flex-shrink: 0;
-  min-height: 3rem;
-  padding-bottom: 0.85rem;
-  margin-bottom: 0.85rem;
+  min-height: 2.25rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 #main-wrapper .spa-sidebar-brand {
   display: flex;
   align-items: center;
-  flex: 1;
+  justify-content: center;
+  width: 100%;
   min-width: 0;
   overflow: hidden;
   text-decoration: none !important;
@@ -84,8 +90,8 @@
 
 #main-wrapper .spa-sidebar-brand-icon {
   display: none;
-  width: 2.35rem;
-  height: 2.35rem;
+  width: 2.5rem;
+  height: 2.5rem;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -94,7 +100,7 @@
   display: block;
   width: auto;
   max-width: 100%;
-  max-height: 2.85rem;
+  max-height: 3.25rem;
   object-fit: contain;
 }
 
@@ -139,6 +145,10 @@
   color: rgba(255, 255, 255, 0.85);
   background: var(--spa-accent-soft);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #main-wrapper .spa-sidebar-user {
@@ -316,9 +326,14 @@
 
 #main-wrapper .spa-sidebar-footer {
   flex-shrink: 0;
-  margin-top: 0.75rem;
+  margin-top: auto;
   padding-top: 0.85rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+#main-wrapper .spa-sidebar-footer .spa-sidebar-brand {
+  margin-bottom: 0.65rem;
 }
 
 #main-wrapper .spa-sidebar-footer-title {
@@ -462,8 +477,8 @@
   gap: 0.65rem;
 }
 
-[data-sidebar-style="full"] #main-wrapper:has(.spa-sidebar).menu-toggle .spa-sidebar-brand-icon,
-[data-sidebar-style="mini"] #main-wrapper:has(.spa-sidebar).menu-toggle .spa-sidebar-brand-icon {
+[data-sidebar-style="full"] #main-wrapper:has(.spa-sidebar).menu-toggle .spa-sidebar-footer .spa-sidebar-brand-icon,
+[data-sidebar-style="mini"] #main-wrapper:has(.spa-sidebar).menu-toggle .spa-sidebar-footer .spa-sidebar-brand-icon {
   display: block;
 }
 

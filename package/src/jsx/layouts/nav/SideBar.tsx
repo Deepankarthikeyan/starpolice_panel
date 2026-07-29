@@ -74,10 +74,7 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
 
         <div className="spa-sidebar-inner">
           <div className="spa-sidebar-header">
-            <Link to={`${basePath}/dashboard`} className="spa-sidebar-brand">
-              <img src={emblemLogo} alt="" className="spa-sidebar-brand-icon" aria-hidden="true" />
-              <img src={fullLogo} alt="Star Police Academy" className="spa-sidebar-brand-logo" />
-            </Link>
+            <span className="spa-sidebar-panel">{panelLabel(panel)}</span>
             <button
               type="button"
               className="spa-sidebar-collapse"
@@ -91,7 +88,6 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
           </div>
 
           <div className="spa-sidebar-meta">
-            <span className="spa-sidebar-panel">{panelLabel(panel)}</span>
             {auth?.name && (
               <div className="spa-sidebar-user">
                 <span className="spa-sidebar-user-avatar">{auth.name.charAt(0).toUpperCase()}</span>
@@ -123,6 +119,10 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
           </nav>
 
           <div className="spa-sidebar-footer">
+            <Link to={`${basePath}/dashboard`} className="spa-sidebar-brand">
+              <img src={emblemLogo} alt="" className="spa-sidebar-brand-icon" aria-hidden="true" />
+              <img src={fullLogo} alt="Star Police Academy" className="spa-sidebar-brand-logo" />
+            </Link>
             <p className="spa-sidebar-footer-title">Star Police Academy</p>
             <p className="spa-sidebar-footer-text">Vellore — No. 1 Police Academy in Tamil Nadu</p>
           </div>
