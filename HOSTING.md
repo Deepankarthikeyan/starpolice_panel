@@ -51,6 +51,28 @@ Netlify dashboard: https://app.netlify.com/projects/starpolice-panel
 
 ---
 
+## Auto-deploy from GitHub (recommended)
+
+Every push to `master` deploys automatically via GitHub Actions once you add **one** secret:
+
+1. Create a Netlify personal access token:  
+   https://app.netlify.com/user/applications#personal-access-tokens
+2. In GitHub → **Settings** → **Secrets and variables** → **Actions**, add:
+   - Name: `NETLIFY_AUTH_TOKEN`
+   - Value: your Netlify token
+3. Push to `master` (or run **Deploy frontend to Netlify** workflow manually).
+
+Manual CLI deploy (same site):
+
+```bash
+export NETLIFY_AUTH_TOKEN="your-token"
+bash scripts/deploy-to-netlify.sh
+```
+
+Optional: link the repo in Netlify (**Project configuration** → **Build & deploy** → **Link repository**) to enable **Trigger deploy** in the Netlify UI. GitHub Actions deploy works without linking.
+
+---
+
 ## Deploy frontend to Netlify (one click)
 
 **Click here to deploy:**
