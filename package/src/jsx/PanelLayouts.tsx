@@ -7,7 +7,7 @@ import { ThemeContext } from "../context/ThemeContext";
 export function AdminLayout() {
   const { openMenuToggle, auth } = useContext(ThemeContext);
 
-  if (!auth || auth.panel !== "admin" || auth.role !== "superadmin") {
+  if (!auth || auth.panel !== "admin" || !["superadmin", "admin"].includes(auth.role)) {
     return <Navigate to="/admin/login" replace />;
   }
 
@@ -27,7 +27,7 @@ export function AdminLayout() {
 export function StaffLayout() {
   const { openMenuToggle, auth } = useContext(ThemeContext);
 
-  if (!auth || auth.panel !== "staff" || auth.role !== "admin") {
+  if (!auth || auth.panel !== "staff" || auth.role !== "staff") {
     return <Navigate to="/staff/login" replace />;
   }
 

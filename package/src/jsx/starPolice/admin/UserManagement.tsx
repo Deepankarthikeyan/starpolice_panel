@@ -12,19 +12,21 @@ import {
 import { getPanelMotherMenu, formatAccountType } from "../panelLabels";
 import type { ManagedUser } from "../types";
 
+type CreateAccountType = "student" | "admin" | "staff";
+
 function PermissionChecklist({
   role,
   selected,
   onChange,
 }: {
-  role: "admin" | "student";
+  role: CreateAccountType;
   selected: string[];
   onChange: (permissions: string[]) => void;
 }) {
   const options =
-    role === "admin"
-      ? ADMIN_PERMISSIONS.filter((option) => STAFF_ADMIN_PERMISSION_KEYS.includes(option.key))
-      : STUDENT_PERMISSIONS;
+    role === "student"
+      ? STUDENT_PERMISSIONS
+      : ADMIN_PERMISSIONS.filter((option) => STAFF_ADMIN_PERMISSION_KEYS.includes(option.key));
 
   const toggle = (key: string) => {
     if (selected.includes(key)) {
@@ -59,11 +61,12 @@ const UserManagement = () => {
   const { auth } = useContext(ThemeContext);
   const isSuperAdmin = auth?.role === "superadmin";
   const [admins, setAdmins] = useState<ManagedUser[]>([]);
+  const [staff, setStaff] = useState<ManagedUser[]>([]);
   const [students, setStudents] = useState<ManagedUser[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [createRole, setCreateRole] = useState<"admin" | "student">("student");
+  const [createAccountType, setCreateAccountType] = useState<CreateAccountType>("student");
   const [createPermissions, setCreatePermissions] = useState<string[]>(
     defaultPermissionsForRole("student")
   );
@@ -74,12 +77,14 @@ const UserManagement = () => {
 
   const loadUsers = async () => {
     if (isSuperAdmin) {
-      const [studentData, adminData] = await Promise.all([
+      const [studentData, adminData, staffData] = await Promise.all([
         api.getUsers("student"),
         api.getUsers("admin"),
+        api.getUsers("staff"),
       ]);
       setStudents(studentData);
-      setAdmins(adminData.filter((user) => user.role === "admin"));
+      setAdmins(adminData);
+      setStaff(staffData);
       return;
     }
     const studentData = await api.getUsers("student");
@@ -91,19 +96,19 @@ const UserManagement = () => {
   }, [isSuperAdmin]);
 
   useEffect(() => {
-    setCreatePermissions(defaultPermissionsForRole(createRole));
-  }, [createRole]);
+    setCreatePermissions(defaultPermissionsForRole(createAccountType));
+  }, [createAccountType]);
 
   const onCreate = async (event: FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setError("");
     try {
-      await api.createUser(name.trim(), email.trim(), password, createRole, createPermissions);
+      await api.createUser(name.trim(), email.trim(), password, createAccountType, createPermissions);
       setName("");
       setEmail("");
       setPassword("");
-      setCreatePermissions(defaultPermissionsForRole(createRole));
+      setCreatePermissions(defaultPermissionsForRole(createAccountType));
       await loadUsers();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create user");
@@ -241,11 +246,12 @@ const UserManagement = () => {
                     <label className="form-label">Account Type</label>
                     <select
                       className="form-select"
-                      value={createRole}
-                      onChange={(e) => setCreateRole(e.target.value as "admin" | "student")}
+                      value={createAccountType}
+                      onChange={(e) => setCreateAccountType(e.target.value as CreateAccountType)}
                     >
                       <option value="student">Student (Student Panel)</option>
-                      <option value="admin">Staff (Staff Panel)</option>
+                      <option value="admin">Admin (Admin Panel)</option>
+                      <option value="staff">Staff (Staff Panel)</option>
                     </select>
                   </div>
                 )}
@@ -286,7 +292,7 @@ const UserManagement = () => {
                     Choose which sections this account can access after login is granted.
                   </p>
                   <PermissionChecklist
-                    role={isSuperAdmin ? createRole : "student"}
+                    role={createAccountType}
                     selected={createPermissions}
                     onChange={setCreatePermissions}
                   />
@@ -308,9 +314,18 @@ const UserManagement = () => {
           {isSuperAdmin && (
             <div className="card mb-4">
               <div className="card-header">
-                <h4 className="card-title mb-0">Staff Accounts</h4>
+                <h4 className="card-title mb-0">Admin Accounts</h4>
               </div>
               <div className="card-body">{renderTable(admins, true, true)}</div>
+            </div>
+          )}
+
+          {isSuperAdmin && (
+            <div className="card mb-4">
+              <div className="card-header">
+                <h4 className="card-title mb-0">Staff Accounts</h4>
+              </div>
+              <div className="card-body">{renderTable(staff, true, true)}</div>
             </div>
           )}
 
@@ -341,7 +356,13 @@ const UserManagement = () => {
                   Update which panel sections <strong>{editingUser.email}</strong> can use.
                 </p>
                 <PermissionChecklist
-                  role={editingUser.role === "admin" ? "admin" : "student"}
+                  role={
+                    editingUser.role === "student"
+                      ? "student"
+                      : editingUser.role === "staff"
+                        ? "staff"
+                        : "admin"
+                  }
                   selected={editPermissions}
                   onChange={setEditPermissions}
                 />

@@ -6,21 +6,30 @@ import { defaultPermissionsForRole, sanitizePermissions } from "../permissions.j
 
 const router = express.Router();
 
-function mapUser(user) {
-  const permissions =
-    user.role === "superadmin"
-      ? defaultPermissionsForRole("admin")
-      : user.permissions?.length
-        ? user.permissions
-        : defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
+function resolveRolePermissions(user) {
+  if (user.role === "superadmin") {
+    return defaultPermissionsForRole("admin");
+  }
+  if (user.permissions?.length) {
+    return user.permissions;
+  }
+  if (user.role === "student") {
+    return defaultPermissionsForRole("student");
+  }
+  if (user.role === "staff") {
+    return defaultPermissionsForRole("staff");
+  }
+  return defaultPermissionsForRole("admin");
+}
 
+function mapUser(user) {
   return {
     id: user._id.toString(),
     name: user.name,
     email: user.email,
     role: user.role,
     isActive: user.role === "superadmin" ? true : user.isActive,
-    permissions,
+    permissions: resolveRolePermissions(user),
     createdAt: user.createdAt,
   };
 }
@@ -36,12 +45,12 @@ router.get(
       const { type } = req.query;
 
       if (type === "admin") {
-        if (req.user.role !== "superadmin") {
-          return res.status(403).json({ message: "Only super admin can list admins." });
-        }
-        const users = await User.find({ role: { $in: ["admin", "superadmin"] } })
-          .select("-password")
-          .sort({ createdAt: -1 });
+        const users = await User.find({ role: "admin" }).select("-password").sort({ createdAt: -1 });
+        return res.json(users.map(mapUser));
+      }
+
+      if (type === "staff") {
+        const users = await User.find({ role: "staff" }).select("-password").sort({ createdAt: -1 });
         return res.json(users.map(mapUser));
       }
 
@@ -50,7 +59,7 @@ router.get(
         return res.json(users.map(mapUser));
       }
 
-      return res.status(400).json({ message: "Query type must be admin or student." });
+      return res.status(400).json({ message: "Query type must be admin, staff, or student." });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -75,15 +84,7 @@ router.post(
         return res.status(409).json({ message: "Email is already registered." });
       }
 
-      if (role === "admin") {
-        if (req.user.role !== "superadmin") {
-          return res.status(403).json({ message: "Only super admin can create admin accounts." });
-        }
-      } else if (role === "student") {
-        if (!["superadmin", "admin"].includes(req.user.role)) {
-          return res.status(403).json({ message: "Admin access required." });
-        }
-      } else {
+      if (!["admin", "staff", "student"].includes(role)) {
         return res.status(400).json({ message: "Invalid role." });
       }
 
@@ -127,14 +128,6 @@ router.patch(
         return res.status(400).json({ message: "Super admin access cannot be changed." });
       }
 
-      if (user.role === "admin" && req.user.role !== "superadmin") {
-        return res.status(403).json({ message: "Only super admin can manage admin access." });
-      }
-
-      if (user.role === "student" && !["superadmin", "admin"].includes(req.user.role)) {
-        return res.status(403).json({ message: "Admin access required." });
-      }
-
       user.isActive = isActive;
       await user.save();
 
@@ -167,14 +160,6 @@ router.patch(
         return res.status(400).json({ message: "Super admin permissions cannot be changed." });
       }
 
-      if (user.role === "admin" && req.user.role !== "superadmin") {
-        return res.status(403).json({ message: "Only super admin can change admin permissions." });
-      }
-
-      if (user.role === "student" && !["superadmin", "admin"].includes(req.user.role)) {
-        return res.status(403).json({ message: "Admin access required." });
-      }
-
       user.permissions = sanitizePermissions(user.role, permissions);
       await user.save();
 
@@ -200,10 +185,6 @@ router.delete(
 
       if (user.role === "superadmin") {
         return res.status(400).json({ message: "Super admin cannot be deleted." });
-      }
-
-      if (user.role === "admin" && req.user.role !== "superadmin") {
-        return res.status(403).json({ message: "Only super admin can delete admin accounts." });
       }
 
       await user.deleteOne();

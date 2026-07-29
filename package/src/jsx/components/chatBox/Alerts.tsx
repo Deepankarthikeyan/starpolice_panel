@@ -33,7 +33,7 @@ const Alerts: React.FC<AlertsProps> = ({ toggleTab, toggleChatBox, toggle }) => 
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const { auth } = useContext(ThemeContext);
-  const isAdmin = auth?.role === "admin" || auth?.role === "superadmin";
+  const isAdmin = auth?.role === "admin" || auth?.role === "staff" || auth?.role === "superadmin";
   const isActive = toggle === "chatbox" && toggleTab === "alerts";
 
   const loadAlerts = useCallback(async () => {

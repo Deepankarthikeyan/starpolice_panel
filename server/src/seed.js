@@ -49,7 +49,7 @@ async function seed() {
       name: "Demo Staff",
       email: "staff@starpolice.academy",
       password: staffPassword,
-      role: "admin",
+      role: "staff",
       isActive: true,
       permissions: adminPermissions,
     },

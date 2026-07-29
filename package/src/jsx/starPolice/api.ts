@@ -96,7 +96,7 @@ export const api = {
     return request<Omit<AuthUser, "token">>("/api/auth/me", {}, panel);
   },
 
-  getUsers(type: "admin" | "student") {
+  getUsers(type: "admin" | "staff" | "student") {
     return request<ManagedUser[]>(`/api/users?type=${type}`);
   },
 
@@ -104,7 +104,7 @@ export const api = {
     name: string,
     email: string,
     password: string,
-    role: "admin" | "student",
+    role: "admin" | "staff" | "student",
     permissions?: string[]
   ) {
     return request<ManagedUser>("/api/users", {

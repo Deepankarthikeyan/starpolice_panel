@@ -7,13 +7,24 @@ import { defaultPermissionsForRole } from "../permissions.js";
 
 const router = express.Router();
 
+function resolveRolePermissions(user) {
+  if (user.role === "superadmin") {
+    return defaultPermissionsForRole("admin");
+  }
+  if (user.permissions?.length) {
+    return user.permissions;
+  }
+  if (user.role === "student") {
+    return defaultPermissionsForRole("student");
+  }
+  if (user.role === "staff") {
+    return defaultPermissionsForRole("staff");
+  }
+  return defaultPermissionsForRole("admin");
+}
+
 function createToken(user, panel) {
-  const permissions =
-    user.role === "superadmin"
-      ? defaultPermissionsForRole("admin")
-      : user.permissions?.length
-        ? user.permissions
-        : defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
+  const permissions = resolveRolePermissions(user);
 
   return jwt.sign(
     {
@@ -31,12 +42,7 @@ function createToken(user, panel) {
 }
 
 function publicUser(user, token, panel) {
-  const permissions =
-    user.role === "superadmin"
-      ? defaultPermissionsForRole("admin")
-      : user.permissions?.length
-        ? user.permissions
-        : defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
+  const permissions = resolveRolePermissions(user);
 
   return {
     id: user._id.toString(),
@@ -51,11 +57,11 @@ function publicUser(user, token, panel) {
 }
 
 function canAccessAdminPanel(user) {
-  return user.role === "superadmin";
+  return user.role === "superadmin" || (user.role === "admin" && user.isActive);
 }
 
 function canAccessStaffPanel(user) {
-  return user.role === "admin" && user.isActive;
+  return user.role === "staff" && user.isActive;
 }
 
 function canAccessStudentPanel(user) {
@@ -134,9 +140,11 @@ router.post("/login", async (req, res) => {
       if (!canAccessAdminPanel(user)) {
         return res.status(403).json({
           message:
-            user.role === "admin"
+            user.role === "staff"
               ? "Staff accounts should sign in from the staff login page."
-              : "You do not have admin panel access.",
+              : user.role === "admin" && !user.isActive
+                ? "Your admin access has not been activated yet. Contact the super admin."
+                : "You do not have admin panel access.",
         });
       }
     } else if (panel === "staff") {
@@ -145,7 +153,7 @@ router.post("/login", async (req, res) => {
           message:
             user.role === "superadmin"
               ? "Super admin accounts should sign in from the admin login page."
-              : user.role === "admin" && !user.isActive
+              :             user.role === "staff" && !user.isActive
                 ? "Your staff access has not been activated yet. Contact the super admin."
                 : "You do not have staff panel access.",
         });
@@ -175,12 +183,7 @@ router.get("/me", authRequired, async (req, res) => {
     return res.status(404).json({ message: "User not found." });
   }
 
-  const permissions =
-    user.role === "superadmin"
-      ? defaultPermissionsForRole("admin")
-      : user.permissions?.length
-        ? user.permissions
-        : defaultPermissionsForRole(user.role === "student" ? "student" : "admin");
+  const permissions = resolveRolePermissions(user);
 
   res.json({
     id: user._id.toString(),

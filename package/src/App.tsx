@@ -58,8 +58,8 @@ function App() {
 
   const setPanelAuth = (user: AuthUser) => setAuth(user);
 
-  const isAdminAuthed = auth?.panel === "admin" && auth.role === "superadmin";
-  const isStaffAuthed = auth?.panel === "staff" && auth.role === "admin";
+  const isAdminAuthed = auth?.panel === "admin" && ["superadmin", "admin"].includes(auth.role);
+  const isStaffAuthed = auth?.panel === "staff" && auth.role === "staff";
   const isStudentAuthed = auth?.panel === "student" && auth.role === "student";
 
   return (

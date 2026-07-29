@@ -29,8 +29,9 @@ export const STAFF_ADMIN_PERMISSION_KEYS = ALL_ADMIN_PERMISSION_KEYS.filter(
 );
 export const ALL_STUDENT_PERMISSION_KEYS = STUDENT_PERMISSIONS.map((item) => item.key);
 
-export function defaultPermissionsForRole(role: "admin" | "student") {
-  return role === "admin" ? [...STAFF_ADMIN_PERMISSION_KEYS] : [...ALL_STUDENT_PERMISSION_KEYS];
+export function defaultPermissionsForRole(role: "admin" | "staff" | "student") {
+  if (role === "admin" || role === "staff") return [...STAFF_ADMIN_PERMISSION_KEYS];
+  return [...ALL_STUDENT_PERMISSION_KEYS];
 }
 
 export function hasPermission(

@@ -8,7 +8,8 @@ export function getPanelMotherMenu(panel?: PanelType) {
 
 export function formatAccountType(role?: UserRole) {
   if (role === "superadmin") return "Super Admin";
-  if (role === "admin") return "Staff";
+  if (role === "admin") return "Admin";
+  if (role === "staff") return "Staff";
   if (role === "student") return "Student";
   return "";
 }

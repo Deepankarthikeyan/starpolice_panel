@@ -16,8 +16,8 @@ function resolveAuthForPath(pathname: string): AuthUser | null {
       : "admin";
   const stored = getStoredAuth(panel);
   if (!stored) return null;
-  if (panel === "admin" && stored.role === "superadmin") return stored;
-  if (panel === "staff" && stored.role === "admin") return stored;
+  if (panel === "admin" && ["superadmin", "admin"].includes(stored.role)) return stored;
+  if (panel === "staff" && stored.role === "staff") return stored;
   if (panel === "student" && stored.role === "student") return stored;
   return null;
 }

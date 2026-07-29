@@ -25,8 +25,8 @@ const StaffLogin = ({ setAuth }: Props) => {
         setError("Super admin accounts should sign in from the admin login page.");
         return;
       }
-      if (user.role !== "admin") {
-        setError("Staff access requires an admin account created by the super admin.");
+      if (user.role !== "staff") {
+        setError("Staff access requires a staff account created by the super admin.");
         return;
       }
       storeAuth(user);
