@@ -18,11 +18,19 @@ export type AdminPermissionKey = (typeof ADMIN_PERMISSIONS)[number]["key"];
 export type StudentPermissionKey = (typeof STUDENT_PERMISSIONS)[number]["key"];
 export type PermissionKey = AdminPermissionKey | StudentPermissionKey;
 
+export const SUPERADMIN_ONLY_PERMISSIONS: readonly PermissionKey[] = [
+  "admin:users",
+  "admin:onboarding",
+];
+
 export const ALL_ADMIN_PERMISSION_KEYS = ADMIN_PERMISSIONS.map((item) => item.key);
+export const STAFF_ADMIN_PERMISSION_KEYS = ALL_ADMIN_PERMISSION_KEYS.filter(
+  (key) => !SUPERADMIN_ONLY_PERMISSIONS.includes(key)
+);
 export const ALL_STUDENT_PERMISSION_KEYS = STUDENT_PERMISSIONS.map((item) => item.key);
 
 export function defaultPermissionsForRole(role: "admin" | "student") {
-  return role === "admin" ? [...ALL_ADMIN_PERMISSION_KEYS] : [...ALL_STUDENT_PERMISSION_KEYS];
+  return role === "admin" ? [...STAFF_ADMIN_PERMISSION_KEYS] : [...ALL_STUDENT_PERMISSION_KEYS];
 }
 
 export function hasPermission(
@@ -30,6 +38,9 @@ export function hasPermission(
   permission: PermissionKey
 ) {
   if (!user) return false;
+  if (SUPERADMIN_ONLY_PERMISSIONS.includes(permission)) {
+    return user.role === "superadmin";
+  }
   if (user.role === "superadmin") return true;
   return (user.permissions || []).includes(permission);
 }

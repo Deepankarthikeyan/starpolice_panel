@@ -1,7 +1,7 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
-import { authRequired, adminPanelOnly, attachUser, requirePermission } from "../middleware/auth.js";
+import { authRequired, adminPanelOnly, attachUser, superAdminOnly } from "../middleware/auth.js";
 import { defaultPermissionsForRole, sanitizePermissions } from "../permissions.js";
 
 const router = express.Router();
@@ -30,7 +30,7 @@ router.get(
   authRequired,
   adminPanelOnly,
   attachUser,
-  requirePermission("admin:users"),
+  superAdminOnly,
   async (req, res) => {
     try {
       const { type } = req.query;
@@ -62,7 +62,7 @@ router.post(
   authRequired,
   adminPanelOnly,
   attachUser,
-  requirePermission("admin:users"),
+  superAdminOnly,
   async (req, res) => {
     try {
       const { name, email, password, role, permissions } = req.body;
@@ -110,7 +110,7 @@ router.patch(
   authRequired,
   adminPanelOnly,
   attachUser,
-  requirePermission("admin:users"),
+  superAdminOnly,
   async (req, res) => {
     try {
       const { isActive } = req.body;
@@ -150,7 +150,7 @@ router.patch(
   authRequired,
   adminPanelOnly,
   attachUser,
-  requirePermission("admin:users"),
+  superAdminOnly,
   async (req, res) => {
     try {
       const { permissions } = req.body;
@@ -190,7 +190,7 @@ router.delete(
   authRequired,
   adminPanelOnly,
   attachUser,
-  requirePermission("admin:users"),
+  superAdminOnly,
   async (req, res) => {
     try {
       const user = await User.findById(req.params.id);

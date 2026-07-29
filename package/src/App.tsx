@@ -116,8 +116,6 @@ function App() {
             <Route path="daywise-upload" element={<DaywiseUpload />} />
             <Route path="student-interaction" element={<AdminStudentInteraction />} />
             <Route path="monthly-calendar" element={<MonthlyCalendar />} />
-            <Route path="user-management" element={<UserManagement />} />
-            <Route path="student-onboarding" element={<StudentOnboarding />} />
             <Route path="profile" element={<PanelProfile />} />
             <Route path="inbox" element={<PanelInbox />} />
             <Route path="settings" element={<PanelSettings />} />

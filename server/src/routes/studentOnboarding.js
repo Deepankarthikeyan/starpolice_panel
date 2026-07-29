@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import StudentOnboarding from "../models/StudentOnboarding.js";
 import User from "../models/User.js";
-import { authRequired, adminPanelOnly, attachUser, requirePermission } from "../middleware/auth.js";
+import { authRequired, adminPanelOnly, attachUser, superAdminOnly } from "../middleware/auth.js";
 import { upload } from "../middleware/upload.js";
 import { defaultPermissionsForRole, sanitizePermissions } from "../permissions.js";
 
@@ -291,7 +291,7 @@ router.get(
   authRequired,
   adminPanelOnly,
   attachUser,
-  requirePermission("admin:onboarding"),
+  superAdminOnly,
   async (_req, res) => {
     try {
       const records = await StudentOnboarding.find().sort({ createdAt: -1 });
@@ -307,7 +307,7 @@ router.get(
   authRequired,
   adminPanelOnly,
   attachUser,
-  requirePermission("admin:onboarding"),
+  superAdminOnly,
   async (req, res) => {
     try {
       const record = await StudentOnboarding.findById(req.params.id);
@@ -326,7 +326,7 @@ router.post(
   authRequired,
   adminPanelOnly,
   attachUser,
-  requirePermission("admin:onboarding"),
+  superAdminOnly,
   upload.fields(FILE_FIELDS),
   async (req, res) => {
     try {
@@ -372,7 +372,7 @@ router.put(
   authRequired,
   adminPanelOnly,
   attachUser,
-  requirePermission("admin:onboarding"),
+  superAdminOnly,
   upload.fields(FILE_FIELDS),
   async (req, res) => {
     try {
@@ -418,7 +418,7 @@ router.delete(
   authRequired,
   adminPanelOnly,
   attachUser,
-  requirePermission("admin:onboarding"),
+  superAdminOnly,
   async (req, res) => {
     try {
       const record = await StudentOnboarding.findById(req.params.id);

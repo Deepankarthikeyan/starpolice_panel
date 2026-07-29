@@ -42,8 +42,6 @@ async function seed() {
     "admin:uploads",
     "admin:messages",
     "admin:calendar",
-    "admin:users",
-    "admin:onboarding",
   ];
   await User.findOneAndUpdate(
     { email: "staff@starpolice.academy" },

@@ -1,3 +1,5 @@
+export const SUPERADMIN_ONLY_PERMISSIONS = ["admin:users", "admin:onboarding"];
+
 export const ADMIN_PERMISSIONS = [
   { key: "admin:dashboard", label: "Dashboard", description: "View admin dashboard and statistics" },
   { key: "admin:uploads", label: "Daywise Upload", description: "Upload and manage study materials" },
@@ -15,10 +17,13 @@ export const STUDENT_PERMISSIONS = [
 ];
 
 export const ALL_ADMIN_PERMISSION_KEYS = ADMIN_PERMISSIONS.map((item) => item.key);
+export const STAFF_ADMIN_PERMISSION_KEYS = ALL_ADMIN_PERMISSION_KEYS.filter(
+  (key) => !SUPERADMIN_ONLY_PERMISSIONS.includes(key)
+);
 export const ALL_STUDENT_PERMISSION_KEYS = STUDENT_PERMISSIONS.map((item) => item.key);
 
 export function defaultPermissionsForRole(role) {
-  if (role === "admin") return [...ALL_ADMIN_PERMISSION_KEYS];
+  if (role === "admin") return [...STAFF_ADMIN_PERMISSION_KEYS];
   if (role === "student") return [...ALL_STUDENT_PERMISSION_KEYS];
   return [];
 }
@@ -26,7 +31,7 @@ export function defaultPermissionsForRole(role) {
 export function sanitizePermissions(role, permissions) {
   const allowed =
     role === "admin"
-      ? ALL_ADMIN_PERMISSION_KEYS
+      ? STAFF_ADMIN_PERMISSION_KEYS
       : role === "student"
         ? ALL_STUDENT_PERMISSION_KEYS
         : [];
@@ -41,6 +46,9 @@ export function sanitizePermissions(role, permissions) {
 
 export function hasPermission(user, permission) {
   if (!user) return false;
+  if (SUPERADMIN_ONLY_PERMISSIONS.includes(permission)) {
+    return user.role === "superadmin";
+  }
   if (user.role === "superadmin") return true;
   const permissions = user.permissions || [];
   return permissions.includes(permission);
