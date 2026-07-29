@@ -290,9 +290,6 @@ const Header = ({ onNote }: propType) => {
                 >
                   <div className="dropdown-header">
                     <h4 className="title mb-0">Notification</h4>
-                    <Link to={"#"} className="d-none">
-                      <i className="flaticon-381-settings-6"></i>
-                    </Link>
                   </div>
                   <div
                     id="DZ_W_Notification1"
