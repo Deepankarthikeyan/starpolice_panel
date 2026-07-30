@@ -215,12 +215,13 @@ const UserManagement = () => {
                       <div className="spa-user-actions">
                         <button
                           type="button"
-                          className="btn btn-sm btn-outline-secondary spa-user-action-btn"
+                          className="btn btn-sm btn-outline-primary spa-user-action-btn spa-user-action-btn--text"
                           onClick={() => openEditProfile(user)}
                           title="Edit Account"
                           aria-label="Edit Account"
                         >
-                          <i className="fa fa-pencil" />
+                          <i className="fas fa-pencil-alt" />
+                          <span>Edit</span>
                         </button>
                         {canEditPermissions && (
                           <button
