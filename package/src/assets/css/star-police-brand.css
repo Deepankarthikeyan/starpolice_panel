@@ -472,14 +472,6 @@
   line-height: 1;
 }
 
-.spa-user-action-btn--text {
-  width: auto;
-  height: auto;
-  min-height: 2rem;
-  padding: 0.25rem 0.65rem;
-  gap: 0.35rem;
-}
-
 .spa-user-action-btn .fa,
 .spa-user-action-btn .material-symbols-outlined {
   font-size: 0.875rem;
