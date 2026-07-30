@@ -452,12 +452,14 @@
 
 .spa-user-actions-cell {
   width: 1%;
+  min-width: 9.5rem;
   white-space: nowrap;
 }
 
 .spa-user-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.4rem;
 }
@@ -466,6 +468,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
   width: 2rem;
   height: 2rem;
   padding: 0;
