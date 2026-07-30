@@ -107,6 +107,58 @@ router.post(
 );
 
 router.patch(
+  "/:id",
+  authRequired,
+  adminPanelOnly,
+  attachUser,
+  superAdminOnly,
+  async (req, res) => {
+    try {
+      const { name, email, password } = req.body;
+
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      if (user.role === "superadmin") {
+        return res.status(400).json({ message: "Super admin profile cannot be changed." });
+      }
+
+      if (name !== undefined) {
+        if (!name?.trim()) {
+          return res.status(400).json({ message: "Name cannot be empty." });
+        }
+        user.name = name.trim();
+      }
+
+      if (email !== undefined) {
+        if (!email?.trim()) {
+          return res.status(400).json({ message: "Email cannot be empty." });
+        }
+        const normalizedEmail = email.toLowerCase().trim();
+        if (normalizedEmail !== user.email) {
+          const existing = await User.findOne({ email: normalizedEmail });
+          if (existing) {
+            return res.status(409).json({ message: "Email is already registered." });
+          }
+          user.email = normalizedEmail;
+        }
+      }
+
+      if (password) {
+        user.password = await bcrypt.hash(password, 10);
+      }
+
+      await user.save();
+      res.json(mapUser(user));
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
+
+router.patch(
   "/:id/access",
   authRequired,
   adminPanelOnly,

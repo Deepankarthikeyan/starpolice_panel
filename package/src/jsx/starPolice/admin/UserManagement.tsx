@@ -72,6 +72,10 @@ const UserManagement = () => {
   );
   const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
   const [editPermissions, setEditPermissions] = useState<string[]>([]);
+  const [editingProfileUser, setEditingProfileUser] = useState<ManagedUser | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPassword, setEditPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -127,6 +131,37 @@ const UserManagement = () => {
     setEditPermissions(user.permissions);
   };
 
+  const openEditProfile = (user: ManagedUser) => {
+    setEditingProfileUser(user);
+    setEditName(user.name);
+    setEditEmail(user.email);
+    setEditPassword("");
+    setError("");
+  };
+
+  const saveEditProfile = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!editingProfileUser) return;
+    setLoading(true);
+    setError("");
+    try {
+      const data: { name: string; email: string; password?: string } = {
+        name: editName.trim(),
+        email: editEmail.trim(),
+      };
+      if (editPassword) {
+        data.password = editPassword;
+      }
+      await api.updateUser(editingProfileUser.id, data);
+      setEditingProfileUser(null);
+      await loadUsers();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update account");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const saveEditPermissions = async () => {
     if (!editingUser) return;
     setLoading(true);
@@ -178,6 +213,15 @@ const UserManagement = () => {
                   <td className="spa-user-actions-cell">
                     {user.role !== "superadmin" && (
                       <div className="spa-user-actions">
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-secondary spa-user-action-btn"
+                          onClick={() => openEditProfile(user)}
+                          title="Edit Account"
+                          aria-label="Edit Account"
+                        >
+                          <i className="fa fa-pencil" />
+                        </button>
                         {canEditPermissions && (
                           <button
                             type="button"
@@ -337,6 +381,69 @@ const UserManagement = () => {
           </div>
         </div>
       </div>
+
+      {editingProfileUser && (
+        <div className="modal fade show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <form onSubmit={saveEditProfile}>
+                <div className="modal-header">
+                  <h5 className="modal-title">Edit Account — {editingProfileUser.name}</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setEditingProfileUser(null)}
+                    aria-label="Close"
+                  />
+                </div>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label">Full Name</label>
+                    <input
+                      className="form-control"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="mb-0">
+                    <label className="form-label">New Password</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      value={editPassword}
+                      onChange={(e) => setEditPassword(e.target.value)}
+                      placeholder="Leave blank to keep current password"
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={() => setEditingProfileUser(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {editingUser && (
         <div className="modal fade show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>

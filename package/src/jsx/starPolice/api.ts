@@ -157,6 +157,13 @@ export const api = {
     });
   },
 
+  updateUser(id: string, data: { name?: string; email?: string; password?: string }) {
+    return request<ManagedUser>(`/api/users/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
   updateUserPermissions(id: string, permissions: string[]) {
     return request<ManagedUser>(`/api/users/${id}/permissions`, {
       method: "PATCH",
