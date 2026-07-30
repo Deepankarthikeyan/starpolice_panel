@@ -457,7 +457,7 @@
 
 .spa-user-actions {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
 }
@@ -470,6 +470,14 @@
   height: 2rem;
   padding: 0;
   line-height: 1;
+}
+
+.spa-user-action-btn--text {
+  width: auto;
+  height: auto;
+  min-height: 2rem;
+  padding: 0.25rem 0.65rem;
+  gap: 0.35rem;
 }
 
 .spa-user-action-btn .fa,
