@@ -615,14 +615,14 @@
   }
 }
 
-/* Page title bar — dark grey (all panels) */
+/* Page title bar — dark grey labels, no bar background */
 .spa-page-titles {
-  background: linear-gradient(135deg, #2a2a2a 0%, #343434 55%, #3d3d3d 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.5rem;
-  padding: 0.85rem 1.25rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0.5rem 0;
+  margin-bottom: 1.25rem;
+  box-shadow: none;
 }
 
 .spa-page-breadcrumb {
@@ -674,7 +674,7 @@
 
 @media only screen and (max-width: 47.9375rem) {
   .spa-page-titles {
-    padding: 0.75rem 1rem;
+    padding: 0.4rem 0;
   }
 
   .spa-breadcrumb-panel span,
