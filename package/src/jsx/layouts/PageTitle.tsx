@@ -7,14 +7,13 @@ interface PageTitleType {
 const PageTitle = ({ motherMenu, activeMenu }: PageTitleType) => {
   return (
     <div className="row page-titles spa-page-titles mx-0">
-      <ol className="breadcrumb spa-page-breadcrumb mb-0">
-        <li className="breadcrumb-item spa-breadcrumb-panel">
-          <span>{motherMenu}</span>
-        </li>
-        <li className="breadcrumb-item spa-breadcrumb-page active" aria-current="page">
-          <span>{activeMenu}</span>
-        </li>
-      </ol>
+      <nav className="spa-page-breadcrumb" aria-label="Breadcrumb">
+        <span className="spa-breadcrumb-panel">{motherMenu}</span>
+        <span className="spa-breadcrumb-separator" aria-hidden="true">
+          &gt;
+        </span>
+        <span className="spa-breadcrumb-page">{activeMenu}</span>
+      </nav>
     </div>
   );
 };
