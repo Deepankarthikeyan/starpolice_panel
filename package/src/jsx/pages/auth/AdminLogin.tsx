@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
 import { api, storeAuth } from "../../starPolice/api";
+import { notify } from "../../starPolice/toast";
 import type { AuthUser } from "../../starPolice/types";
 
 interface Props {
@@ -23,9 +24,12 @@ const AdminLogin = ({ setAuth }: Props) => {
       const user = await api.login(email, password, "admin");
       storeAuth(user);
       setAuth(user);
+      notify.success("Signed in successfully.");
       navigate("/admin/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      const message = err instanceof Error ? err.message : "Login failed";
+      setError(message);
+      notify.error(err, "Login failed");
     } finally {
       setLoading(false);
     }

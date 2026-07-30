@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { api } from "../api";
+import { notify } from "../toast";
 import type { ChatMessage } from "../types";
 
 const StudentInteraction = () => {
@@ -30,8 +31,9 @@ const StudentInteraction = () => {
       await api.sendMessage(message.trim());
       setMessage("");
       await loadMessages();
+      notify.success("Message sent successfully.");
     } catch (error) {
-      console.error(error);
+      notify.error(error, "Failed to send message");
     } finally {
       setLoading(false);
     }

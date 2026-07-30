@@ -2,6 +2,7 @@ import { FormEvent, useContext, useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
+import { notify } from "../toast";
 import { getPanelMotherMenu } from "../panelLabels";
 import type { ChatMessage } from "../types";
 
@@ -33,8 +34,9 @@ const StudentInteraction = () => {
       await api.sendMessage(message.trim());
       setMessage("");
       await loadMessages();
+      notify.success("Message sent successfully.");
     } catch (error) {
-      console.error(error);
+      notify.error(error, "Failed to send message");
     } finally {
       setLoading(false);
     }

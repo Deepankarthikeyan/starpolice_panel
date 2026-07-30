@@ -4,6 +4,7 @@ import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
 import { hasPermission } from "../permissions";
 import { getPanelMotherMenu } from "../panelLabels";
+import { notify } from "../toast";
 import {
   emptyStudentOnboardingForm,
   type StudentOnboardingFormState,
@@ -185,13 +186,17 @@ const StudentOnboarding = () => {
       }
       if (editingId) {
         await api.updateStudentOnboarding(editingId, form, files);
+        notify.success("Student onboarding record updated.");
       } else {
         await api.createStudentOnboarding(form, files);
+        notify.success("Student onboarding record created.");
       }
       await loadRecords();
       resetForm();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save student onboarding record.");
+      const message = err instanceof Error ? err.message : "Failed to save student onboarding record.";
+      setError(message);
+      notify.error(err, "Failed to save student onboarding record.");
     } finally {
       setLoading(false);
     }
@@ -210,8 +215,11 @@ const StudentOnboarding = () => {
       if (editingId === record.id) {
         resetForm();
       }
+      notify.success("Student onboarding record deleted.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete record.");
+      const message = err instanceof Error ? err.message : "Failed to delete record.";
+      setError(message);
+      notify.error(err, "Failed to delete record.");
     } finally {
       setLoading(false);
     }

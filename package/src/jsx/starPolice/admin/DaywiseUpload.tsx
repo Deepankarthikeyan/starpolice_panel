@@ -5,6 +5,7 @@ import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
 import { getPanelMotherMenu } from "../panelLabels";
+import { notify } from "../toast";
 import { UploadPreviewButton } from "../shared/UploadFilePreview";
 import type { FileCategory, UploadedFile } from "../types";
 
@@ -80,7 +81,9 @@ const DaywiseUpload = () => {
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
       setTitleError(true);
-      setError("Please enter a title before uploading.");
+      const message = "Please enter a title before uploading.";
+      setError(message);
+      notify.error(message);
       titleInputRef.current?.focus();
       if (input) input.value = "";
       return;
@@ -94,8 +97,11 @@ const DaywiseUpload = () => {
       await api.uploadFiles(dateKey, category, trimmedTitle, Array.from(files));
       await loadUploads();
       setTitle("");
+      notify.success("Files uploaded successfully.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      const message = err instanceof Error ? err.message : "Upload failed";
+      setError(message);
+      notify.error(err, "Upload failed");
     } finally {
       setLoading(false);
     }
@@ -287,8 +293,13 @@ const DaywiseUpload = () => {
                             <button
                               className="btn btn-sm btn-danger"
                               onClick={async () => {
-                                await api.deleteUpload(upload.id);
-                                await loadUploads();
+                                try {
+                                  await api.deleteUpload(upload.id);
+                                  await loadUploads();
+                                  notify.success("Upload deleted successfully.");
+                                } catch (err) {
+                                  notify.error(err, "Failed to delete upload");
+                                }
                               }}
                             >
                               Delete
