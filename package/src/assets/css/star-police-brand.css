@@ -614,3 +614,106 @@
     padding: 0.4rem !important;
   }
 }
+
+/* Page title bar — dark panel + page colors (all panels) */
+.spa-page-titles {
+  background: linear-gradient(135deg, #081428 0%, #0f2744 55%, #123d73 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 18px rgba(8, 20, 40, 0.14);
+}
+
+.spa-page-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+.spa-page-breadcrumb .breadcrumb-item {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+}
+
+.spa-page-breadcrumb .breadcrumb-item::before,
+.spa-page-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+  display: none;
+  content: none;
+}
+
+.spa-breadcrumb-panel span,
+.spa-breadcrumb-page span {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.spa-breadcrumb-panel span {
+  background: #06101f;
+  color: #c9a227;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+}
+
+.spa-breadcrumb-page span {
+  background: #1a3d66;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Staff panel */
+#main-wrapper:has(.spa-sidebar-staff) .spa-page-titles {
+  background: linear-gradient(135deg, #0a1a2e 0%, #12304f 55%, #1a4a73 100%);
+}
+
+#main-wrapper:has(.spa-sidebar-staff) .spa-breadcrumb-panel span {
+  background: #071525;
+  color: #6ea8d8;
+  border-color: rgba(110, 168, 216, 0.35);
+}
+
+#main-wrapper:has(.spa-sidebar-staff) .spa-breadcrumb-page span {
+  background: #1e5580;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Student panel */
+#main-wrapper:has(.spa-sidebar-student) .spa-page-titles {
+  background: linear-gradient(135deg, #061a14 0%, #0a2e22 55%, #146b4a 100%);
+}
+
+#main-wrapper:has(.spa-sidebar-student) .spa-breadcrumb-panel span {
+  background: #04140f;
+  color: #3ecf8e;
+  border-color: rgba(62, 207, 142, 0.35);
+}
+
+#main-wrapper:has(.spa-sidebar-student) .spa-breadcrumb-page span {
+  background: #1a7a52;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+@media only screen and (max-width: 47.9375rem) {
+  .spa-page-titles {
+    padding: 0.75rem 1rem;
+  }
+
+  .spa-breadcrumb-panel span,
+  .spa-breadcrumb-page span {
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.75rem;
+  }
+}
