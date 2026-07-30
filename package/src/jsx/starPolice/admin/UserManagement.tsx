@@ -10,6 +10,7 @@ import {
   hasPermission,
 } from "../permissions";
 import { getPanelMotherMenu, formatAccountType } from "../panelLabels";
+import { notify } from "../toast";
 import type { ManagedUser } from "../types";
 
 type CreateAccountType = "student" | "admin" | "staff";
@@ -114,16 +115,24 @@ const UserManagement = () => {
       setPassword("");
       setCreatePermissions(defaultPermissionsForRole(createAccountType));
       await loadUsers();
+      notify.success("Account created successfully.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create user");
+      const message = err instanceof Error ? err.message : "Failed to create user";
+      setError(message);
+      notify.error(err, "Failed to create user");
     } finally {
       setLoading(false);
     }
   };
 
   const toggleAccess = async (user: ManagedUser) => {
-    await api.setUserAccess(user.id, !user.isActive);
-    await loadUsers();
+    try {
+      await api.setUserAccess(user.id, !user.isActive);
+      await loadUsers();
+      notify.success(user.isActive ? "Login access revoked." : "Login access granted.");
+    } catch (err) {
+      notify.error(err, "Failed to update login access");
+    }
   };
 
   const openEditPermissions = (user: ManagedUser) => {
@@ -155,8 +164,11 @@ const UserManagement = () => {
       await api.updateUser(editingProfileUser.id, data);
       setEditingProfileUser(null);
       await loadUsers();
+      notify.success("Account updated successfully.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update account");
+      const message = err instanceof Error ? err.message : "Failed to update account";
+      setError(message);
+      notify.error(err, "Failed to update account");
     } finally {
       setLoading(false);
     }
@@ -170,8 +182,11 @@ const UserManagement = () => {
       await api.updateUserPermissions(editingUser.id, editPermissions);
       setEditingUser(null);
       await loadUsers();
+      notify.success("Permissions updated successfully.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update permissions");
+      const message = err instanceof Error ? err.message : "Failed to update permissions";
+      setError(message);
+      notify.error(err, "Failed to update permissions");
     } finally {
       setLoading(false);
     }
@@ -248,8 +263,13 @@ const UserManagement = () => {
                           type="button"
                           className="btn btn-sm btn-outline-danger spa-user-action-btn"
                           onClick={async () => {
-                            await api.deleteUser(user.id);
-                            await loadUsers();
+                            try {
+                              await api.deleteUser(user.id);
+                              await loadUsers();
+                              notify.success("Account deleted successfully.");
+                            } catch (err) {
+                              notify.error(err, "Failed to delete account");
+                            }
                           }}
                           title="Delete"
                           aria-label="Delete"

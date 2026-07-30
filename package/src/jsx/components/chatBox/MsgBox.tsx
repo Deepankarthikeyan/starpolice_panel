@@ -2,6 +2,7 @@ import { FormEvent, useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../../starPolice/api";
+import { notify } from "../../starPolice/toast";
 import type { ChatMessage } from "../../starPolice/types";
 
 interface MsgBoxProps {
@@ -41,8 +42,9 @@ const MsgBox: React.FC<MsgBoxProps> = ({
       await api.sendMessage(message.trim());
       setMessage("");
       await onMessageSent();
+      notify.success("Message sent successfully.");
     } catch (error) {
-      console.error(error);
+      notify.error(error, "Failed to send message");
     } finally {
       setLoading(false);
     }

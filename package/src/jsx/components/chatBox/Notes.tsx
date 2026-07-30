@@ -2,6 +2,7 @@ import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../../starPolice/api";
+import { notify } from "../../starPolice/toast";
 import type { Note } from "../../starPolice/types";
 
 interface NotesProps {
@@ -42,13 +43,15 @@ const Notes: React.FC<NotesProps> = ({ toggleTab, toggleChatBox }) => {
     try {
       if (editingId) {
         await api.updateNote(editingId, content.trim());
+        notify.success("Note updated successfully.");
       } else {
         await api.createNote(content.trim());
+        notify.success("Note created successfully.");
       }
       resetForm();
       await loadNotes();
     } catch (error) {
-      console.error(error);
+      notify.error(error, "Failed to save note");
     } finally {
       setLoading(false);
     }
@@ -64,8 +67,9 @@ const Notes: React.FC<NotesProps> = ({ toggleTab, toggleChatBox }) => {
     try {
       await api.deleteNote(id);
       await loadNotes();
+      notify.success("Note deleted successfully.");
     } catch (error) {
-      console.error(error);
+      notify.error(error, "Failed to delete note");
     }
   };
 

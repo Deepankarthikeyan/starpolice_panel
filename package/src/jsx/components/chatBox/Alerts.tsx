@@ -2,6 +2,7 @@ import React, { FormEvent, useContext, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../../starPolice/api";
+import { notify } from "../../starPolice/toast";
 import { usePolling } from "../../starPolice/usePolling";
 import type { AcademyAlert } from "../../starPolice/types";
 
@@ -55,8 +56,9 @@ const Alerts: React.FC<AlertsProps> = ({ toggleTab, toggleChatBox, toggle }) => 
       setMessage("");
       setShowForm(false);
       await loadAlerts();
+      notify.success("Alert posted successfully.");
     } catch (error) {
-      console.error(error);
+      notify.error(error, "Failed to post alert");
     } finally {
       setLoading(false);
     }

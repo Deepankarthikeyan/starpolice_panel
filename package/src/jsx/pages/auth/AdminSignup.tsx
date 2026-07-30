@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
 import { api, storeAuth } from "../../starPolice/api";
+import { notify } from "../../starPolice/toast";
 import type { AuthUser } from "../../starPolice/types";
 
 interface Props {
@@ -29,9 +30,12 @@ const AdminSignup = ({ setAuth }: Props) => {
       const user = await api.register(name, email, password, "admin");
       storeAuth(user);
       setAuth(user);
+      notify.success("Super admin account created successfully.");
       navigate("/admin/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Signup failed");
+      const message = err instanceof Error ? err.message : "Signup failed";
+      setError(message);
+      notify.error(err, "Signup failed");
     } finally {
       setLoading(false);
     }

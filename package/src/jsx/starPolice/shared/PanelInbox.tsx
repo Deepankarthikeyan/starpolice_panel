@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
+import { notify } from "../toast";
 import { getPanelMotherMenu } from "../panelLabels";
 import type { AppNotification } from "../types";
 
@@ -25,8 +26,13 @@ const PanelInbox = () => {
   }, []);
 
   const markRead = async (id: string) => {
-    await api.markNotificationRead(id);
-    await loadNotifications();
+    try {
+      await api.markNotificationRead(id);
+      await loadNotifications();
+      notify.success("Notification marked as read.");
+    } catch (err) {
+      notify.error(err, "Failed to mark notification as read");
+    }
   };
 
   return (
@@ -42,7 +48,15 @@ const PanelInbox = () => {
           <button
             type="button"
             className="btn btn-sm btn-outline-primary"
-            onClick={() => api.markAllNotificationsRead().then(loadNotifications)}
+            onClick={async () => {
+              try {
+                await api.markAllNotificationsRead();
+                await loadNotifications();
+                notify.success("All notifications marked as read.");
+              } catch (err) {
+                notify.error(err, "Failed to mark all notifications as read");
+              }
+            }}
           >
             Mark all read
           </button>

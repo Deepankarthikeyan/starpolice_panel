@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { Dropdown } from "react-bootstrap";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../../starPolice/api";
+import { notify } from "../../starPolice/toast";
 import { usePolling } from "../../starPolice/usePolling";
 import type { AppNotification } from "../../starPolice/types";
 
@@ -49,8 +50,9 @@ const Header = ({ onNote }: propType) => {
     try {
       await api.markAllNotificationsRead();
       await loadNotifications();
+      notify.success("All notifications marked as read.");
     } catch (error) {
-      console.error(error);
+      notify.error(error, "Failed to mark all notifications as read");
     }
   };
 

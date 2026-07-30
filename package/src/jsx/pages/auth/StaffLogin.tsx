@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
 import { api, storeAuth } from "../../starPolice/api";
+import { notify } from "../../starPolice/toast";
 import type { AuthUser } from "../../starPolice/types";
 
 interface Props {
@@ -22,18 +23,25 @@ const StaffLogin = ({ setAuth }: Props) => {
     try {
       const user = await api.login(email, password, "staff");
       if (user.role === "superadmin") {
-        setError("Super admin accounts should sign in from the admin login page.");
+        const message = "Super admin accounts should sign in from the admin login page.";
+        setError(message);
+        notify.error(message);
         return;
       }
       if (user.role !== "staff") {
-        setError("Staff access requires a staff account created by the super admin.");
+        const message = "Staff access requires a staff account created by the super admin.";
+        setError(message);
+        notify.error(message);
         return;
       }
       storeAuth(user);
       setAuth(user);
+      notify.success("Signed in successfully.");
       navigate("/staff/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      const message = err instanceof Error ? err.message : "Login failed";
+      setError(message);
+      notify.error(err, "Login failed");
     } finally {
       setLoading(false);
     }
