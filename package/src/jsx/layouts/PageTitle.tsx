@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-
 interface PageTitleType {
   motherMenu: string;
   activeMenu: string;
@@ -8,18 +6,16 @@ interface PageTitleType {
 
 const PageTitle = ({ motherMenu, activeMenu }: PageTitleType) => {
   return (
-    <>
-      <div className="row page-titles mx-0">
-        <ol className="breadcrumb">
-          <li className="breadcrumb-item active">
-            <Link to={`#`}>{motherMenu}</Link>
-          </li>
-          <li className="breadcrumb-item  ">
-            <Link to={`#`}>{activeMenu}</Link>
-          </li>
-        </ol>
-      </div>
-    </>
+    <div className="row page-titles spa-page-titles mx-0">
+      <ol className="breadcrumb spa-page-breadcrumb mb-0">
+        <li className="breadcrumb-item spa-breadcrumb-panel">
+          <span>{motherMenu}</span>
+        </li>
+        <li className="breadcrumb-item spa-breadcrumb-page active" aria-current="page">
+          <span>{activeMenu}</span>
+        </li>
+      </ol>
+    </div>
   );
 };
 
