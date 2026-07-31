@@ -7,6 +7,7 @@ import App from "./App.tsx";
 import "./assets/css/style.css";
 import "./assets/css/star-police-brand.css";
 import "./assets/css/spa-sidebar.css";
+import "./assets/css/spa-responsive.css";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-toastify/dist/ReactToastify.css";
 

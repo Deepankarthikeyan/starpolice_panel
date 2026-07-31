@@ -1,0 +1,230 @@
+/* Star Police Academy — responsive overrides (all panels) */
+
+/* Content padding on small screens */
+@media only screen and (max-width: 47.9375rem) {
+  #main-wrapper:has(.spa-sidebar) .content-body {
+    padding-top: 4.25rem !important;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .header .header-content {
+    padding-left: 3.25rem !important;
+    padding-right: 0.75rem !important;
+    height: 4.25rem;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .container-fluid {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .spa-page-breadcrumb {
+    font-size: 0.8125rem;
+    gap: 0.35rem;
+  }
+
+  .spa-breadcrumb-panel,
+  .spa-breadcrumb-page {
+    word-break: break-word;
+  }
+}
+
+@media only screen and (max-width: 63.9375rem) {
+  #main-wrapper:has(.spa-sidebar) .header .header-content {
+    padding-right: 1rem !important;
+  }
+}
+
+/* Header — hide nonessential controls on phones */
+@media only screen and (max-width: 47.9375rem) {
+  .header-right .dz-theme-mode,
+  .header-right .dz-fullscreen {
+    display: none !important;
+  }
+
+  .header-right .navbar-nav {
+    gap: 0;
+  }
+
+  .header-right .notification_dropdown .nav-link {
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+  }
+
+  .header .notification_dropdown .dropdown-menu {
+    max-height: min(380px, calc(100vh - 5rem));
+    overflow-y: auto;
+  }
+}
+
+/* User management action buttons */
+@media only screen and (max-width: 47.9375rem) {
+  .spa-user-actions-cell {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .spa-user-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    max-width: 8rem;
+  }
+}
+
+/* Daywise upload filters */
+@media only screen and (max-width: 47.9375rem) {
+  .daywise-upload-filters .daywise-upload-type-filter {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .daywise-upload-filters .col-auto {
+    width: 100%;
+  }
+}
+
+/* Onboarding table & actions */
+@media only screen and (max-width: 47.9375rem) {
+  .spa-onboarding-table {
+    min-width: 36rem;
+  }
+
+  .spa-onboarding-actions {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .spa-onboarding-records-card .card-header {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .spa-onboarding-records-card .card-header .btn {
+    width: 100%;
+  }
+}
+
+/* Inbox */
+@media only screen and (max-width: 47.9375rem) {
+  .spa-inbox-item-time {
+    white-space: normal !important;
+    text-align: right;
+  }
+
+  .spa-inbox-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.75rem;
+  }
+
+  .spa-inbox-header .btn {
+    width: 100%;
+  }
+}
+
+/* Auth pages */
+@media only screen and (max-width: 47.9375rem) {
+  .spa-auth-page {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .spa-auth-brand {
+    display: none !important;
+  }
+
+  .spa-auth-form-wrap {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .spa-auth-form-inner {
+    padding: 1.5rem 1.25rem !important;
+  }
+
+  .spa-auth-form-inner h2 {
+    font-size: 1.35rem;
+  }
+
+  .spa-auth-container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .spa-auth-card {
+    border-radius: 0.75rem;
+  }
+}
+
+@media only screen and (min-width: 48rem) and (max-width: 61.9375rem) {
+  .spa-auth-vector {
+    max-height: 10rem;
+    margin-top: 1rem;
+  }
+
+  .spa-auth-brand-inner h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Chat sidebar drawer */
+@media only screen and (max-width: 47.9375rem) {
+  .chatbox {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    right: -100vw !important;
+  }
+
+  .chatActive {
+    right: 0 !important;
+  }
+
+  .chatbox-close {
+    width: 100vw !important;
+  }
+}
+
+@media only screen and (max-width: 35.9375rem) {
+  .chatbox {
+    width: 100vw !important;
+  }
+}
+
+/* Modals */
+@media only screen and (max-width: 47.9375rem) {
+  .modal-dialog {
+    margin: 0.75rem;
+  }
+
+  .upload-preview-frame {
+    min-height: 50vh;
+  }
+
+  .upload-preview-image,
+  .upload-preview-video {
+    max-height: 60vh;
+  }
+}
+
+/* Cards & forms */
+@media only screen and (max-width: 47.9375rem) {
+  .card-header .card-title {
+    font-size: 1rem;
+  }
+
+  .table th,
+  .table td {
+    font-size: 0.8125rem;
+    padding: 0.5rem 0.4rem;
+  }
+
+  .btn-sm {
+    font-size: 0.75rem;
+  }
+}
+
+/* Student interaction send button */
+@media only screen and (max-width: 47.9375rem) {
+  .spa-interaction-send {
+    width: 100%;
+  }
+}

@@ -230,7 +230,7 @@ const DaywiseUpload = () => {
                       onChange={(event) => setSearchQuery(event.target.value)}
                     />
                   </div>
-                  <div className="col-auto">
+                  <div className="col-12 col-sm-auto">
                     <select
                       className="form-select daywise-upload-type-filter"
                       value={typeFilter}
@@ -247,7 +247,7 @@ const DaywiseUpload = () => {
                     </select>
                   </div>
                   {hasActiveFilters && (
-                    <div className="col-auto">
+                    <div className="col-12 col-sm-auto">
                       <button
                         type="button"
                         className="btn btn-outline-secondary"

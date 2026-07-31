@@ -82,7 +82,7 @@ const StudentInteraction = () => {
               />
             </div>
             <div className="col-md-2 d-flex align-items-start">
-              <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+              <button type="submit" className="btn btn-primary w-100 spa-interaction-send" disabled={loading}>
                 Send
               </button>
             </div>

@@ -43,7 +43,7 @@ const PanelInbox = () => {
         pageContent=""
       />
       <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
+        <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 spa-inbox-header">
           <h4 className="card-title mb-0">Notifications</h4>
           <button
             type="button"
@@ -82,7 +82,7 @@ const PanelInbox = () => {
                       <div>{notification.title}</div>
                       <small className="text-muted">{notification.message}</small>
                     </div>
-                    <small className="text-muted text-nowrap">
+                    <small className="text-muted text-nowrap spa-inbox-item-time">
                       {new Date(notification.createdAt).toLocaleString()}
                     </small>
                   </div>

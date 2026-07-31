@@ -49,12 +49,10 @@ function App() {
 
   useEffect(() => {
     function resizeHandler() {
-      if (window.innerWidth <= 775) {
+      if (window.innerWidth <= 1023) {
         document.body.setAttribute("data-sidebar-style", "overlay");
-      } else if (window.innerWidth >= 1024) {
-        document.body.setAttribute("data-sidebar-style", "full");
       } else {
-        document.body.setAttribute("data-sidebar-style", "mini");
+        document.body.setAttribute("data-sidebar-style", "full");
       }
     }
 
