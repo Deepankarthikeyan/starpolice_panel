@@ -351,7 +351,7 @@ const StudentOnboarding = () => {
         </div>
       ) : (
         <form onSubmit={onSubmit}>
-          <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
             <h4 className="mb-0">{editingId ? "Edit Student Onboarding" : "New Student Onboarding"}</h4>
             <button type="button" className="btn btn-outline-secondary" onClick={resetForm}>
               Back to List

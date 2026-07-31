@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { getMenuList } from "./Menu";
 import { ThemeContext } from "../../../context/ThemeContext";
@@ -54,15 +54,61 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
     setIconhover(Boolean(sidebarStyle?.includes("icon-hover")));
   }
 
+  const [sidebarStyle, setSidebarStyle] = useState(
+    () => document.body.getAttribute("data-sidebar-style") || "full"
+  );
+  const isOverlay = sidebarStyle === "overlay";
+
+  useEffect(() => {
+    const updateSidebarStyle = () => {
+      setSidebarStyle(document.body.getAttribute("data-sidebar-style") || "full");
+    };
+    window.addEventListener("resize", updateSidebarStyle);
+    updateSidebarStyle();
+    return () => window.removeEventListener("resize", updateSidebarStyle);
+  }, []);
+
+  useEffect(() => {
+    if (isOverlay) {
+      setOpenMenuToggle(false);
+    }
+  }, [location.pathname, isOverlay, setOpenMenuToggle]);
+
+  useEffect(() => {
+    if (isOverlay && openMenuToggle) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+    document.body.style.overflow = "";
+    return undefined;
+  }, [isOverlay, openMenuToggle]);
+
+  const closeMobileMenu = () => {
+    if (isOverlay) {
+      setOpenMenuToggle(false);
+    }
+  };
+
   return (
     <>
+      {openMenuToggle && isOverlay && (
+        <button
+          type="button"
+          className="spa-sidebar-backdrop"
+          aria-label="Close navigation menu"
+          onClick={() => setOpenMenuToggle(false)}
+        />
+      )}
+
       <button
         type="button"
         className="spa-sidebar-mobile-trigger"
-        aria-label="Open navigation menu"
-        onClick={() => setOpenMenuToggle(true)}
+        aria-label={openMenuToggle ? "Close navigation menu" : "Open navigation menu"}
+        onClick={() => setOpenMenuToggle(!openMenuToggle)}
       >
-        <i className="material-symbols-outlined">menu</i>
+        <i className="material-symbols-outlined">{openMenuToggle && isOverlay ? "close" : "menu"}</i>
       </button>
 
       <aside
@@ -108,7 +154,12 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
 
                 return (
                   <li key={item.title} className={isActive ? "is-active" : ""}>
-                    <Link to={itemPath} className="spa-sidebar-link" title={item.title}>
+                    <Link
+                      to={itemPath}
+                      className="spa-sidebar-link"
+                      title={item.title}
+                      onClick={closeMobileMenu}
+                    >
                       <span className="spa-sidebar-link-icon">{item.iconStyle}</span>
                       <span className="spa-sidebar-link-text">{item.title}</span>
                     </Link>
@@ -119,7 +170,7 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
           </nav>
 
           <div className="spa-sidebar-footer">
-            <Link to={`${basePath}/dashboard`} className="spa-sidebar-brand">
+            <Link to={`${basePath}/dashboard`} className="spa-sidebar-brand" onClick={closeMobileMenu}>
               <img src={emblemLogo} alt="" className="spa-sidebar-brand-icon" aria-hidden="true" />
               <img src={fullLogo} alt="Star Police Academy" className="spa-sidebar-brand-logo" />
             </Link>
