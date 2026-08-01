@@ -224,7 +224,11 @@
 
 /* Student interaction send button */
 @media only screen and (max-width: 47.9375rem) {
-  .spa-interaction-send {
-    width: 100%;
+  .spa-lead-status-select {
+    min-width: 10rem;
+  }
+
+  .spa-leads-table {
+    min-width: 40rem;
   }
 }

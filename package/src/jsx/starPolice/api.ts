@@ -12,6 +12,7 @@ import type {
   UploadedFile,
 } from "./types";
 import type { StudentOnboardingFormState, StudentOnboardingRecord } from "./admin/studentOnboardingDefaults";
+import type { LeadFormState, LeadRecord, LeadStatus } from "./admin/leadDefaults";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
@@ -322,6 +323,49 @@ export const api = {
 
   deleteStudentOnboarding(id: string) {
     return request<{ message: string }>(`/api/student-onboarding/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  getLeads(status?: LeadStatus) {
+    const query = status ? `?status=${encodeURIComponent(status)}` : "";
+    return request<LeadRecord[]>(`/api/leads${query}`);
+  },
+
+  getLead(id: string) {
+    return request<LeadRecord>(`/api/leads/${id}`);
+  },
+
+  createLead(form: LeadFormState) {
+    return request<LeadRecord>("/api/leads", {
+      method: "POST",
+      body: JSON.stringify(form),
+    });
+  },
+
+  updateLead(id: string, form: LeadFormState) {
+    return request<LeadRecord>(`/api/leads/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(form),
+    });
+  },
+
+  updateLeadStatus(id: string, status: LeadStatus, rejectionReason?: string) {
+    return request<LeadRecord>(`/api/leads/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status, rejectionReason }),
+    });
+  },
+
+  convertLeadToStudent(id: string) {
+    return request<{ lead: LeadRecord; studentOnboardingId: string; studentId: string }>(
+      `/api/leads/${id}/convert`,
+      { method: "POST" }
+    );
+  },
+
+  deleteLead(id: string) {
+    return request<{ message: string }>(`/api/leads/${id}`, {
       method: "DELETE",
     });
   },

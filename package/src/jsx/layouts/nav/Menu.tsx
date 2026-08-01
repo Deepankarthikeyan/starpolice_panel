@@ -28,6 +28,12 @@ const AdminMenuList = (auth?: AuthUser | null) => {
       permission: "admin:calendar" as const,
     },
     {
+      title: "Leads",
+      iconStyle: <i className="material-symbols-outlined">contact_page</i>,
+      to: "leads",
+      permission: "admin:leads" as const,
+    },
+    {
       title: "Student\u00a0Onboarding",
       iconStyle: <i className="material-symbols-outlined">person_add</i>,
       to: "student-onboarding",
