@@ -12,6 +12,7 @@ import alertRoutes from "./routes/alerts.js";
 import notificationRoutes from "./routes/notifications.js";
 import userRoutes from "./routes/users.js";
 import studentOnboardingRoutes from "./routes/studentOnboarding.js";
+import leadRoutes from "./routes/leads.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import { uploadDir } from "./middleware/upload.js";
 
@@ -43,6 +44,7 @@ app.use("/api/alerts", alertRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/student-onboarding", studentOnboardingRoutes);
+app.use("/api/leads", leadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
 app.use((error, _req, res, _next) => {
