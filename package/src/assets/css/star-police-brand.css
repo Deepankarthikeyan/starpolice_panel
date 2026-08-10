@@ -652,12 +652,154 @@
   font-weight: 600;
 }
 
+.physical-record-card {
+  border: 2px solid #0b1f4a;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #fff;
+}
+
+.physical-record-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #0b1f4a, #123d73);
+  color: #fff;
+}
+
+.physical-record-academy {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.physical-record-subtitle {
+  font-size: 0.8rem;
+  opacity: 0.9;
+  margin-top: 0.25rem;
+}
+
+.physical-record-title-wrap {
+  text-align: right;
+}
+
+.physical-record-title {
+  color: #ff4d4f;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.physical-record-card-name {
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.physical-record-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.physical-record-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.physical-record-value {
+  font-weight: 600;
+  color: #111827;
+}
+
+.physical-record-table thead th {
+  background: #0b1f4a;
+  color: #fff;
+  border: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.physical-record-table tbody td {
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+.physical-record-event {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.physical-record-footer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.physical-record-attendance-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.physical-record-attendance-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.physical-record-overall-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.physical-record-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.physical-record-remarks {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.physical-record-signature {
+  padding: 1rem 1.5rem 1.5rem;
+  text-align: right;
+  font-weight: 600;
+  color: #0b1f4a;
+}
+
 @media only screen and (max-width: 47.9375rem) {
-  .spa-page-titles {
-    padding: 0.4rem 0;
+  .physical-record-title-wrap {
+    text-align: left;
   }
 
-  .spa-page-breadcrumb {
-    font-size: 0.875rem;
+  .physical-record-header {
+    padding: 1rem;
+  }
+
+  .physical-record-info-grid,
+  .physical-record-footer,
+  .physical-record-remarks {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }

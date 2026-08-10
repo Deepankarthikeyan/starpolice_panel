@@ -8,6 +8,7 @@ export const ADMIN_PERMISSIONS = [
   { key: "admin:users", label: "User Management", description: "Create and manage student accounts" },
   { key: "admin:onboarding", label: "Student Onboarding", description: "Create and manage student onboarding records" },
   { key: "admin:leads", label: "Leads", description: "Manage prospective student leads" },
+  { key: "admin:performance", label: "Student Performance", description: "Manage physical efficiency records" },
 ];
 
 export const STUDENT_PERMISSIONS = [
@@ -15,6 +16,7 @@ export const STUDENT_PERMISSIONS = [
   { key: "student:materials", label: "Study Materials", description: "View uploaded study materials" },
   { key: "student:messages", label: "Admin Interaction", description: "Chat with admins" },
   { key: "student:calendar", label: "Monthly Calendar", description: "View the monthly calendar" },
+  { key: "student:performance", label: "Physical Performance", description: "View physical efficiency record" },
 ];
 
 export const ALL_ADMIN_PERMISSION_KEYS = ADMIN_PERMISSIONS.map((item) => item.key);

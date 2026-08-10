@@ -13,6 +13,10 @@ import type {
 } from "./types";
 import type { StudentOnboardingFormState, StudentOnboardingRecord } from "./admin/studentOnboardingDefaults";
 import type { LeadFormState, LeadRecord, LeadStatus } from "./admin/leadDefaults";
+import type {
+  StudentPerformanceRecord,
+  StudentPerformanceSummary,
+} from "./admin/performanceDefaults";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
@@ -368,6 +372,33 @@ export const api = {
     return request<{ message: string }>(`/api/leads/${id}`, {
       method: "DELETE",
     });
+  },
+
+  getStudentPerformanceStudents() {
+    return request<StudentPerformanceSummary[]>("/api/student-performance/students");
+  },
+
+  getStudentPerformanceByStudent(studentOnboardingId: string) {
+    return request<StudentPerformanceRecord & { hasRecord?: boolean }>(
+      `/api/student-performance/by-student/${studentOnboardingId}`
+    );
+  },
+
+  saveStudentPerformance(studentOnboardingId: string, form: StudentPerformanceRecord) {
+    return request<StudentPerformanceRecord>(`/api/student-performance/by-student/${studentOnboardingId}`, {
+      method: "PUT",
+      body: JSON.stringify(form),
+    });
+  },
+
+  deleteStudentPerformance(studentOnboardingId: string) {
+    return request<{ message: string }>(`/api/student-performance/by-student/${studentOnboardingId}`, {
+      method: "DELETE",
+    });
+  },
+
+  getMyStudentPerformance() {
+    return request<StudentPerformanceRecord & { hasRecord?: boolean }>("/api/student-performance/me");
   },
 };
 

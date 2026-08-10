@@ -14,6 +14,7 @@ import userRoutes from "./routes/users.js";
 import studentOnboardingRoutes from "./routes/studentOnboarding.js";
 import leadRoutes from "./routes/leads.js";
 import dashboardRoutes from "./routes/dashboard.js";
+import studentPerformanceRoutes from "./routes/studentPerformance.js";
 import { uploadDir } from "./middleware/upload.js";
 
 dotenv.config();
@@ -46,6 +47,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/student-onboarding", studentOnboardingRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/student-performance", studentPerformanceRoutes);
 
 app.use((error, _req, res, _next) => {
   res.status(500).json({ message: error.message || "Server error" });
