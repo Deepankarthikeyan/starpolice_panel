@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import type {
   OverallPerformance,
   PerformanceCardType,
@@ -6,9 +5,7 @@ import type {
   StudentPerformanceRecord,
 } from "../admin/performanceDefaults";
 import {
-  FEMALE_EVENT_DEFINITIONS,
   getEventDefinitions,
-  MALE_EVENT_DEFINITIONS,
   mergeEventsWithDefaults,
   overallPerformanceLabel,
   OVERALL_PERFORMANCE_OPTIONS,
@@ -68,8 +65,6 @@ function eventIcon(eventKey: string) {
 export default function PhysicalRecordCard({ form, readOnly = false, onChange }: PhysicalRecordCardProps) {
   const cardType: PerformanceCardType = form.cardType;
   const definitions = getEventDefinitions();
-  const femaleKeys = new Set(FEMALE_EVENT_DEFINITIONS.map((item) => item.eventKey));
-  const maleKeys = new Set(MALE_EVENT_DEFINITIONS.map((item) => item.eventKey));
   const studentName = form.student?.fullName || "—";
   const registerNo = form.student?.studentId || "—";
   const batch = form.student?.batch || "—";
@@ -194,23 +189,9 @@ export default function PhysicalRecordCard({ form, readOnly = false, onChange }:
           <tbody>
             {definitions.map((definition: PerformanceEventDefinition) => {
               const event = getEventForDefinition(form, definition);
-              const sectionLabel = femaleKeys.has(definition.eventKey)
-                ? definition.eventKey === FEMALE_EVENT_DEFINITIONS[0].eventKey
-                  ? "Female Category Events"
-                  : null
-                : maleKeys.has(definition.eventKey) &&
-                    definition.eventKey === MALE_EVENT_DEFINITIONS[0].eventKey
-                  ? "Male Category Events"
-                  : null;
 
               return (
-                <Fragment key={definition.eventKey}>
-                  {sectionLabel && (
-                    <tr key={`section-${sectionLabel}`} className="physical-record-section-row">
-                      <td colSpan={5}>{sectionLabel}</td>
-                    </tr>
-                  )}
-                  <tr key={definition.eventKey}>
+                <tr key={definition.eventKey}>
                     <td>
                       <div className="physical-record-event">
                         <i className="material-symbols-outlined text-danger">{eventIcon(definition.eventKey)}</i>
@@ -269,8 +250,7 @@ export default function PhysicalRecordCard({ form, readOnly = false, onChange }:
                         />
                       )}
                     </td>
-                  </tr>
-                </Fragment>
+                </tr>
               );
             })}
           </tbody>
