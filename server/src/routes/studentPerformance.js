@@ -23,7 +23,7 @@ const FEMALE_EVENTS = [
   { eventKey: "ball_throw", label: "Ball Throw", benchmark: "24m / 17m" },
   { eventKey: "shot_put", label: "shot put", benchmark: "5.50m / 4.25m" },
   {
-    eventKey: "sprint_run",
+    eventKey: "sprint_200_100",
     label: "200m Run sec / 100m Run sec",
     benchmark: "33.00sec / 38.00sec — 15.50sec / 17.50sec",
   },
@@ -38,11 +38,13 @@ const MALE_EVENTS = [
     benchmark: "4.50 / 3.80m — 1.40 / 1.20m",
   },
   {
-    eventKey: "sprint_run",
+    eventKey: "sprint_100_400",
     label: "100m Run sec / 400m Run sec",
     benchmark: "13.50 / 15.50sec — 70 / 80sec",
   },
 ];
+
+const ALL_EVENTS = [...FEMALE_EVENTS, ...MALE_EVENTS];
 
 function getCardTypeFromGender(gender = "") {
   const value = gender.toLowerCase();
@@ -52,15 +54,35 @@ function getCardTypeFromGender(gender = "") {
   return "male";
 }
 
-function defaultEvents(cardType) {
-  const defs = cardType === "female" ? FEMALE_EVENTS : MALE_EVENTS;
-  return defs.map((item) => ({
-    eventKey: item.eventKey,
-    performance: item.benchmark,
-    singleStar: "",
-    doubleStar: "",
-    remarks: "",
-  }));
+function mergeEventsWithDefaults(saved = []) {
+  const byKey = new Map(saved.map((event) => [event.eventKey, event]));
+  const legacySprint = byKey.get("sprint_run");
+  if (legacySprint) {
+    if (!byKey.has("sprint_200_100")) {
+      byKey.set("sprint_200_100", { ...legacySprint, eventKey: "sprint_200_100" });
+    }
+    if (!byKey.has("sprint_100_400")) {
+      byKey.set("sprint_100_400", { ...legacySprint, eventKey: "sprint_100_400" });
+    }
+    byKey.delete("sprint_run");
+  }
+
+  return ALL_EVENTS.map((definition) => {
+    const existing = byKey.get(definition.eventKey);
+    return existing
+      ? { ...existing }
+      : {
+          eventKey: definition.eventKey,
+          performance: definition.benchmark,
+          singleStar: "",
+          doubleStar: "",
+          remarks: "",
+        };
+  });
+}
+
+function defaultEvents() {
+  return mergeEventsWithDefaults();
 }
 
 function fullStudentName(student) {
@@ -79,7 +101,7 @@ function mapPerformance(item, student) {
     weightKg: item.weightKg,
     chestNormalCm: item.chestNormalCm,
     chestExpansionCm: item.chestExpansionCm,
-    events: item.events || [],
+    events: mergeEventsWithDefaults(item.events || []),
     attendancePresent: item.attendancePresent,
     attendanceAbsent: item.attendanceAbsent,
     attendanceLeave: item.attendanceLeave,
@@ -121,7 +143,7 @@ function pickPerformanceFields(body) {
 }
 
 router.get("/event-definitions", authRequired, (_req, res) => {
-  res.json({ female: FEMALE_EVENTS, male: MALE_EVENTS });
+  res.json({ female: FEMALE_EVENTS, male: MALE_EVENTS, all: ALL_EVENTS });
 });
 
 router.get("/students", adminGuard, async (_req, res) => {
@@ -234,9 +256,7 @@ router.put("/by-student/:studentOnboardingId", adminGuard, async (req, res) => {
 
     const payload = pickPerformanceFields(req.body);
     const cardType = payload.cardType || getCardTypeFromGender(student.gender);
-    if (!payload.events.length) {
-      payload.events = defaultEvents(cardType);
-    }
+    payload.events = mergeEventsWithDefaults(payload.events);
 
     const performance = await StudentPerformance.findOneAndUpdate(
       { studentOnboardingId: student._id },

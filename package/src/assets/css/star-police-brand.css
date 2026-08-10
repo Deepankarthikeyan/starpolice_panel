@@ -780,6 +780,16 @@
   border-top: 1px solid #e5e7eb;
 }
 
+.physical-record-section-row td {
+  background: #f1f5f9;
+  color: #0b1f4a;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-top: 2px solid #0b1f4a;
+}
+
 .physical-record-signature {
   padding: 1rem 1.5rem 1.5rem;
   text-align: right;

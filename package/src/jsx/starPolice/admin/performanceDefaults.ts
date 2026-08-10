@@ -70,7 +70,7 @@ export const FEMALE_EVENT_DEFINITIONS: PerformanceEventDefinition[] = [
   { eventKey: "ball_throw", label: "Ball Throw", benchmark: "24m / 17m" },
   { eventKey: "shot_put", label: "shot put", benchmark: "5.50m / 4.25m" },
   {
-    eventKey: "sprint_run",
+    eventKey: "sprint_200_100",
     label: "200m Run sec / 100m Run sec",
     benchmark: "33.00sec / 38.00sec — 15.50sec / 17.50sec",
   },
@@ -85,10 +85,16 @@ export const MALE_EVENT_DEFINITIONS: PerformanceEventDefinition[] = [
     benchmark: "4.50 / 3.80m — 1.40 / 1.20m",
   },
   {
-    eventKey: "sprint_run",
+    eventKey: "sprint_100_400",
     label: "100m Run sec / 400m Run sec",
     benchmark: "13.50 / 15.50sec — 70 / 80sec",
   },
+];
+
+/** All events from both TNUSRB physical record card templates combined. */
+export const ALL_EVENT_DEFINITIONS: PerformanceEventDefinition[] = [
+  ...FEMALE_EVENT_DEFINITIONS,
+  ...MALE_EVENT_DEFINITIONS,
 ];
 
 export const OVERALL_PERFORMANCE_OPTIONS: { value: OverallPerformance; label: string }[] = [
@@ -106,18 +112,41 @@ export function getCardTypeFromGender(gender = ""): PerformanceCardType {
   return "male";
 }
 
-export function getEventDefinitions(cardType: PerformanceCardType) {
-  return cardType === "female" ? FEMALE_EVENT_DEFINITIONS : MALE_EVENT_DEFINITIONS;
+export function getEventDefinitions(_cardType?: PerformanceCardType) {
+  return ALL_EVENT_DEFINITIONS;
 }
 
-export function defaultEvents(cardType: PerformanceCardType): PerformanceEvent[] {
-  return getEventDefinitions(cardType).map((item) => ({
-    eventKey: item.eventKey,
-    performance: item.benchmark,
-    singleStar: "",
-    doubleStar: "",
-    remarks: "",
-  }));
+export function mergeEventsWithDefaults(saved: PerformanceEvent[] = []): PerformanceEvent[] {
+  const byKey = new Map(saved.map((event) => [event.eventKey, event]));
+
+  // Migrate legacy sprint_run key from older records
+  const legacySprint = byKey.get("sprint_run");
+  if (legacySprint) {
+    if (!byKey.has("sprint_200_100")) {
+      byKey.set("sprint_200_100", { ...legacySprint, eventKey: "sprint_200_100" });
+    }
+    if (!byKey.has("sprint_100_400")) {
+      byKey.set("sprint_100_400", { ...legacySprint, eventKey: "sprint_100_400" });
+    }
+    byKey.delete("sprint_run");
+  }
+
+  return ALL_EVENT_DEFINITIONS.map((definition) => {
+    const existing = byKey.get(definition.eventKey);
+    return existing
+      ? { ...existing }
+      : {
+          eventKey: definition.eventKey,
+          performance: definition.benchmark,
+          singleStar: "",
+          doubleStar: "",
+          remarks: "",
+        };
+  });
+}
+
+export function defaultEvents(_cardType?: PerformanceCardType): PerformanceEvent[] {
+  return mergeEventsWithDefaults();
 }
 
 export function emptyPerformanceForm(
@@ -187,6 +216,6 @@ export function suggestOverallPerformance(events: PerformanceEvent[]): OverallPe
 export function recordToForm(record: StudentPerformanceRecord): StudentPerformanceRecord {
   return {
     ...record,
-    events: record.events?.length ? record.events : defaultEvents(record.cardType),
+    events: mergeEventsWithDefaults(record.events),
   };
 }

@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import type {
   OverallPerformance,
   PerformanceCardType,
@@ -5,7 +6,10 @@ import type {
   StudentPerformanceRecord,
 } from "../admin/performanceDefaults";
 import {
+  FEMALE_EVENT_DEFINITIONS,
   getEventDefinitions,
+  MALE_EVENT_DEFINITIONS,
+  mergeEventsWithDefaults,
   overallPerformanceLabel,
   OVERALL_PERFORMANCE_OPTIONS,
   type PerformanceEventDefinition,
@@ -27,17 +31,30 @@ function setField<K extends keyof StudentPerformanceRecord>(
   onChange({ ...form, [key]: value });
 }
 
-function setEventField(
+function setEventFieldByKey(
   form: StudentPerformanceRecord,
-  index: number,
+  eventKey: string,
   key: keyof PerformanceEvent,
   value: string,
   onChange?: (next: StudentPerformanceRecord) => void
 ) {
   if (!onChange) return;
-  const events = [...form.events];
-  events[index] = { ...events[index], [key]: value };
+  const events = mergeEventsWithDefaults(form.events).map((event) =>
+    event.eventKey === eventKey ? { ...event, [key]: value } : event
+  );
   onChange({ ...form, events });
+}
+
+function getEventForDefinition(form: StudentPerformanceRecord, definition: PerformanceEventDefinition) {
+  return (
+    mergeEventsWithDefaults(form.events).find((event) => event.eventKey === definition.eventKey) || {
+      eventKey: definition.eventKey,
+      performance: definition.benchmark,
+      singleStar: "",
+      doubleStar: "",
+      remarks: "",
+    }
+  );
 }
 
 function eventIcon(eventKey: string) {
@@ -50,7 +67,9 @@ function eventIcon(eventKey: string) {
 
 export default function PhysicalRecordCard({ form, readOnly = false, onChange }: PhysicalRecordCardProps) {
   const cardType: PerformanceCardType = form.cardType;
-  const definitions = getEventDefinitions(cardType);
+  const definitions = getEventDefinitions();
+  const femaleKeys = new Set(FEMALE_EVENT_DEFINITIONS.map((item) => item.eventKey));
+  const maleKeys = new Set(MALE_EVENT_DEFINITIONS.map((item) => item.eventKey));
   const studentName = form.student?.fullName || "—";
   const registerNo = form.student?.studentId || "—";
   const batch = form.student?.batch || "—";
@@ -135,34 +154,30 @@ export default function PhysicalRecordCard({ form, readOnly = false, onChange }:
             />
           )}
         </div>
-        {cardType === "male" && (
-          <>
-            <div>
-              <span className="physical-record-label">Chest Normal (cm)</span>
-              {readOnly ? (
-                <div className="physical-record-value">{form.chestNormalCm || "—"}</div>
-              ) : (
-                <input
-                  className="form-control form-control-sm"
-                  value={form.chestNormalCm}
-                  onChange={(e) => setField(form, "chestNormalCm", e.target.value, onChange)}
-                />
-              )}
-            </div>
-            <div>
-              <span className="physical-record-label">Chest Expansion (cm)</span>
-              {readOnly ? (
-                <div className="physical-record-value">{form.chestExpansionCm || "—"}</div>
-              ) : (
-                <input
-                  className="form-control form-control-sm"
-                  value={form.chestExpansionCm}
-                  onChange={(e) => setField(form, "chestExpansionCm", e.target.value, onChange)}
-                />
-              )}
-            </div>
-          </>
-        )}
+        <div>
+          <span className="physical-record-label">Chest Normal (cm)</span>
+          {readOnly ? (
+            <div className="physical-record-value">{form.chestNormalCm || "—"}</div>
+          ) : (
+            <input
+              className="form-control form-control-sm"
+              value={form.chestNormalCm}
+              onChange={(e) => setField(form, "chestNormalCm", e.target.value, onChange)}
+            />
+          )}
+        </div>
+        <div>
+          <span className="physical-record-label">Chest Expansion (cm)</span>
+          {readOnly ? (
+            <div className="physical-record-value">{form.chestExpansionCm || "—"}</div>
+          ) : (
+            <input
+              className="form-control form-control-sm"
+              value={form.chestExpansionCm}
+              onChange={(e) => setField(form, "chestExpansionCm", e.target.value, onChange)}
+            />
+          )}
+        </div>
       </div>
 
       <div className="table-responsive">
@@ -177,67 +192,85 @@ export default function PhysicalRecordCard({ form, readOnly = false, onChange }:
             </tr>
           </thead>
           <tbody>
-            {definitions.map((definition: PerformanceEventDefinition, index: number) => {
-              const event = form.events[index] || {
-                eventKey: definition.eventKey,
-                performance: definition.benchmark,
-                singleStar: "",
-                doubleStar: "",
-                remarks: "",
-              };
+            {definitions.map((definition: PerformanceEventDefinition) => {
+              const event = getEventForDefinition(form, definition);
+              const sectionLabel = femaleKeys.has(definition.eventKey)
+                ? definition.eventKey === FEMALE_EVENT_DEFINITIONS[0].eventKey
+                  ? "Female Category Events"
+                  : null
+                : maleKeys.has(definition.eventKey) &&
+                    definition.eventKey === MALE_EVENT_DEFINITIONS[0].eventKey
+                  ? "Male Category Events"
+                  : null;
+
               return (
-                <tr key={definition.eventKey}>
-                  <td>
-                    <div className="physical-record-event">
-                      <i className="material-symbols-outlined text-danger">{eventIcon(definition.eventKey)}</i>
-                      <span>{definition.label}</span>
-                    </div>
-                  </td>
-                  <td>
-                    {readOnly ? (
-                      <span>{event.performance || definition.benchmark}</span>
-                    ) : (
-                      <input
-                        className="form-control form-control-sm"
-                        value={event.performance}
-                        onChange={(e) => setEventField(form, index, "performance", e.target.value, onChange)}
-                      />
-                    )}
-                  </td>
-                  <td>
-                    {readOnly ? (
-                      <span>{event.singleStar || "—"}</span>
-                    ) : (
-                      <input
-                        className="form-control form-control-sm"
-                        value={event.singleStar}
-                        onChange={(e) => setEventField(form, index, "singleStar", e.target.value, onChange)}
-                      />
-                    )}
-                  </td>
-                  <td>
-                    {readOnly ? (
-                      <span>{event.doubleStar || "—"}</span>
-                    ) : (
-                      <input
-                        className="form-control form-control-sm"
-                        value={event.doubleStar}
-                        onChange={(e) => setEventField(form, index, "doubleStar", e.target.value, onChange)}
-                      />
-                    )}
-                  </td>
-                  <td>
-                    {readOnly ? (
-                      <span>{event.remarks || "—"}</span>
-                    ) : (
-                      <input
-                        className="form-control form-control-sm"
-                        value={event.remarks}
-                        onChange={(e) => setEventField(form, index, "remarks", e.target.value, onChange)}
-                      />
-                    )}
-                  </td>
-                </tr>
+                <Fragment key={definition.eventKey}>
+                  {sectionLabel && (
+                    <tr key={`section-${sectionLabel}`} className="physical-record-section-row">
+                      <td colSpan={5}>{sectionLabel}</td>
+                    </tr>
+                  )}
+                  <tr key={definition.eventKey}>
+                    <td>
+                      <div className="physical-record-event">
+                        <i className="material-symbols-outlined text-danger">{eventIcon(definition.eventKey)}</i>
+                        <span>{definition.label}</span>
+                      </div>
+                    </td>
+                    <td>
+                      {readOnly ? (
+                        <span>{event.performance || definition.benchmark}</span>
+                      ) : (
+                        <input
+                          className="form-control form-control-sm"
+                          value={event.performance}
+                          onChange={(e) =>
+                            setEventFieldByKey(form, definition.eventKey, "performance", e.target.value, onChange)
+                          }
+                        />
+                      )}
+                    </td>
+                    <td>
+                      {readOnly ? (
+                        <span>{event.singleStar || "—"}</span>
+                      ) : (
+                        <input
+                          className="form-control form-control-sm"
+                          value={event.singleStar}
+                          onChange={(e) =>
+                            setEventFieldByKey(form, definition.eventKey, "singleStar", e.target.value, onChange)
+                          }
+                        />
+                      )}
+                    </td>
+                    <td>
+                      {readOnly ? (
+                        <span>{event.doubleStar || "—"}</span>
+                      ) : (
+                        <input
+                          className="form-control form-control-sm"
+                          value={event.doubleStar}
+                          onChange={(e) =>
+                            setEventFieldByKey(form, definition.eventKey, "doubleStar", e.target.value, onChange)
+                          }
+                        />
+                      )}
+                    </td>
+                    <td>
+                      {readOnly ? (
+                        <span>{event.remarks || "—"}</span>
+                      ) : (
+                        <input
+                          className="form-control form-control-sm"
+                          value={event.remarks}
+                          onChange={(e) =>
+                            setEventFieldByKey(form, definition.eventKey, "remarks", e.target.value, onChange)
+                          }
+                        />
+                      )}
+                    </td>
+                  </tr>
+                </Fragment>
               );
             })}
           </tbody>
