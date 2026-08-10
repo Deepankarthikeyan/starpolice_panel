@@ -26,12 +26,24 @@ const StudentPerformance = () => {
   const [form, setForm] = useState<StudentPerformanceRecord | null>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const [listLoading, setListLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [listError, setListError] = useState("");
 
   const loadStudents = async () => {
-    const data = await api.getStudentPerformanceStudents();
-    setStudents(data);
+    setListLoading(true);
+    setListError("");
+    try {
+      const data = await api.getStudentPerformanceStudents();
+      setStudents(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to load students.";
+      setListError(message);
+      setStudents([]);
+    } finally {
+      setListLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -105,7 +117,11 @@ const StudentPerformance = () => {
       closeForm();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to save performance record.";
-      setError(message);
+      const hint =
+        message.includes("404") || message.toLowerCase().includes("not found")
+          ? " The performance API may not be deployed yet. Merge and deploy the latest backend update."
+          : "";
+      setError(message + hint);
       notify.error(err, "Failed to save performance record.");
     } finally {
       setSaving(false);
@@ -162,8 +178,21 @@ const StudentPerformance = () => {
             />
           </div>
           <div className="card-body">
-            {!filteredStudents.length ? (
-              <p className="text-muted mb-0">No students found. Add students via Student Onboarding first.</p>
+            {listError && (
+              <div className="alert alert-danger">
+                {listError}
+                <button type="button" className="btn btn-sm btn-outline-danger ms-2" onClick={loadStudents}>
+                  Retry
+                </button>
+              </div>
+            )}
+            {listLoading ? (
+              <p className="text-muted mb-0">Loading students...</p>
+            ) : !filteredStudents.length ? (
+              <p className="text-muted mb-0">
+                No students found. Add students via Student Onboarding first, then return here to record their
+                physical performance.
+              </p>
             ) : (
               <div className="table-responsive">
                 <table className="table table-hover">

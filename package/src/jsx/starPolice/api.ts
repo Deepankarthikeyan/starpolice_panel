@@ -17,6 +17,10 @@ import type {
   StudentPerformanceRecord,
   StudentPerformanceSummary,
 } from "./admin/performanceDefaults";
+import {
+  defaultEvents,
+  getCardTypeFromGender,
+} from "./admin/performanceDefaults";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 
@@ -375,13 +379,19 @@ export const api = {
   },
 
   getStudentPerformanceStudents() {
-    return request<StudentPerformanceSummary[]>("/api/student-performance/students");
+    return request<StudentPerformanceSummary[]>("/api/student-performance/students").catch(async () => {
+      const records = await request<StudentOnboardingRecord[]>("/api/student-onboarding");
+      return records.map(onboardingToPerformanceSummary);
+    });
   },
 
   getStudentPerformanceByStudent(studentOnboardingId: string) {
     return request<StudentPerformanceRecord & { hasRecord?: boolean }>(
       `/api/student-performance/by-student/${studentOnboardingId}`
-    );
+    ).catch(async () => {
+      const record = await request<StudentOnboardingRecord>(`/api/student-onboarding/${studentOnboardingId}`);
+      return onboardingToEmptyPerformance(record);
+    });
   },
 
   saveStudentPerformance(studentOnboardingId: string, form: StudentPerformanceRecord) {
@@ -398,9 +408,66 @@ export const api = {
   },
 
   getMyStudentPerformance() {
-    return request<StudentPerformanceRecord & { hasRecord?: boolean }>("/api/student-performance/me");
+    return request<StudentPerformanceRecord & { hasRecord?: boolean }>("/api/student-performance/me").catch(
+      async () => {
+        throw new Error("Physical performance records are not available until the API is updated.");
+      }
+    );
   },
 };
+
+function fullOnboardingName(record: StudentOnboardingRecord) {
+  return [record.firstName, record.middleName, record.lastName].filter(Boolean).join(" ");
+}
+
+function onboardingToPerformanceSummary(record: StudentOnboardingRecord): StudentPerformanceSummary {
+  return {
+    studentOnboardingId: record.id,
+    studentId: record.studentId,
+    fullName: fullOnboardingName(record),
+    batch: record.batch,
+    gender: record.gender,
+    userId: record.userId,
+    cardType: getCardTypeFromGender(record.gender),
+    overallPerformance: "",
+    hasRecord: false,
+    performanceId: null,
+    updatedAt: null,
+  };
+}
+
+function onboardingToEmptyPerformance(record: StudentOnboardingRecord) {
+  const cardType = getCardTypeFromGender(record.gender);
+  return {
+    hasRecord: false,
+    studentOnboardingId: record.id,
+    userId: record.userId,
+    cardType,
+    recordYear: new Date().getFullYear(),
+    age: "",
+    heightCm: "",
+    weightKg: "",
+    chestNormalCm: "",
+    chestExpansionCm: "",
+    events: defaultEvents(cardType),
+    attendancePresent: "",
+    attendanceAbsent: "",
+    attendanceLeave: "",
+    overallPerformance: "" as const,
+    trainerRemarks: "",
+    student: {
+      studentOnboardingId: record.id,
+      studentId: record.studentId,
+      firstName: record.firstName,
+      middleName: record.middleName,
+      lastName: record.lastName,
+      fullName: fullOnboardingName(record),
+      batch: record.batch,
+      gender: record.gender,
+      dateOfBirth: record.dateOfBirth,
+    },
+  };
+}
 
 const STUDENT_ONBOARDING_TEXT_FIELDS: Array<keyof StudentOnboardingFormState> = [
   "firstName",
