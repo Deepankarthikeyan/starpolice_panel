@@ -15,10 +15,12 @@ const MonthlyCalendar = lazy(() => import("./jsx/starPolice/admin/MonthlyCalenda
 const UserManagement = lazy(() => import("./jsx/starPolice/admin/UserManagement"));
 const StudentOnboarding = lazy(() => import("./jsx/starPolice/admin/StudentOnboarding"));
 const Leads = lazy(() => import("./jsx/starPolice/admin/Leads"));
+const StudentPerformanceAdmin = lazy(() => import("./jsx/starPolice/admin/StudentPerformance"));
 const StudentDashboard = lazy(() => import("./jsx/starPolice/student/StudentDashboard"));
 const StudentMaterials = lazy(() => import("./jsx/starPolice/student/StudentMaterials"));
 const StudentInteraction = lazy(() => import("./jsx/starPolice/student/StudentInteraction"));
 const StudentCalendar = lazy(() => import("./jsx/starPolice/student/StudentCalendar"));
+const StudentPerformance = lazy(() => import("./jsx/starPolice/student/StudentPerformance"));
 const PanelProfile = lazy(() => import("./jsx/starPolice/shared/PanelProfile"));
 const PanelSettings = lazy(() => import("./jsx/starPolice/shared/PanelSettings"));
 const PanelInbox = lazy(() => import("./jsx/starPolice/shared/PanelInbox"));
@@ -112,6 +114,7 @@ function App() {
             <Route path="user-management" element={<UserManagement />} />
             <Route path="student-onboarding" element={<StudentOnboarding />} />
             <Route path="leads" element={<Leads />} />
+            <Route path="student-performance" element={<StudentPerformanceAdmin />} />
             <Route path="profile" element={<PanelProfile />} />
             <Route path="inbox" element={<PanelInbox />} />
             <Route path="settings" element={<PanelSettings />} />
@@ -124,6 +127,7 @@ function App() {
             <Route path="student-interaction" element={<AdminStudentInteraction />} />
             <Route path="monthly-calendar" element={<MonthlyCalendar />} />
             <Route path="leads" element={<Leads />} />
+            <Route path="student-performance" element={<StudentPerformanceAdmin />} />
             <Route path="profile" element={<PanelProfile />} />
             <Route path="inbox" element={<PanelInbox />} />
             <Route path="settings" element={<PanelSettings />} />
@@ -135,6 +139,7 @@ function App() {
             <Route path="materials" element={<StudentMaterials />} />
             <Route path="interaction" element={<StudentInteraction />} />
             <Route path="calendar" element={<StudentCalendar />} />
+            <Route path="performance" element={<StudentPerformance />} />
             <Route path="profile" element={<PanelProfile />} />
             <Route path="inbox" element={<PanelInbox />} />
             <Route path="settings" element={<PanelSettings />} />

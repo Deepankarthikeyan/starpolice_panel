@@ -28,6 +28,7 @@ async function seed() {
     "student:materials",
     "student:messages",
     "student:calendar",
+    "student:performance",
   ];
   await User.findOneAndUpdate(
     { email: "student@starpolice.academy" },
@@ -49,6 +50,7 @@ async function seed() {
     "admin:uploads",
     "admin:messages",
     "admin:calendar",
+    "admin:performance",
   ];
   await User.findOneAndUpdate(
     { email: "staff@starpolice.academy" },

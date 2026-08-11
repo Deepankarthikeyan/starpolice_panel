@@ -34,6 +34,12 @@ const AdminMenuList = (auth?: AuthUser | null) => {
       permission: "admin:leads" as const,
     },
     {
+      title: "Student Performance",
+      iconStyle: <i className="material-symbols-outlined">fitness_center</i>,
+      to: "student-performance",
+      permission: "admin:performance" as const,
+    },
+    {
       title: "Student\u00a0Onboarding",
       iconStyle: <i className="material-symbols-outlined">person_add</i>,
       to: "student-onboarding",
@@ -75,6 +81,12 @@ const StudentMenuList = (auth?: AuthUser | null) => {
       iconStyle: <i className="material-symbols-outlined">calendar_month</i>,
       to: "calendar",
       permission: "student:calendar" as const,
+    },
+    {
+      title: "Physical Performance",
+      iconStyle: <i className="material-symbols-outlined">fitness_center</i>,
+      to: "performance",
+      permission: "student:performance" as const,
     },
   ];
 

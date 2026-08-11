@@ -2,13 +2,28 @@ import { useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
+import {
+  overallPerformanceBadgeClass,
+  overallPerformanceLabel,
+  recordToForm,
+} from "../admin/performanceDefaults";
 import type { StudentDashboardStats } from "../types";
+import type { StudentPerformanceRecord } from "../admin/performanceDefaults";
 
 const StudentDashboard = () => {
   const [stats, setStats] = useState<StudentDashboardStats | null>(null);
+  const [performance, setPerformance] = useState<StudentPerformanceRecord | null>(null);
 
   useEffect(() => {
     api.getStudentDashboardStats().then(setStats).catch(console.error);
+    api
+      .getMyStudentPerformance()
+      .then((record) => {
+        if (record.hasRecord) {
+          setPerformance(recordToForm(record));
+        }
+      })
+      .catch(() => undefined);
   }, []);
 
   return (
@@ -36,6 +51,18 @@ const StudentDashboard = () => {
             <div className="card-body">
               <h6 className="text-muted">Admin Messages</h6>
               <h2>{stats?.adminMessages ?? 0}</h2>
+            </div>
+          </div>
+        </div>
+        <div className="col-xl-4 col-sm-6">
+          <div className="card">
+            <div className="card-body">
+              <h6 className="text-muted">Overall Physical Performance</h6>
+              <span className={`badge ${overallPerformanceBadgeClass(performance?.overallPerformance || "")}`}>
+                {performance?.overallPerformance
+                  ? overallPerformanceLabel(performance.overallPerformance)
+                  : "Not rated yet"}
+              </span>
             </div>
           </div>
         </div>
