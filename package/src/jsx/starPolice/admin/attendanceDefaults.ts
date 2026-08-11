@@ -43,6 +43,23 @@ export interface StudentAttendanceHistoryDay {
   records: StudentAttendanceHistoryRecord[];
 }
 
+export interface StudentAttendanceDateSummary {
+  date: string;
+  total: number;
+  present: number;
+  absent: number;
+  late: number;
+  leave: number;
+}
+
+export interface StudentAttendanceDayDetail extends StudentAttendanceDayResponse {
+  total: number;
+  present: number;
+  absent: number;
+  late: number;
+  leave: number;
+}
+
 export const ATTENDANCE_STATUS_OPTIONS: {
   value: Exclude<AttendanceStatus, "">;
   label: string;
@@ -117,4 +134,15 @@ export function sortAttendanceRows(rows: StudentAttendanceRow[], sortKey: Attend
     return a.fullName.localeCompare(b.fullName);
   });
   return sorted;
+}
+
+export function toDateObject(date: string) {
+  return new Date(`${date}T00:00:00`);
+}
+
+export function dateToString(value: Date) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }

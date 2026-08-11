@@ -140,6 +140,76 @@ router.put("/today", attendanceGuard, async (req, res) => {
   }
 });
 
+router.get("/dates", attendanceGuard, async (_req, res) => {
+  try {
+    const summaries = await StudentAttendance.aggregate([
+      {
+        $group: {
+          _id: "$date",
+          total: { $sum: 1 },
+          present: { $sum: { $cond: [{ $eq: ["$status", "present"] }, 1, 0] } },
+          absent: { $sum: { $cond: [{ $eq: ["$status", "absent"] }, 1, 0] } },
+          late: { $sum: { $cond: [{ $eq: ["$status", "late"] }, 1, 0] } },
+          leave: { $sum: { $cond: [{ $eq: ["$status", "leave"] }, 1, 0] } },
+        },
+      },
+      { $sort: { _id: -1 } },
+    ]);
+
+    res.json(
+      summaries.map((item) => ({
+        date: item._id,
+        total: item.total,
+        present: item.present,
+        absent: item.absent,
+        late: item.late,
+        leave: item.leave,
+      }))
+    );
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get("/day/:date", attendanceGuard, async (req, res) => {
+  try {
+    const { date } = req.params;
+    if (!isValidDateString(date)) {
+      return res.status(400).json({ message: "Invalid date format. Use YYYY-MM-DD." });
+    }
+
+    const students = await StudentOnboarding.find().sort({ firstName: 1, lastName: 1, studentId: 1 });
+    const records = await StudentAttendance.find({ date });
+    const recordByStudent = new Map(records.map((item) => [item.studentOnboardingId.toString(), item]));
+
+    const rows = students.map((student) => {
+      const record = recordByStudent.get(student._id.toString());
+      return {
+        studentOnboardingId: student._id.toString(),
+        studentId: student.studentId,
+        fullName: fullStudentName(student),
+        batch: student.batch,
+        status: record?.status || "",
+        attendanceId: record?._id.toString() || null,
+        updatedAt: record?.updatedAt || null,
+      };
+    });
+
+    const marked = rows.filter((row) => row.status);
+    res.json({
+      date,
+      rows,
+      total: marked.length,
+      present: marked.filter((row) => row.status === "present").length,
+      absent: marked.filter((row) => row.status === "absent").length,
+      late: marked.filter((row) => row.status === "late").length,
+      leave: marked.filter((row) => row.status === "leave").length,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get("/history", attendanceGuard, async (req, res) => {
   try {
     const { date, status, search } = req.query;

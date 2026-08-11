@@ -781,6 +781,43 @@
   background: #f8fafc;
 }
 
+.attendance-calendar-panel .react-datepicker {
+  width: 100%;
+  border: none;
+  font-family: inherit;
+}
+
+.attendance-calendar-panel .react-datepicker__month-container {
+  width: 100%;
+}
+
+.attendance-calendar-panel .react-datepicker__day--highlighted {
+  background-color: #1e3a5f;
+  color: #fff;
+  border-radius: 0.35rem;
+}
+
+.attendance-calendar-panel .react-datepicker__day--selected {
+  background-color: #0d6efd;
+}
+
+.attendance-dates-list {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.attendance-date-item {
+  padding: 0.9rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #eef2f7;
+  transition: background-color 0.15s ease;
+}
+
+.attendance-date-item:hover,
+.attendance-date-item.active {
+  background: #f0f6ff;
+}
+
 .physical-record-checkbox {
   display: inline-flex;
   align-items: center;

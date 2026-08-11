@@ -20,6 +20,8 @@ import type {
 import type {
   StudentAttendanceDayResponse,
   StudentAttendanceHistoryDay,
+  StudentAttendanceDateSummary,
+  StudentAttendanceDayDetail,
 } from "./admin/attendanceDefaults";
 import {
   defaultEvents,
@@ -437,6 +439,14 @@ export const api = {
     if (params?.search) query.set("search", params.search);
     const suffix = query.toString() ? `?${query.toString()}` : "";
     return request<StudentAttendanceHistoryDay[]>(`/api/student-attendance/history${suffix}`);
+  },
+
+  getStudentAttendanceDates() {
+    return request<StudentAttendanceDateSummary[]>("/api/student-attendance/dates");
+  },
+
+  getStudentAttendanceByDate(date: string) {
+    return request<StudentAttendanceDayDetail>(`/api/student-attendance/day/${date}`);
   },
 };
 
