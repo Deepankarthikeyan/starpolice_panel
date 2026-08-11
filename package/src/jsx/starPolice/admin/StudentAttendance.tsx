@@ -288,7 +288,7 @@ const StudentAttendance = () => {
                     <table className="table table-striped table-hover attendance-table mb-0">
                       <thead>
                         <tr>
-                          <th>#</th>
+                          <th>S.No</th>
                           <th>Student ID</th>
                           <th>Name</th>
                           <th>Batch</th>
@@ -426,7 +426,7 @@ const StudentAttendance = () => {
                           <table className="table table-sm table-striped mb-0">
                             <thead>
                               <tr>
-                                <th>#</th>
+                                <th>S.No</th>
                                 <th>Student ID</th>
                                 <th>Name</th>
                                 <th>Batch</th>
