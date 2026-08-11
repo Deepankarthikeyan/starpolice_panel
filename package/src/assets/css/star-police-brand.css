@@ -781,26 +781,6 @@
   background: #f8fafc;
 }
 
-.attendance-calendar-panel .react-datepicker {
-  width: 100%;
-  border: none;
-  font-family: inherit;
-}
-
-.attendance-calendar-panel .react-datepicker__month-container {
-  width: 100%;
-}
-
-.attendance-calendar-panel .react-datepicker__day--highlighted {
-  background-color: #1e3a5f;
-  color: #fff;
-  border-radius: 0.35rem;
-}
-
-.attendance-calendar-panel .react-datepicker__day--selected {
-  background-color: #0d6efd;
-}
-
 .attendance-dates-list {
   max-height: 420px;
   overflow-y: auto;

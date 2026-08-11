@@ -1,5 +1,4 @@
 import { useContext, useEffect, useMemo, useState } from "react";
-import DatePicker from "react-datepicker";
 import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
@@ -16,8 +15,6 @@ import {
   statusBadgeClass,
   statusLabel,
   todayDateString,
-  toDateObject,
-  dateToString,
   type AttendanceSortKey,
   type AttendanceStatus,
   type StudentAttendanceDateSummary,
@@ -47,8 +44,8 @@ const StudentAttendance = () => {
   const [selectedDayDetail, setSelectedDayDetail] = useState<StudentAttendanceDayDetail | null>(null);
   const [historySearch, setHistorySearch] = useState("");
   const [historyStatusFilter, setHistoryStatusFilter] = useState<StatusFilter>("");
+  const [historyDateFilter, setHistoryDateFilter] = useState("");
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [calendarMonth, setCalendarMonth] = useState<Date>(() => toDateObject(todayDateString()));
 
   const loadToday = async () => {
     setLoading(true);
@@ -122,14 +119,12 @@ const StudentAttendance = () => {
     loadHistory(selectedHistoryDate).catch(console.error);
   }, [showHistory, canManage]);
 
-  const highlightedDates = useMemo(
-    () => dateSummaries.map((item) => toDateObject(item.date)),
-    [dateSummaries]
-  );
-
   const filteredDateSummaries = useMemo(() => {
     const query = historySearch.trim().toLowerCase();
     return dateSummaries.filter((item) => {
+      if (historyDateFilter && item.date !== historyDateFilter) {
+        return false;
+      }
       if (historyStatusFilter) {
         const count =
           historyStatusFilter === "present"
@@ -149,7 +144,7 @@ const StudentAttendance = () => {
         formatDisplayDate(item.date).toLowerCase().includes(query)
       );
     });
-  }, [dateSummaries, historySearch, historyStatusFilter]);
+  }, [dateSummaries, historySearch, historyStatusFilter, historyDateFilter]);
 
   const selectedDayRows = useMemo(() => {
     if (!selectedDayDetail) return [];
@@ -242,15 +237,10 @@ const StudentAttendance = () => {
     }
   };
 
-  const onCalendarChange = (value: Date | null) => {
-    if (!value) return;
-    const date = dateToString(value);
-    setCalendarMonth(value);
-    if (dateSummaries.some((item) => item.date === date)) {
-      selectHistoryDate(date).catch(console.error);
-    } else {
-      setSelectedHistoryDate(date);
-      setSelectedDayDetail(null);
+  const onHistoryDateChange = (value: string) => {
+    setHistoryDateFilter(value);
+    if (value) {
+      selectHistoryDate(value).catch(console.error);
     }
   };
 
@@ -403,8 +393,9 @@ const StudentAttendance = () => {
               </div>
             ) : (
               <div className="card-body">
-                <div className="row g-3 mb-3">
-                  <div className="col-md-5">
+                <div className="row g-3 mb-3 align-items-end">
+                  <div className="col-md-4">
+                    <label className="form-label small text-muted mb-1">Search</label>
                     <input
                       className="form-control"
                       placeholder="Search dates or students..."
@@ -413,6 +404,7 @@ const StudentAttendance = () => {
                     />
                   </div>
                   <div className="col-md-4">
+                    <label className="form-label small text-muted mb-1">Status</label>
                     <select
                       className="form-control"
                       value={historyStatusFilter}
@@ -425,139 +417,129 @@ const StudentAttendance = () => {
                       <option value="leave">Leave</option>
                     </select>
                   </div>
-                  <div className="col-md-3 d-flex align-items-center">
-                    <span className="text-muted small">{filteredDateSummaries.length} date(s)</span>
+                  <div className="col-md-4">
+                    <label className="form-label small text-muted mb-1" htmlFor="attendance-date-filter">
+                      Date
+                    </label>
+                    <input
+                      id="attendance-date-filter"
+                      name="date"
+                      type="date"
+                      className="form-control"
+                      value={historyDateFilter}
+                      onChange={(e) => onHistoryDateChange(e.target.value)}
+                    />
                   </div>
                 </div>
 
                 {historyLoading && dateSummaries.length === 0 ? (
                   <p className="text-muted mb-0">Loading attendance history...</p>
                 ) : (
-                  <div className="row g-4">
-                    <div className="col-xl-4">
-                      <div className="attendance-calendar-panel card border h-100">
-                        <div className="card-body">
-                          <h6 className="mb-3">Attendance Calendar</h6>
-                          <DatePicker
-                            inline
-                            selected={selectedHistoryDate ? toDateObject(selectedHistoryDate) : null}
-                            onChange={onCalendarChange}
-                            highlightDates={highlightedDates}
-                            openToDate={calendarMonth}
-                            onMonthChange={setCalendarMonth}
-                            calendarClassName="attendance-inline-calendar"
-                          />
-                          <p className="text-muted small mt-3 mb-0">
-                            Highlighted dates have saved attendance. Click a highlighted date to view details.
-                          </p>
-                        </div>
+                  <>
+                    <div className="card border mb-4">
+                      <div className="card-header bg-transparent d-flex justify-content-between align-items-center">
+                        <h6 className="mb-0">All Dates</h6>
+                        <span className="text-muted small">{filteredDateSummaries.length} date(s)</span>
                       </div>
-                    </div>
-
-                    <div className="col-xl-8">
-                      <div className="card border h-100">
-                        <div className="card-header bg-transparent">
-                          <h6 className="mb-0">All Dates</h6>
-                        </div>
-                        <div className="card-body p-0">
-                          {filteredDateSummaries.length === 0 ? (
-                            <p className="text-muted p-3 mb-0">No attendance records yet.</p>
-                          ) : (
-                            <div className="attendance-dates-list">
-                              {filteredDateSummaries.map((day) => (
-                                <button
-                                  key={day.date}
-                                  type="button"
-                                  className={`attendance-date-item w-100 text-start border-0 ${
-                                    selectedHistoryDate === day.date ? "active" : ""
-                                  }`}
-                                  onClick={() => selectHistoryDate(day.date).catch(console.error)}
-                                >
-                                  <div className="d-flex justify-content-between align-items-start gap-2">
-                                    <div>
-                                      <strong>{formatDisplayDate(day.date)}</strong>
-                                      <div className="text-muted small">{day.date}</div>
-                                    </div>
-                                    <div className="d-flex flex-wrap gap-1 justify-content-end">
-                                      <span className="badge badge-success">P {day.present}</span>
-                                      <span className="badge badge-danger">A {day.absent}</span>
-                                      <span className="badge badge-warning">L {day.late}</span>
-                                      <span className="badge badge-info">Lv {day.leave}</span>
-                                    </div>
+                      <div className="card-body p-0">
+                        {filteredDateSummaries.length === 0 ? (
+                          <p className="text-muted p-3 mb-0">No attendance records found.</p>
+                        ) : (
+                          <div className="attendance-dates-list">
+                            {filteredDateSummaries.map((day) => (
+                              <button
+                                key={day.date}
+                                type="button"
+                                className={`attendance-date-item w-100 text-start border-0 ${
+                                  selectedHistoryDate === day.date ? "active" : ""
+                                }`}
+                                onClick={() => {
+                                  setHistoryDateFilter(day.date);
+                                  selectHistoryDate(day.date).catch(console.error);
+                                }}
+                              >
+                                <div className="d-flex justify-content-between align-items-start gap-2">
+                                  <div>
+                                    <strong>{formatDisplayDate(day.date)}</strong>
+                                    <div className="text-muted small">{day.date}</div>
                                   </div>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                                  <div className="d-flex flex-wrap gap-1 justify-content-end">
+                                    <span className="badge badge-success">P {day.present}</span>
+                                    <span className="badge badge-danger">A {day.absent}</span>
+                                    <span className="badge badge-warning">L {day.late}</span>
+                                    <span className="badge badge-info">Lv {day.leave}</span>
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
 
-                    <div className="col-12">
-                      <div className="card border">
-                        <div className="card-header bg-transparent d-flex flex-wrap justify-content-between align-items-center gap-2">
-                          <div>
-                            <h6 className="mb-1">Date Details</h6>
-                            {selectedHistoryDate ? (
-                              <p className="text-muted small mb-0">
-                                {formatDisplayDate(selectedHistoryDate)} ({selectedHistoryDate})
-                              </p>
-                            ) : (
-                              <p className="text-muted small mb-0">Select a date from the calendar or list.</p>
-                            )}
-                          </div>
-                          {selectedDayDetail && (
-                            <div className="d-flex flex-wrap gap-2 small">
-                              <span className="badge badge-success">Present {selectedDayDetail.present}</span>
-                              <span className="badge badge-danger">Absent {selectedDayDetail.absent}</span>
-                              <span className="badge badge-warning">Late {selectedDayDetail.late}</span>
-                              <span className="badge badge-info">Leave {selectedDayDetail.leave}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="card-body">
-                          {historyLoading && selectedHistoryDate ? (
-                            <p className="text-muted mb-0">Loading date details...</p>
-                          ) : !selectedHistoryDate ? (
-                            <p className="text-muted mb-0">Pick a date to view student attendance.</p>
-                          ) : !selectedDayDetail || selectedDayDetail.total === 0 ? (
-                            <p className="text-muted mb-0">No attendance saved for this date.</p>
-                          ) : selectedDayRows.length === 0 ? (
-                            <p className="text-muted mb-0">No students match your search or filter.</p>
+                    <div className="card border">
+                      <div className="card-header bg-transparent d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                          <h6 className="mb-1">Date Details</h6>
+                          {selectedHistoryDate ? (
+                            <p className="text-muted small mb-0">
+                              {formatDisplayDate(selectedHistoryDate)} ({selectedHistoryDate})
+                            </p>
                           ) : (
-                            <div className="table-responsive">
-                              <table className="table table-sm table-striped mb-0">
-                                <thead>
-                                  <tr>
-                                    <th>#</th>
-                                    <th>Student ID</th>
-                                    <th>Name</th>
-                                    <th>Batch</th>
-                                    <th>Status</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {selectedDayRows.map((row, index) => (
-                                    <tr key={row.studentOnboardingId}>
-                                      <td>{index + 1}</td>
-                                      <td>{row.studentId}</td>
-                                      <td>{row.fullName}</td>
-                                      <td>{row.batch || "—"}</td>
-                                      <td>
-                                        <span className={`badge ${statusBadgeClass(row.status)}`}>
-                                          {statusLabel(row.status)}
-                                        </span>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
+                            <p className="text-muted small mb-0">Select a date from the list or pick a date above.</p>
                           )}
                         </div>
+                        {selectedDayDetail && selectedDayDetail.total > 0 && (
+                          <div className="d-flex flex-wrap gap-2 small">
+                            <span className="badge badge-success">Present {selectedDayDetail.present}</span>
+                            <span className="badge badge-danger">Absent {selectedDayDetail.absent}</span>
+                            <span className="badge badge-warning">Late {selectedDayDetail.late}</span>
+                            <span className="badge badge-info">Leave {selectedDayDetail.leave}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="card-body">
+                        {historyLoading && selectedHistoryDate ? (
+                          <p className="text-muted mb-0">Loading date details...</p>
+                        ) : !selectedHistoryDate ? (
+                          <p className="text-muted mb-0">Pick a date to view student attendance.</p>
+                        ) : !selectedDayDetail || selectedDayDetail.total === 0 ? (
+                          <p className="text-muted mb-0">No attendance saved for this date.</p>
+                        ) : selectedDayRows.length === 0 ? (
+                          <p className="text-muted mb-0">No students match your search or filter.</p>
+                        ) : (
+                          <div className="table-responsive">
+                            <table className="table table-sm table-striped mb-0">
+                              <thead>
+                                <tr>
+                                  <th>#</th>
+                                  <th>Student ID</th>
+                                  <th>Name</th>
+                                  <th>Batch</th>
+                                  <th>Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {selectedDayRows.map((row, index) => (
+                                  <tr key={row.studentOnboardingId}>
+                                    <td>{index + 1}</td>
+                                    <td>{row.studentId}</td>
+                                    <td>{row.fullName}</td>
+                                    <td>{row.batch || "—"}</td>
+                                    <td>
+                                      <span className={`badge ${statusBadgeClass(row.status)}`}>
+                                        {statusLabel(row.status)}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             )}
