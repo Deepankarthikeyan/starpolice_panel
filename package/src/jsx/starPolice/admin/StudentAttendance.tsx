@@ -224,7 +224,7 @@ const StudentAttendance = () => {
                   className="btn btn-outline-primary btn-sm"
                   onClick={() => (showHistory ? setShowHistory(false) : openHistory())}
                 >
-                  {showHistory ? "Hide List" : "List"}
+                  {showHistory ? "Back" : "List"}
                 </button>
                 {afterCutoff && !showHistory && (
                   <button type="button" className="btn btn-outline-warning btn-sm" onClick={markAllUnmarkedLate}>
