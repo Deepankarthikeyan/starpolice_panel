@@ -7,6 +7,7 @@ export const ADMIN_PERMISSIONS = [
   { key: "admin:onboarding", label: "Student Onboarding", description: "Create and manage student onboarding records" },
   { key: "admin:leads", label: "Leads", description: "Manage prospective student leads" },
   { key: "admin:performance", label: "Student Performance", description: "Manage physical efficiency records" },
+  { key: "admin:attendance", label: "Student Attendance", description: "Mark and review daily student attendance" },
 ] as const;
 
 export const STUDENT_PERMISSIONS = [

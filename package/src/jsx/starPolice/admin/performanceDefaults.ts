@@ -40,9 +40,6 @@ export interface StudentPerformanceRecord {
   chestNormalCm: string;
   chestExpansionCm: string;
   events: PerformanceEvent[];
-  attendancePresent: string;
-  attendanceAbsent: string;
-  attendanceLeave: string;
   overallPerformance: OverallPerformance;
   trainerRemarks: string;
   student?: StudentPerformanceStudent;
@@ -164,9 +161,6 @@ export function emptyPerformanceForm(
     chestNormalCm: "",
     chestExpansionCm: "",
     events: defaultEvents(cardType),
-    attendancePresent: "",
-    attendanceAbsent: "",
-    attendanceLeave: "",
     overallPerformance: "",
     trainerRemarks: "",
     student,

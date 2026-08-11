@@ -40,6 +40,12 @@ const AdminMenuList = (auth?: AuthUser | null) => {
       permission: "admin:performance" as const,
     },
     {
+      title: "Student Attendance",
+      iconStyle: <i className="material-symbols-outlined">fact_check</i>,
+      to: "student-attendance",
+      permission: "admin:attendance" as const,
+    },
+    {
       title: "Student\u00a0Onboarding",
       iconStyle: <i className="material-symbols-outlined">person_add</i>,
       to: "student-onboarding",

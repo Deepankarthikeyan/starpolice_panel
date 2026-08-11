@@ -17,6 +17,10 @@ import type {
   StudentPerformanceRecord,
   StudentPerformanceSummary,
 } from "./admin/performanceDefaults";
+import type {
+  StudentAttendanceDayResponse,
+  StudentAttendanceHistoryDay,
+} from "./admin/attendanceDefaults";
 import {
   defaultEvents,
   getCardTypeFromGender,
@@ -414,6 +418,26 @@ export const api = {
       }
     );
   },
+
+  getTodayStudentAttendance() {
+    return request<StudentAttendanceDayResponse>("/api/student-attendance/today");
+  },
+
+  saveTodayStudentAttendance(entries: { studentOnboardingId: string; status: string }[]) {
+    return request<StudentAttendanceDayResponse & { message: string }>("/api/student-attendance/today", {
+      method: "PUT",
+      body: JSON.stringify({ entries }),
+    });
+  },
+
+  getStudentAttendanceHistory(params?: { date?: string; status?: string; search?: string }) {
+    const query = new URLSearchParams();
+    if (params?.date) query.set("date", params.date);
+    if (params?.status) query.set("status", params.status);
+    if (params?.search) query.set("search", params.search);
+    const suffix = query.toString() ? `?${query.toString()}` : "";
+    return request<StudentAttendanceHistoryDay[]>(`/api/student-attendance/history${suffix}`);
+  },
 };
 
 function fullOnboardingName(record: StudentOnboardingRecord) {
@@ -450,9 +474,6 @@ function onboardingToEmptyPerformance(record: StudentOnboardingRecord) {
     chestNormalCm: "",
     chestExpansionCm: "",
     events: defaultEvents(cardType),
-    attendancePresent: "",
-    attendanceAbsent: "",
-    attendanceLeave: "",
     overallPerformance: "" as const,
     trainerRemarks: "",
     student: {

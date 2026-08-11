@@ -16,6 +16,7 @@ const UserManagement = lazy(() => import("./jsx/starPolice/admin/UserManagement"
 const StudentOnboarding = lazy(() => import("./jsx/starPolice/admin/StudentOnboarding"));
 const Leads = lazy(() => import("./jsx/starPolice/admin/Leads"));
 const StudentPerformanceAdmin = lazy(() => import("./jsx/starPolice/admin/StudentPerformance"));
+const StudentAttendance = lazy(() => import("./jsx/starPolice/admin/StudentAttendance"));
 const StudentDashboard = lazy(() => import("./jsx/starPolice/student/StudentDashboard"));
 const StudentMaterials = lazy(() => import("./jsx/starPolice/student/StudentMaterials"));
 const StudentInteraction = lazy(() => import("./jsx/starPolice/student/StudentInteraction"));
@@ -115,6 +116,7 @@ function App() {
             <Route path="student-onboarding" element={<StudentOnboarding />} />
             <Route path="leads" element={<Leads />} />
             <Route path="student-performance" element={<StudentPerformanceAdmin />} />
+            <Route path="student-attendance" element={<StudentAttendance />} />
             <Route path="profile" element={<PanelProfile />} />
             <Route path="inbox" element={<PanelInbox />} />
             <Route path="settings" element={<PanelSettings />} />
@@ -128,6 +130,7 @@ function App() {
             <Route path="monthly-calendar" element={<MonthlyCalendar />} />
             <Route path="leads" element={<Leads />} />
             <Route path="student-performance" element={<StudentPerformanceAdmin />} />
+            <Route path="student-attendance" element={<StudentAttendance />} />
             <Route path="profile" element={<PanelProfile />} />
             <Route path="inbox" element={<PanelInbox />} />
             <Route path="settings" element={<PanelSettings />} />

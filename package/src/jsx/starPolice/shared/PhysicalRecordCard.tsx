@@ -258,48 +258,6 @@ export default function PhysicalRecordCard({ form, readOnly = false, onChange }:
       </div>
 
       <div className="physical-record-footer">
-        <div className="physical-record-attendance">
-          <strong>ATTENDANCE</strong>
-          <div className="physical-record-attendance-fields">
-            <label>
-              Present:
-              {readOnly ? (
-                <span>{form.attendancePresent || "—"}</span>
-              ) : (
-                <input
-                  className="form-control form-control-sm"
-                  value={form.attendancePresent}
-                  onChange={(e) => setField(form, "attendancePresent", e.target.value, onChange)}
-                />
-              )}
-            </label>
-            <label>
-              Absent:
-              {readOnly ? (
-                <span>{form.attendanceAbsent || "—"}</span>
-              ) : (
-                <input
-                  className="form-control form-control-sm"
-                  value={form.attendanceAbsent}
-                  onChange={(e) => setField(form, "attendanceAbsent", e.target.value, onChange)}
-                />
-              )}
-            </label>
-            <label>
-              Leave:
-              {readOnly ? (
-                <span>{form.attendanceLeave || "—"}</span>
-              ) : (
-                <input
-                  className="form-control form-control-sm"
-                  value={form.attendanceLeave}
-                  onChange={(e) => setField(form, "attendanceLeave", e.target.value, onChange)}
-                />
-              )}
-            </label>
-          </div>
-        </div>
-
         <div className="physical-record-overall">
           <strong>OVERALL PERFORMANCE</strong>
           <div className="physical-record-overall-options">
