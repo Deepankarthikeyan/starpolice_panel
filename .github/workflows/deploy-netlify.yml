@@ -32,14 +32,16 @@ jobs:
       - name: Deploy to Netlify
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_BUILD_HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
         run: |
           if [ -n "$NETLIFY_AUTH_TOKEN" ]; then
-            echo "Deploying with Netlify CLI..."
+            SITE_REF="${NETLIFY_SITE_ID:-starpolice-panel}"
+            echo "Deploying with Netlify CLI (site: $SITE_REF)..."
             npx netlify-cli@17 deploy \
               --prod \
               --dir package/dist \
-              --site starpolice-panel \
+              --site "$SITE_REF" \
               --auth "$NETLIFY_AUTH_TOKEN" \
               --message "Deploy from GitHub Actions (${GITHUB_SHA:0:7})"
             exit 0
