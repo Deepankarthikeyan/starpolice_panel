@@ -383,8 +383,8 @@ const StudentAttendance = () => {
                 {historyLoading && !selectedDayDetail ? (
                   <p className="text-muted mb-0">Loading attendance...</p>
                 ) : (
-                  <div className="card border">
-                    <div className="card-header bg-transparent d-flex flex-wrap justify-content-between align-items-center gap-2">
+                  <div className="attendance-date-details">
+                    <div className="attendance-date-details-header">
                       <div>
                         <h6 className="mb-1">Date Details</h6>
                         {selectedHistoryDate ? (
@@ -396,15 +396,23 @@ const StudentAttendance = () => {
                         )}
                       </div>
                       {selectedDayDetail && selectedDayDetail.total > 0 && (
-                        <div className="d-flex flex-wrap gap-2 small">
-                          <span className="badge badge-success">Present {selectedDayDetail.present}</span>
-                          <span className="badge badge-danger">Absent {selectedDayDetail.absent}</span>
-                          <span className="badge badge-warning">Late {selectedDayDetail.late}</span>
-                          <span className="badge badge-info">Leave {selectedDayDetail.leave}</span>
+                        <div className="attendance-summary-badges">
+                          <span className="badge badge-success attendance-summary-badge">
+                            Present {selectedDayDetail.present}
+                          </span>
+                          <span className="badge badge-danger attendance-summary-badge">
+                            Absent {selectedDayDetail.absent}
+                          </span>
+                          <span className="badge badge-warning attendance-summary-badge">
+                            Late {selectedDayDetail.late}
+                          </span>
+                          <span className="badge badge-info attendance-summary-badge">
+                            Leave {selectedDayDetail.leave}
+                          </span>
                         </div>
                       )}
                     </div>
-                    <div className="card-body">
+                    <div className="attendance-date-details-body">
                       {historyLoading && selectedHistoryDate ? (
                         <p className="text-muted mb-0">Loading date details...</p>
                       ) : !selectedHistoryDate ? (

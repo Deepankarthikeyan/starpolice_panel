@@ -617,10 +617,13 @@
 
 /* Page title — plain text breadcrumb (no background, no pills) */
 .spa-page-titles {
-  background: transparent;
+  position: sticky;
+  top: 5rem;
+  z-index: 20;
+  background: var(--bs-body-bg, #f5f7fa);
   border: none;
   border-radius: 0;
-  padding: 0.5rem 0;
+  padding: 0.75rem 0;
   margin-bottom: 1.25rem;
   box-shadow: none;
 }
@@ -784,6 +787,41 @@
 .attendance-dates-list {
   max-height: 420px;
   overflow-y: auto;
+}
+
+.attendance-date-details {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #fff;
+}
+
+.attendance-date-details-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #eef2f7;
+  background: #fafbfc;
+}
+
+.attendance-date-details-body {
+  padding: 1rem 1.25rem;
+}
+
+.attendance-summary-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.attendance-summary-badge {
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+  line-height: 1.2;
 }
 
 .attendance-date-item {
