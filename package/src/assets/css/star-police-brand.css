@@ -905,3 +905,56 @@
   border-color: #86b7fe;
   color: #212529;
 }
+
+.spa-subject-selected-box {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+  min-height: 3rem;
+}
+
+.spa-subject-selected-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.spa-subject-selected-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.spa-subject-selected-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  background: #123d73;
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.spa-subject-selected-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.spa-subject-selected-remove:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
