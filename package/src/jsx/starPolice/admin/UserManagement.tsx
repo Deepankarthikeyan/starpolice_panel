@@ -13,6 +13,7 @@ import {
 import { getPanelMotherMenu, formatAccountType } from "../panelLabels";
 import { notify } from "../toast";
 import type { ManagedUser, StaffType, Subject } from "../types";
+import { SubjectMultiSelect } from "./SubjectMultiSelect";
 
 type CreateAccountType = "student" | "admin" | "staff";
 
@@ -61,48 +62,6 @@ function PermissionChecklist({
   );
 }
 
-function SubjectChecklist({
-  subjects,
-  selected,
-  onChange,
-}: {
-  subjects: Subject[];
-  selected: string[];
-  onChange: (subjectIds: string[]) => void;
-}) {
-  const toggle = (id: string) => {
-    if (selected.includes(id)) {
-      onChange(selected.filter((item) => item !== id));
-      return;
-    }
-    onChange([...selected, id]);
-  };
-
-  if (subjects.length === 0) {
-    return (
-      <p className="text-muted small mb-0">
-        No subjects found. Add subjects under Master in the sidebar first.
-      </p>
-    );
-  }
-
-  return (
-    <div className="spa-permission-list">
-      {subjects.map((subject) => (
-        <label key={subject.id} className="spa-permission-item">
-          <input
-            type="checkbox"
-            className="form-check-input"
-            checked={selected.includes(subject.id)}
-            onChange={() => toggle(subject.id)}
-          />
-          <span>{subject.name}</span>
-        </label>
-      ))}
-    </div>
-  );
-}
-
 const UserManagement = () => {
   const { auth } = useContext(ThemeContext);
   const isSuperAdmin = auth?.role === "superadmin";
@@ -122,26 +81,31 @@ const UserManagement = () => {
   const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
   const [editPermissions, setEditPermissions] = useState<string[]>([]);
   const [editingProfileUser, setEditingProfileUser] = useState<ManagedUser | null>(null);
+  const [editingSubjectsUser, setEditingSubjectsUser] = useState<ManagedUser | null>(null);
+  const [subjectsStaffType, setSubjectsStaffType] = useState<StaffType>("physical");
+  const [subjectsSelectedIds, setSubjectsSelectedIds] = useState<string[]>([]);
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
   const [editPassword, setEditPassword] = useState("");
-  const [editStaffType, setEditStaffType] = useState<StaffType>("physical");
-  const [editSubjectIds, setEditSubjectIds] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const refreshSubjects = async () => {
+    const subjectData = await api.getSubjects();
+    setSubjects(subjectData.filter((subject) => subject.isActive));
+  };
+
   const loadUsers = async () => {
     if (isSuperAdmin) {
-      const [studentData, adminData, staffData, subjectData] = await Promise.all([
+      const [studentData, adminData, staffData] = await Promise.all([
         api.getUsers("student"),
         api.getUsers("admin"),
         api.getUsers("staff"),
-        api.getSubjects(),
       ]);
       setStudents(studentData);
       setAdmins(adminData);
       setStaff(staffData);
-      setSubjects(subjectData.filter((subject) => subject.isActive));
+      await refreshSubjects();
       return;
     }
     const studentData = await api.getUsers("student");
@@ -157,7 +121,9 @@ const UserManagement = () => {
     if (createAccountType !== "staff") {
       setCreateStaffType("physical");
       setCreateSubjectIds([]);
+      return;
     }
+    refreshSubjects().catch(console.error);
   }, [createAccountType]);
 
   const onCreate = async (event: FormEvent) => {
@@ -217,9 +183,43 @@ const UserManagement = () => {
     setEditName(user.name);
     setEditEmail(user.email);
     setEditPassword("");
-    setEditStaffType(user.staffType || "physical");
-    setEditSubjectIds(user.subjectIds || []);
     setError("");
+  };
+
+  const openEditSubjects = async (user: ManagedUser) => {
+    await refreshSubjects();
+    setEditingSubjectsUser(user);
+    setSubjectsStaffType(user.staffType || "physical");
+    setSubjectsSelectedIds(user.subjectIds || []);
+    setError("");
+  };
+
+  const saveEditSubjects = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!editingSubjectsUser) return;
+    setLoading(true);
+    setError("");
+    try {
+      if (subjectsStaffType === "subject" && subjectsSelectedIds.length === 0) {
+        setError("Please select at least one subject for subject staff.");
+        setLoading(false);
+        return;
+      }
+
+      await api.updateUser(editingSubjectsUser.id, {
+        staffType: subjectsStaffType,
+        subjectIds: subjectsStaffType === "subject" ? subjectsSelectedIds : [],
+      });
+      setEditingSubjectsUser(null);
+      await loadUsers();
+      notify.success("Staff subjects updated successfully.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to update staff subjects";
+      setError(message);
+      notify.error(err, "Failed to update staff subjects");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const saveEditProfile = async (event: FormEvent) => {
@@ -228,27 +228,12 @@ const UserManagement = () => {
     setLoading(true);
     setError("");
     try {
-      const data: {
-        name: string;
-        email: string;
-        password?: string;
-        staffType?: StaffType;
-        subjectIds?: string[];
-      } = {
+      const data: { name: string; email: string; password?: string } = {
         name: editName.trim(),
         email: editEmail.trim(),
       };
       if (editPassword) {
         data.password = editPassword;
-      }
-      if (editingProfileUser.role === "staff") {
-        if (editStaffType === "subject" && editSubjectIds.length === 0) {
-          setError("Please select at least one subject for subject staff.");
-          setLoading(false);
-          return;
-        }
-        data.staffType = editStaffType;
-        data.subjectIds = editStaffType === "subject" ? editSubjectIds : [];
       }
       await api.updateUser(editingProfileUser.id, data);
       setEditingProfileUser(null);
@@ -306,7 +291,7 @@ const UserManagement = () => {
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
-            {showStaffDetails && <th>Staff Type</th>}
+            {showStaffDetails && <th>Subjects</th>}
             <th>Status</th>
             {canManage && <th>Actions</th>}
           </tr>
@@ -345,6 +330,17 @@ const UserManagement = () => {
                         >
                           <i className="fas fa-pencil-alt" />
                         </button>
+                        {showStaffDetails && user.role === "staff" && (
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-primary spa-user-action-btn"
+                            onClick={() => openEditSubjects(user)}
+                            title="Edit Subjects"
+                            aria-label="Edit Subjects"
+                          >
+                            <i className="fa fa-book" />
+                          </button>
+                        )}
                         {canEditPermissions && (
                           <button
                             type="button"
@@ -481,12 +477,10 @@ const UserManagement = () => {
                     {createStaffType === "subject" && (
                       <div className="mb-3">
                         <label className="form-label">Subjects</label>
-                        <p className="text-muted small mb-2">
-                          Select all subjects this staff will teach.
-                        </p>
-                        <SubjectChecklist
+                        <SubjectMultiSelect
+                          name="create-staff-subjects"
                           subjects={subjects}
-                          selected={createSubjectIds}
+                          selectedIds={createSubjectIds}
                           onChange={setCreateSubjectIds}
                         />
                       </div>
@@ -580,40 +574,6 @@ const UserManagement = () => {
                       required
                     />
                   </div>
-                  {editingProfileUser.role === "staff" && (
-                    <>
-                      <div className="mb-3">
-                        <label className="form-label">Staff Type</label>
-                        <select
-                          className="form-select"
-                          value={editStaffType}
-                          onChange={(e) => {
-                            const nextType = e.target.value as StaffType;
-                            setEditStaffType(nextType);
-                            if (nextType === "physical") {
-                              setEditSubjectIds([]);
-                            }
-                          }}
-                        >
-                          <option value="physical">Physical Staff</option>
-                          <option value="subject">Subject Staff</option>
-                        </select>
-                      </div>
-                      {editStaffType === "subject" && (
-                        <div className="mb-3">
-                          <label className="form-label">Subjects</label>
-                          <p className="text-muted small mb-2">
-                            Select all subjects this staff will teach.
-                          </p>
-                          <SubjectChecklist
-                            subjects={subjects}
-                            selected={editSubjectIds}
-                            onChange={setEditSubjectIds}
-                          />
-                        </div>
-                      )}
-                    </>
-                  )}
                   <div className="mb-0">
                     <label className="form-label">New Password</label>
                     <input
@@ -635,6 +595,68 @@ const UserManagement = () => {
                   </button>
                   <button type="submit" className="btn btn-primary" disabled={loading}>
                     {loading ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingSubjectsUser && (
+        <div className="modal fade show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <form onSubmit={saveEditSubjects}>
+                <div className="modal-header">
+                  <h5 className="modal-title">Edit Subjects — {editingSubjectsUser.name}</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setEditingSubjectsUser(null)}
+                    aria-label="Close"
+                  />
+                </div>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label">Staff Type</label>
+                    <select
+                      className="form-select"
+                      value={subjectsStaffType}
+                      onChange={(e) => {
+                        const nextType = e.target.value as StaffType;
+                        setSubjectsStaffType(nextType);
+                        if (nextType === "physical") {
+                          setSubjectsSelectedIds([]);
+                        }
+                      }}
+                    >
+                      <option value="physical">Physical Staff</option>
+                      <option value="subject">Subject Staff</option>
+                    </select>
+                  </div>
+                  {subjectsStaffType === "subject" && (
+                    <div className="mb-0">
+                      <label className="form-label">Subjects</label>
+                      <SubjectMultiSelect
+                        name="edit-staff-subjects"
+                        subjects={subjects}
+                        selectedIds={subjectsSelectedIds}
+                        onChange={setSubjectsSelectedIds}
+                      />
+                    </div>
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={() => setEditingSubjectsUser(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? "Saving..." : "Save Subjects"}
                   </button>
                 </div>
               </form>
