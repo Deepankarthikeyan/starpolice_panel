@@ -4,6 +4,7 @@ import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
 import {
   ADMIN_PERMISSIONS,
+  ADMIN_ROLE_PERMISSION_KEYS,
   STAFF_ADMIN_PERMISSION_KEYS,
   STUDENT_PERMISSIONS,
   defaultPermissionsForRole,
@@ -27,7 +28,9 @@ function PermissionChecklist({
   const options =
     role === "student"
       ? STUDENT_PERMISSIONS
-      : ADMIN_PERMISSIONS.filter((option) => STAFF_ADMIN_PERMISSION_KEYS.includes(option.key));
+      : ADMIN_PERMISSIONS.filter((option) =>
+          (role === "admin" ? ADMIN_ROLE_PERMISSION_KEYS : STAFF_ADMIN_PERMISSION_KEYS).includes(option.key)
+        );
 
   const toggle = (key: string) => {
     if (selected.includes(key)) {

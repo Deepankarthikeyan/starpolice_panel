@@ -27,14 +27,20 @@ export const SUPERADMIN_ONLY_PERMISSIONS: readonly PermissionKey[] = [
   "admin:onboarding",
 ];
 
+export const ADMIN_ONLY_PERMISSIONS: readonly PermissionKey[] = ["admin:leads"];
+
 export const ALL_ADMIN_PERMISSION_KEYS = ADMIN_PERMISSIONS.map((item) => item.key);
 export const STAFF_ADMIN_PERMISSION_KEYS = ALL_ADMIN_PERMISSION_KEYS.filter(
+  (key) => !SUPERADMIN_ONLY_PERMISSIONS.includes(key) && !ADMIN_ONLY_PERMISSIONS.includes(key)
+);
+export const ADMIN_ROLE_PERMISSION_KEYS = ALL_ADMIN_PERMISSION_KEYS.filter(
   (key) => !SUPERADMIN_ONLY_PERMISSIONS.includes(key)
 );
 export const ALL_STUDENT_PERMISSION_KEYS = STUDENT_PERMISSIONS.map((item) => item.key);
 
 export function defaultPermissionsForRole(role: "admin" | "staff" | "student") {
-  if (role === "admin" || role === "staff") return [...STAFF_ADMIN_PERMISSION_KEYS];
+  if (role === "admin") return [...ADMIN_ROLE_PERMISSION_KEYS];
+  if (role === "staff") return [...STAFF_ADMIN_PERMISSION_KEYS];
   return [...ALL_STUDENT_PERMISSION_KEYS];
 }
 
@@ -44,9 +50,8 @@ export function getEffectivePermissions(
   if (!user) return [];
   if (user.role === "superadmin") return [...ALL_ADMIN_PERMISSION_KEYS];
   if (user.permissions?.length) return user.permissions;
-  if (user.role === "admin" || user.role === "staff") {
-    return defaultPermissionsForRole(user.role);
-  }
+  if (user.role === "admin") return defaultPermissionsForRole("admin");
+  if (user.role === "staff") return defaultPermissionsForRole("staff");
   if (user.role === "student") return defaultPermissionsForRole("student");
   return [];
 }
@@ -58,6 +63,9 @@ export function hasPermission(
   if (!user) return false;
   if (SUPERADMIN_ONLY_PERMISSIONS.includes(permission)) {
     return user.role === "superadmin";
+  }
+  if (ADMIN_ONLY_PERMISSIONS.includes(permission)) {
+    return user.role === "superadmin" || user.role === "admin";
   }
   if (user.role === "superadmin") return true;
   return getEffectivePermissions(user).includes(permission);
