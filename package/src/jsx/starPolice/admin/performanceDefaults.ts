@@ -53,12 +53,18 @@ export interface StudentPerformanceSummary {
   fullName: string;
   batch: string;
   gender: string;
+  mobileNumber?: string;
   userId: string | null;
   cardType: PerformanceCardType;
   overallPerformance: OverallPerformance;
   hasRecord: boolean;
   performanceId: string | null;
   updatedAt: string | null;
+  attendancePercent?: number | null;
+  attendanceTotal?: number;
+  physicalExamPercent?: number | null;
+  writtenExamPercent?: number | null;
+  overallPercent?: number | null;
 }
 
 export const FEMALE_EVENT_DEFINITIONS: PerformanceEventDefinition[] = [
@@ -134,7 +140,7 @@ export function mergeEventsWithDefaults(saved: PerformanceEvent[] = []): Perform
       ? { ...existing }
       : {
           eventKey: definition.eventKey,
-          performance: definition.benchmark,
+          performance: "",
           singleStar: "",
           doubleStar: "",
           remarks: "",
@@ -190,10 +196,14 @@ export function countStars(events: PerformanceEvent[]) {
   let single = 0;
   let double = 0;
   events.forEach((event) => {
-    if (event.singleStar.trim()) single += 1;
-    if (event.doubleStar.trim()) double += 1;
+    if (isStarChecked(event.singleStar)) single += 1;
+    if (isStarChecked(event.doubleStar)) double += 1;
   });
   return { single, double };
+}
+
+export function isStarChecked(value: string | undefined) {
+  return value === "1" || value === "true" || Boolean(value?.trim());
 }
 
 export function suggestOverallPerformance(events: PerformanceEvent[]): OverallPerformance {

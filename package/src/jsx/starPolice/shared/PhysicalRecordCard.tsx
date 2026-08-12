@@ -1,11 +1,11 @@
 import type {
   OverallPerformance,
   PerformanceCardType,
-  PerformanceEvent,
   StudentPerformanceRecord,
 } from "../admin/performanceDefaults";
 import {
   getEventDefinitions,
+  isStarChecked,
   mergeEventsWithDefaults,
   overallPerformanceLabel,
   OVERALL_PERFORMANCE_OPTIONS,
@@ -28,17 +28,21 @@ function setField<K extends keyof StudentPerformanceRecord>(
   onChange({ ...form, [key]: value });
 }
 
-function setEventFieldByKey(
+function setStarField(
   form: StudentPerformanceRecord,
   eventKey: string,
-  key: keyof PerformanceEvent,
-  value: string,
+  type: "single" | "double",
+  checked: boolean,
   onChange?: (next: StudentPerformanceRecord) => void
 ) {
   if (!onChange) return;
-  const events = mergeEventsWithDefaults(form.events).map((event) =>
-    event.eventKey === eventKey ? { ...event, [key]: value } : event
-  );
+  const events = mergeEventsWithDefaults(form.events).map((event) => {
+    if (event.eventKey !== eventKey) return event;
+    if (type === "single") {
+      return { ...event, singleStar: checked ? "1" : "", doubleStar: checked ? "" : event.doubleStar };
+    }
+    return { ...event, doubleStar: checked ? "1" : "", singleStar: checked ? "" : event.singleStar };
+  });
   onChange({ ...form, events });
 }
 
@@ -46,7 +50,7 @@ function getEventForDefinition(form: StudentPerformanceRecord, definition: Perfo
   return (
     mergeEventsWithDefaults(form.events).find((event) => event.eventKey === definition.eventKey) || {
       eventKey: definition.eventKey,
-      performance: definition.benchmark,
+      performance: "",
       singleStar: "",
       doubleStar: "",
       remarks: "",
@@ -199,40 +203,32 @@ export default function PhysicalRecordCard({ form, readOnly = false, onChange }:
                       </div>
                     </td>
                     <td>
+                      <span className="physical-record-benchmark">{definition.benchmark}</span>
+                    </td>
+                    <td className="text-center">
                       {readOnly ? (
-                        <span>{event.performance || definition.benchmark}</span>
+                        <span>{isStarChecked(event.singleStar) ? "✓" : "—"}</span>
                       ) : (
                         <input
-                          className="form-control form-control-sm"
-                          value={event.performance}
+                          type="checkbox"
+                          className="form-check-input"
+                          checked={isStarChecked(event.singleStar)}
                           onChange={(e) =>
-                            setEventFieldByKey(form, definition.eventKey, "performance", e.target.value, onChange)
+                            setStarField(form, definition.eventKey, "single", e.target.checked, onChange)
                           }
                         />
                       )}
                     </td>
-                    <td>
+                    <td className="text-center">
                       {readOnly ? (
-                        <span>{event.singleStar || "—"}</span>
+                        <span>{isStarChecked(event.doubleStar) ? "✓" : "—"}</span>
                       ) : (
                         <input
-                          className="form-control form-control-sm"
-                          value={event.singleStar}
+                          type="checkbox"
+                          className="form-check-input"
+                          checked={isStarChecked(event.doubleStar)}
                           onChange={(e) =>
-                            setEventFieldByKey(form, definition.eventKey, "singleStar", e.target.value, onChange)
-                          }
-                        />
-                      )}
-                    </td>
-                    <td>
-                      {readOnly ? (
-                        <span>{event.doubleStar || "—"}</span>
-                      ) : (
-                        <input
-                          className="form-control form-control-sm"
-                          value={event.doubleStar}
-                          onChange={(e) =>
-                            setEventFieldByKey(form, definition.eventKey, "doubleStar", e.target.value, onChange)
+                            setStarField(form, definition.eventKey, "double", e.target.checked, onChange)
                           }
                         />
                       )}
@@ -244,9 +240,15 @@ export default function PhysicalRecordCard({ form, readOnly = false, onChange }:
                         <input
                           className="form-control form-control-sm"
                           value={event.remarks}
-                          onChange={(e) =>
-                            setEventFieldByKey(form, definition.eventKey, "remarks", e.target.value, onChange)
-                          }
+                          onChange={(e) => {
+                            if (!onChange) return;
+                            const events = mergeEventsWithDefaults(form.events).map((item) =>
+                              item.eventKey === definition.eventKey
+                                ? { ...item, remarks: e.target.value }
+                                : item
+                            );
+                            onChange({ ...form, events });
+                          }}
                         />
                       )}
                     </td>

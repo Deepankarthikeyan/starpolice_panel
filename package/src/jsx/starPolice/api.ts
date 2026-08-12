@@ -14,6 +14,7 @@ import type {
 } from "./types";
 import type { StudentOnboardingFormState, StudentOnboardingRecord } from "./admin/studentOnboardingDefaults";
 import type { LeadFormState, LeadRecord, LeadStatus } from "./admin/leadDefaults";
+import type { Exam, StudentPerformanceDetail } from "./admin/examDefaults";
 import type {
   StudentPerformanceRecord,
   StudentPerformanceSummary,
@@ -235,6 +236,44 @@ export const api = {
     });
   },
 
+  getExams() {
+    return request<Exam[]>("/api/exams");
+  },
+
+  createExam(data: {
+    name: string;
+    examType: "physical_exam" | "written_exam";
+    subjectId?: string | null;
+    totalMarks: number;
+  }) {
+    return request<Exam>("/api/exams", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateExam(
+    id: string,
+    data: {
+      name?: string;
+      examType?: "physical_exam" | "written_exam";
+      subjectId?: string | null;
+      totalMarks?: number;
+      isActive?: boolean;
+    }
+  ) {
+    return request<Exam>(`/api/exams/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteExam(id: string) {
+    return request<{ message: string }>(`/api/exams/${id}`, {
+      method: "DELETE",
+    });
+  },
+
   getUploads(date?: string) {
     const query = date ? `?date=${encodeURIComponent(date)}` : "";
     return request<UploadedFile[]>(`/api/uploads${query}`);
@@ -433,6 +472,22 @@ export const api = {
     ).catch(async () => {
       const record = await request<StudentOnboardingRecord>(`/api/student-onboarding/${studentOnboardingId}`);
       return onboardingToEmptyPerformance(record);
+    });
+  },
+
+  getStudentPerformanceDetail(studentOnboardingId: string) {
+    return request<StudentPerformanceDetail>(
+      `/api/student-performance/by-student/${studentOnboardingId}/detail`
+    );
+  },
+
+  saveStudentExamMarks(
+    studentOnboardingId: string,
+    marks: Array<{ examId: string; scoredMarks: number; remarks?: string }>
+  ) {
+    return request<{ message: string }>(`/api/student-performance/by-student/${studentOnboardingId}/exam-marks`, {
+      method: "PUT",
+      body: JSON.stringify({ marks }),
     });
   },
 

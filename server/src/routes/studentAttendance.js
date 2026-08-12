@@ -265,4 +265,37 @@ router.get("/history", attendanceGuard, async (req, res) => {
   }
 });
 
+router.get("/student/:studentOnboardingId/summary", attendanceGuard, async (req, res) => {
+  try {
+    const student = await StudentOnboarding.findById(req.params.studentOnboardingId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    const records = await StudentAttendance.find({ studentOnboardingId: student._id });
+    const total = records.length;
+    const present = records.filter((item) => item.status === "present" || item.status === "late").length;
+    const absent = records.filter((item) => item.status === "absent").length;
+    const leave = records.filter((item) => item.status === "leave").length;
+    const percent = total > 0 ? Math.round((present / total) * 100) : null;
+
+    res.json({
+      studentOnboardingId: student._id.toString(),
+      total,
+      present,
+      absent,
+      leave,
+      percent,
+      records: records
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .map((item) => ({
+          date: item.date,
+          status: item.status,
+        })),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default router;
