@@ -24,8 +24,8 @@ export interface ManagedUser {
   isActive: boolean;
   permissions: PermissionKey[];
   staffType?: StaffType | null;
-  subjectId?: string | null;
-  subjectName?: string | null;
+  subjectIds?: string[];
+  subjectNames?: string[];
   createdAt: string;
 }
 

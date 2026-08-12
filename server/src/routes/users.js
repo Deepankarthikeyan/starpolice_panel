@@ -23,16 +23,28 @@ function resolveRolePermissions(user) {
   return defaultPermissionsForRole("admin");
 }
 
+function mapSubjectRefs(subjectRefs) {
+  const subjectIds = [];
+  const subjectNames = [];
+
+  if (!subjectRefs?.length) {
+    return { subjectIds, subjectNames };
+  }
+
+  for (const ref of subjectRefs) {
+    if (ref && typeof ref === "object" && ref._id) {
+      subjectIds.push(ref._id.toString());
+      if (ref.name) subjectNames.push(ref.name);
+    } else if (ref) {
+      subjectIds.push(ref.toString());
+    }
+  }
+
+  return { subjectIds, subjectNames };
+}
+
 function mapUser(user) {
-  const subjectRef = user.subjectId;
-  const subjectId =
-    subjectRef
-      ? typeof subjectRef === "object" && subjectRef._id
-        ? subjectRef._id.toString()
-        : subjectRef.toString()
-      : null;
-  const subjectName =
-    subjectRef && typeof subjectRef === "object" && subjectRef.name ? subjectRef.name : null;
+  const { subjectIds, subjectNames } = mapSubjectRefs(user.subjectIds);
 
   return {
     id: user._id.toString(),
@@ -42,10 +54,24 @@ function mapUser(user) {
     isActive: user.role === "superadmin" ? true : user.isActive,
     permissions: resolveRolePermissions(user),
     staffType: user.staffType || null,
-    subjectId,
-    subjectName,
+    subjectIds,
+    subjectNames,
     createdAt: user.createdAt,
   };
+}
+
+async function validateSubjectIds(subjectIds) {
+  if (!Array.isArray(subjectIds) || subjectIds.length === 0) {
+    return { error: "At least one subject is required for subject staff." };
+  }
+
+  const uniqueIds = [...new Set(subjectIds.filter(Boolean))];
+  const subjects = await Subject.find({ _id: { $in: uniqueIds } });
+  if (subjects.length !== uniqueIds.length) {
+    return { error: "One or more selected subjects were not found." };
+  }
+
+  return { ids: uniqueIds };
 }
 
 router.get(
@@ -66,7 +92,7 @@ router.get(
       if (type === "staff") {
         const users = await User.find({ role: "staff" })
           .select("-password")
-          .populate("subjectId", "name")
+          .populate("subjectIds", "name")
           .sort({ createdAt: -1 });
         return res.json(users.map(mapUser));
       }
@@ -91,23 +117,23 @@ router.post(
   superAdminOnly,
   async (req, res) => {
     try {
-      const { name, email, password, role, permissions, staffType, subjectId } = req.body;
+      const { name, email, password, role, permissions, staffType, subjectIds } = req.body;
       if (!name?.trim() || !email?.trim() || !password || !role) {
         return res.status(400).json({ message: "Name, email, password, and role are required." });
       }
+
+      let validatedSubjectIds = [];
 
       if (role === "staff") {
         if (!staffType || !["physical", "subject"].includes(staffType)) {
           return res.status(400).json({ message: "Staff type must be physical or subject." });
         }
         if (staffType === "subject") {
-          if (!subjectId) {
-            return res.status(400).json({ message: "Subject is required for subject staff." });
+          const validation = await validateSubjectIds(subjectIds);
+          if (validation.error) {
+            return res.status(400).json({ message: validation.error });
           }
-          const subject = await Subject.findById(subjectId);
-          if (!subject) {
-            return res.status(400).json({ message: "Selected subject not found." });
-          }
+          validatedSubjectIds = validation.ids;
         }
       }
 
@@ -133,12 +159,12 @@ router.post(
 
       if (role === "staff") {
         userData.staffType = staffType;
-        userData.subjectId = staffType === "subject" ? subjectId : null;
+        userData.subjectIds = staffType === "subject" ? validatedSubjectIds : [];
       }
 
       const user = await User.create(userData);
-      if (role === "staff" && user.subjectId) {
-        await user.populate("subjectId", "name");
+      if (role === "staff" && user.subjectIds?.length) {
+        await user.populate("subjectIds", "name");
       }
 
       res.status(201).json(mapUser(user));
@@ -156,7 +182,7 @@ router.patch(
   superAdminOnly,
   async (req, res) => {
     try {
-      const { name, email, password, staffType, subjectId } = req.body;
+      const { name, email, password, staffType, subjectIds } = req.body;
 
       const user = await User.findById(req.params.id);
       if (!user) {
@@ -199,29 +225,27 @@ router.patch(
           }
           user.staffType = staffType;
           if (staffType === "physical") {
-            user.subjectId = null;
+            user.subjectIds = [];
           }
         }
 
-        if (subjectId !== undefined || user.staffType === "subject") {
-          const effectiveStaffType = staffType ?? user.staffType;
-          if (effectiveStaffType === "subject") {
-            const effectiveSubjectId = subjectId ?? user.subjectId?.toString();
-            if (!effectiveSubjectId) {
-              return res.status(400).json({ message: "Subject is required for subject staff." });
+        const effectiveStaffType = staffType ?? user.staffType;
+        if (effectiveStaffType === "subject") {
+          if (subjectIds !== undefined) {
+            const validation = await validateSubjectIds(subjectIds);
+            if (validation.error) {
+              return res.status(400).json({ message: validation.error });
             }
-            const subject = await Subject.findById(effectiveSubjectId);
-            if (!subject) {
-              return res.status(400).json({ message: "Selected subject not found." });
-            }
-            user.subjectId = effectiveSubjectId;
+            user.subjectIds = validation.ids;
+          } else if (!user.subjectIds?.length) {
+            return res.status(400).json({ message: "At least one subject is required for subject staff." });
           }
         }
       }
 
       await user.save();
-      if (user.subjectId) {
-        await user.populate("subjectId", "name");
+      if (user.subjectIds?.length) {
+        await user.populate("subjectIds", "name");
       }
       res.json(mapUser(user));
     } catch (error) {

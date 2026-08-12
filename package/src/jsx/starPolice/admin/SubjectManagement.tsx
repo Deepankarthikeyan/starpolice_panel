@@ -107,10 +107,6 @@ const SubjectManagement = () => {
                   <h4 className="card-title mb-0">Add Subject</h4>
                 </div>
                 <div className="card-body">
-                  <p className="text-muted small mb-3">
-                    Add subjects such as Chemistry, Physics, Mathematics, etc. Subject staff can be
-                    assigned to these when creating staff accounts.
-                  </p>
                   <form onSubmit={onCreate}>
                     <div className="mb-3">
                       <label className="form-label">Subject Name</label>

@@ -61,6 +61,48 @@ function PermissionChecklist({
   );
 }
 
+function SubjectChecklist({
+  subjects,
+  selected,
+  onChange,
+}: {
+  subjects: Subject[];
+  selected: string[];
+  onChange: (subjectIds: string[]) => void;
+}) {
+  const toggle = (id: string) => {
+    if (selected.includes(id)) {
+      onChange(selected.filter((item) => item !== id));
+      return;
+    }
+    onChange([...selected, id]);
+  };
+
+  if (subjects.length === 0) {
+    return (
+      <p className="text-muted small mb-0">
+        No subjects found. Add subjects under Master in the sidebar first.
+      </p>
+    );
+  }
+
+  return (
+    <div className="spa-permission-list">
+      {subjects.map((subject) => (
+        <label key={subject.id} className="spa-permission-item">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            checked={selected.includes(subject.id)}
+            onChange={() => toggle(subject.id)}
+          />
+          <span>{subject.name}</span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
 const UserManagement = () => {
   const { auth } = useContext(ThemeContext);
   const isSuperAdmin = auth?.role === "superadmin";
@@ -75,7 +117,7 @@ const UserManagement = () => {
     defaultPermissionsForRole("student")
   );
   const [createStaffType, setCreateStaffType] = useState<StaffType>("physical");
-  const [createSubjectId, setCreateSubjectId] = useState("");
+  const [createSubjectIds, setCreateSubjectIds] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
   const [editPermissions, setEditPermissions] = useState<string[]>([]);
@@ -84,7 +126,7 @@ const UserManagement = () => {
   const [editEmail, setEditEmail] = useState("");
   const [editPassword, setEditPassword] = useState("");
   const [editStaffType, setEditStaffType] = useState<StaffType>("physical");
-  const [editSubjectId, setEditSubjectId] = useState("");
+  const [editSubjectIds, setEditSubjectIds] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -114,7 +156,7 @@ const UserManagement = () => {
     setCreatePermissions(defaultPermissionsForRole(createAccountType));
     if (createAccountType !== "staff") {
       setCreateStaffType("physical");
-      setCreateSubjectId("");
+      setCreateSubjectIds([]);
     }
   }, [createAccountType]);
 
@@ -123,8 +165,8 @@ const UserManagement = () => {
     setLoading(true);
     setError("");
     try {
-      if (createAccountType === "staff" && createStaffType === "subject" && !createSubjectId) {
-        setError("Please select a subject for subject staff.");
+      if (createAccountType === "staff" && createStaffType === "subject" && createSubjectIds.length === 0) {
+        setError("Please select at least one subject for subject staff.");
         setLoading(false);
         return;
       }
@@ -136,13 +178,13 @@ const UserManagement = () => {
         createAccountType,
         createPermissions,
         createAccountType === "staff" ? createStaffType : undefined,
-        createAccountType === "staff" && createStaffType === "subject" ? createSubjectId : undefined
+        createAccountType === "staff" && createStaffType === "subject" ? createSubjectIds : undefined
       );
       setName("");
       setEmail("");
       setPassword("");
       setCreateStaffType("physical");
-      setCreateSubjectId("");
+      setCreateSubjectIds([]);
       setCreatePermissions(defaultPermissionsForRole(createAccountType));
       await loadUsers();
       notify.success("Account created successfully.");
@@ -176,7 +218,7 @@ const UserManagement = () => {
     setEditEmail(user.email);
     setEditPassword("");
     setEditStaffType(user.staffType || "physical");
-    setEditSubjectId(user.subjectId || "");
+    setEditSubjectIds(user.subjectIds || []);
     setError("");
   };
 
@@ -191,7 +233,7 @@ const UserManagement = () => {
         email: string;
         password?: string;
         staffType?: StaffType;
-        subjectId?: string | null;
+        subjectIds?: string[];
       } = {
         name: editName.trim(),
         email: editEmail.trim(),
@@ -200,13 +242,13 @@ const UserManagement = () => {
         data.password = editPassword;
       }
       if (editingProfileUser.role === "staff") {
-        if (editStaffType === "subject" && !editSubjectId) {
-          setError("Please select a subject for subject staff.");
+        if (editStaffType === "subject" && editSubjectIds.length === 0) {
+          setError("Please select at least one subject for subject staff.");
           setLoading(false);
           return;
         }
         data.staffType = editStaffType;
-        data.subjectId = editStaffType === "subject" ? editSubjectId : null;
+        data.subjectIds = editStaffType === "subject" ? editSubjectIds : [];
       }
       await api.updateUser(editingProfileUser.id, data);
       setEditingProfileUser(null);
@@ -243,7 +285,10 @@ const UserManagement = () => {
     if (user.role !== "staff") return "—";
     if (user.staffType === "physical") return "Physical Staff";
     if (user.staffType === "subject") {
-      return user.subjectName ? `Subject Staff — ${user.subjectName}` : "Subject Staff";
+      if (user.subjectNames?.length) {
+        return `Subject Staff — ${user.subjectNames.join(", ")}`;
+      }
+      return "Subject Staff";
     }
     return "—";
   };
@@ -424,7 +469,7 @@ const UserManagement = () => {
                           const nextType = e.target.value as StaffType;
                           setCreateStaffType(nextType);
                           if (nextType === "physical") {
-                            setCreateSubjectId("");
+                            setCreateSubjectIds([]);
                           }
                         }}
                       >
@@ -435,25 +480,15 @@ const UserManagement = () => {
 
                     {createStaffType === "subject" && (
                       <div className="mb-3">
-                        <label className="form-label">Subject</label>
-                        <select
-                          className="form-select"
-                          value={createSubjectId}
-                          onChange={(e) => setCreateSubjectId(e.target.value)}
-                          required
-                        >
-                          <option value="">Select subject</option>
-                          {subjects.map((subject) => (
-                            <option key={subject.id} value={subject.id}>
-                              {subject.name}
-                            </option>
-                          ))}
-                        </select>
-                        {subjects.length === 0 && (
-                          <p className="text-muted small mt-2 mb-0">
-                            No subjects found. Add subjects under Master in the sidebar first.
-                          </p>
-                        )}
+                        <label className="form-label">Subjects</label>
+                        <p className="text-muted small mb-2">
+                          Select all subjects this staff will teach.
+                        </p>
+                        <SubjectChecklist
+                          subjects={subjects}
+                          selected={createSubjectIds}
+                          onChange={setCreateSubjectIds}
+                        />
                       </div>
                     )}
                   </>
@@ -556,7 +591,7 @@ const UserManagement = () => {
                             const nextType = e.target.value as StaffType;
                             setEditStaffType(nextType);
                             if (nextType === "physical") {
-                              setEditSubjectId("");
+                              setEditSubjectIds([]);
                             }
                           }}
                         >
@@ -566,20 +601,15 @@ const UserManagement = () => {
                       </div>
                       {editStaffType === "subject" && (
                         <div className="mb-3">
-                          <label className="form-label">Subject</label>
-                          <select
-                            className="form-select"
-                            value={editSubjectId}
-                            onChange={(e) => setEditSubjectId(e.target.value)}
-                            required
-                          >
-                            <option value="">Select subject</option>
-                            {subjects.map((subject) => (
-                              <option key={subject.id} value={subject.id}>
-                                {subject.name}
-                              </option>
-                            ))}
-                          </select>
+                          <label className="form-label">Subjects</label>
+                          <p className="text-muted small mb-2">
+                            Select all subjects this staff will teach.
+                          </p>
+                          <SubjectChecklist
+                            subjects={subjects}
+                            selected={editSubjectIds}
+                            onChange={setEditSubjectIds}
+                          />
                         </div>
                       )}
                     </>

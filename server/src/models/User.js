@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
       enum: ["physical", "subject"],
       default: null,
     },
-    subjectId: { type: mongoose.Schema.Types.ObjectId, ref: "Subject", default: null },
+    subjectIds: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subject" }], default: [] },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
   },
   { timestamps: true }
