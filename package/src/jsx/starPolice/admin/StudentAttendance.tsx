@@ -157,10 +157,6 @@ const StudentAttendance = () => {
     return list;
   }, [rows, search, sortKey, statusFilter, marks]);
 
-  const markedCount = useMemo(
-    () => Object.values(marks).filter((status) => status).length,
-    [marks]
-  );
 
   const onSave = async () => {
     setSaving(true);
@@ -281,11 +277,6 @@ const StudentAttendance = () => {
                       <option value="leave">Leave</option>
                       <option value="unmarked">Not marked</option>
                     </select>
-                  </div>
-                  <div className="col-md-2 d-flex align-items-center">
-                    <span className="text-muted small">
-                      {markedCount}/{rows.length} marked · {rows.length} students
-                    </span>
                   </div>
                 </div>
 
