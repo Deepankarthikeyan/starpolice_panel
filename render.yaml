@@ -12,3 +12,5 @@ services:
         value: https://starpolice-panel.netlify.app
       - key: JWT_SECRET
         generateValue: true
+      - key: MONGODB_URI
+        sync: false

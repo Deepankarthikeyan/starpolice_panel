@@ -21,9 +21,8 @@ ENV JWT_SECRET=starpolice-production-jwt-change-me
 ENV CLIENT_URL=https://starpolice-panel.netlify.app
 
 RUN mkdir -p /data/db
+RUN chmod +x start.sh
 
 EXPOSE 5000
 
-CMD mongod --dbpath /data/db --bind_ip 127.0.0.1 --port 27017 --fork --logpath /var/log/mongod.log \
-  && node src/seed.js \
-  && node src/index.js
+CMD ["./start.sh"]

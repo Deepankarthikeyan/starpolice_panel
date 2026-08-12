@@ -96,8 +96,10 @@ const StudentAttendance = () => {
 
   const selectedDayRows = useMemo(() => {
     if (!selectedDayDetail) return [];
-    let list = selectedDayDetail.rows.filter((row) => row.status);
-    if (historyStatusFilter && historyStatusFilter !== "unmarked") {
+    let list = selectedDayDetail.rows;
+    if (historyStatusFilter === "unmarked") {
+      list = list.filter((row) => !row.status);
+    } else if (historyStatusFilter) {
       list = list.filter((row) => row.status === historyStatusFilter);
     }
     const query = historySearch.trim().toLowerCase();
@@ -221,6 +223,14 @@ const StudentAttendance = () => {
               <div className="d-flex flex-wrap gap-2">
                 <button
                   type="button"
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={() => loadToday().catch(console.error)}
+                  disabled={loading}
+                >
+                  {loading ? "Refreshing..." : "Refresh"}
+                </button>
+                <button
+                  type="button"
                   className="btn btn-outline-primary btn-sm"
                   onClick={() => (showHistory ? setShowHistory(false) : openHistory())}
                 >
@@ -274,7 +284,7 @@ const StudentAttendance = () => {
                   </div>
                   <div className="col-md-2 d-flex align-items-center">
                     <span className="text-muted small">
-                      {markedCount}/{rows.length} marked
+                      {markedCount}/{rows.length} marked · {rows.length} students
                     </span>
                   </div>
                 </div>
@@ -282,7 +292,11 @@ const StudentAttendance = () => {
                 {loading ? (
                   <p className="text-muted mb-0">Loading students...</p>
                 ) : filteredRows.length === 0 ? (
-                  <p className="text-muted mb-0">No students found.</p>
+                  <p className="text-muted mb-0">
+                    {rows.length === 0
+                      ? "No students enrolled yet. Add students in Student Onboarding."
+                      : "No students found."}
+                  </p>
                 ) : (
                   <div className="table-responsive">
                     <table className="table table-striped table-hover attendance-table mb-0">
@@ -363,6 +377,7 @@ const StudentAttendance = () => {
                       <option value="absent">Absent</option>
                       <option value="late">Late</option>
                       <option value="leave">Leave</option>
+                      <option value="unmarked">Not marked</option>
                     </select>
                   </div>
                   <div className="col-md-4">
@@ -390,12 +405,13 @@ const StudentAttendance = () => {
                         {selectedHistoryDate ? (
                           <p className="text-muted small mb-0">
                             {formatDisplayDate(selectedHistoryDate)} ({selectedHistoryDate})
+                            {selectedDayDetail ? ` · ${selectedDayDetail.rows.length} students` : ""}
                           </p>
                         ) : (
                           <p className="text-muted small mb-0">Pick a date above to view student attendance.</p>
                         )}
                       </div>
-                      {selectedDayDetail && selectedDayDetail.total > 0 && (
+                      {selectedDayDetail && selectedDayDetail.rows.length > 0 && (
                         <div className="attendance-summary-badges">
                           <span className="badge badge-success attendance-summary-badge">
                             Present {selectedDayDetail.present}
@@ -417,12 +433,22 @@ const StudentAttendance = () => {
                         <p className="text-muted mb-0">Loading date details...</p>
                       ) : !selectedHistoryDate ? (
                         <p className="text-muted mb-0">Pick a date to view student attendance.</p>
-                      ) : !selectedDayDetail || selectedDayDetail.total === 0 ? (
-                        <p className="text-muted mb-0">No attendance saved for this date.</p>
+                      ) : !selectedDayDetail ? (
+                        <p className="text-muted mb-0">Unable to load attendance for this date.</p>
+                      ) : selectedDayDetail.rows.length === 0 ? (
+                        <p className="text-muted mb-0">
+                          No students enrolled yet. Add students in Student Onboarding.
+                        </p>
                       ) : selectedDayRows.length === 0 ? (
                         <p className="text-muted mb-0">No students match your search or filter.</p>
                       ) : (
-                        <div className="table-responsive">
+                        <>
+                          {selectedDayDetail.total === 0 && (
+                            <p className="text-muted small mb-3">
+                              No attendance marked for this date yet. Students below are shown as Not marked.
+                            </p>
+                          )}
+                          <div className="table-responsive">
                           <table className="table table-sm table-striped mb-0">
                             <thead>
                               <tr>
@@ -450,6 +476,7 @@ const StudentAttendance = () => {
                             </tbody>
                           </table>
                         </div>
+                        </>
                       )}
                     </div>
                   </div>
