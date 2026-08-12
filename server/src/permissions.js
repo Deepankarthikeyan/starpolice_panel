@@ -1,4 +1,4 @@
-export const SUPERADMIN_ONLY_PERMISSIONS = ["admin:users", "admin:onboarding"];
+export const SUPERADMIN_ONLY_PERMISSIONS = ["admin:users", "admin:onboarding", "admin:master"];
 export const ADMIN_ONLY_PERMISSIONS = ["admin:leads"];
 
 export const ADMIN_PERMISSIONS = [
@@ -11,6 +11,7 @@ export const ADMIN_PERMISSIONS = [
   { key: "admin:leads", label: "Leads", description: "Manage prospective student leads" },
   { key: "admin:performance", label: "Student Performance", description: "Manage physical efficiency records" },
   { key: "admin:attendance", label: "Student Attendance", description: "Mark and review daily student attendance" },
+  { key: "admin:master", label: "Master", description: "Manage master data such as subjects" },
 ];
 
 export const STUDENT_PERMISSIONS = [

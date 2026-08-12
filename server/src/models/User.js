@@ -12,6 +12,12 @@ const userSchema = new mongoose.Schema(
     },
     isActive: { type: Boolean, default: false },
     permissions: { type: [String], default: [] },
+    staffType: {
+      type: String,
+      enum: ["physical", "subject"],
+      default: null,
+    },
+    subjectId: { type: mongoose.Schema.Types.ObjectId, ref: "Subject", default: null },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
   },
   { timestamps: true }

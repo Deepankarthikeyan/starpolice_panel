@@ -57,6 +57,13 @@ const AdminMenuList = (auth?: AuthUser | null) => {
       to: "user-management",
       permission: "admin:users" as const,
     },
+    {
+      title: "Subjects",
+      iconStyle: <i className="material-symbols-outlined">menu_book</i>,
+      to: "master/subjects",
+      permission: "admin:master" as const,
+      section: "master" as const,
+    },
   ];
 
   return items.filter((item) => hasPermission(auth, item.permission));

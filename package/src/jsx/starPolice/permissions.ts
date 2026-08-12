@@ -8,6 +8,7 @@ export const ADMIN_PERMISSIONS = [
   { key: "admin:leads", label: "Leads", description: "Manage prospective student leads" },
   { key: "admin:performance", label: "Student Performance", description: "Manage physical efficiency records" },
   { key: "admin:attendance", label: "Student Attendance", description: "Mark and review daily student attendance" },
+  { key: "admin:master", label: "Master", description: "Manage master data such as subjects" },
 ] as const;
 
 export const STUDENT_PERMISSIONS = [
@@ -25,6 +26,7 @@ export type PermissionKey = AdminPermissionKey | StudentPermissionKey;
 export const SUPERADMIN_ONLY_PERMISSIONS: readonly PermissionKey[] = [
   "admin:users",
   "admin:onboarding",
+  "admin:master",
 ];
 
 export const ADMIN_ONLY_PERMISSIONS: readonly PermissionKey[] = ["admin:leads"];

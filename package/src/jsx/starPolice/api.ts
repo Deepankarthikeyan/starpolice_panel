@@ -10,6 +10,7 @@ import type {
   SetupStatus,
   StudentDashboardStats,
   UploadedFile,
+  Subject,
 } from "./types";
 import type { StudentOnboardingFormState, StudentOnboardingRecord } from "./admin/studentOnboardingDefaults";
 import type { LeadFormState, LeadRecord, LeadStatus } from "./admin/leadDefaults";
@@ -164,15 +165,26 @@ export const api = {
     email: string,
     password: string,
     role: "admin" | "staff" | "student",
-    permissions?: string[]
+    permissions?: string[],
+    staffType?: "physical" | "subject",
+    subjectId?: string
   ) {
     return request<ManagedUser>("/api/users", {
       method: "POST",
-      body: JSON.stringify({ name, email, password, role, permissions }),
+      body: JSON.stringify({ name, email, password, role, permissions, staffType, subjectId }),
     });
   },
 
-  updateUser(id: string, data: { name?: string; email?: string; password?: string }) {
+  updateUser(
+    id: string,
+    data: {
+      name?: string;
+      email?: string;
+      password?: string;
+      staffType?: "physical" | "subject";
+      subjectId?: string | null;
+    }
+  ) {
     return request<ManagedUser>(`/api/users/${id}`, {
       method: "PATCH",
       body: JSON.stringify(data),
@@ -195,6 +207,30 @@ export const api = {
 
   deleteUser(id: string) {
     return request<{ message: string }>(`/api/users/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  getSubjects() {
+    return request<Subject[]>("/api/subjects");
+  },
+
+  createSubject(name: string) {
+    return request<Subject>("/api/subjects", {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    });
+  },
+
+  updateSubject(id: string, data: { name?: string; isActive?: boolean }) {
+    return request<Subject>(`/api/subjects/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteSubject(id: string) {
+    return request<{ message: string }>(`/api/subjects/${id}`, {
       method: "DELETE",
     });
   },

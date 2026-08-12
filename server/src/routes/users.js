@@ -1,6 +1,7 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import Subject from "../models/Subject.js";
 import { authRequired, adminPanelOnly, attachUser, superAdminOnly } from "../middleware/auth.js";
 import { defaultPermissionsForRole, sanitizePermissions } from "../permissions.js";
 
@@ -23,6 +24,16 @@ function resolveRolePermissions(user) {
 }
 
 function mapUser(user) {
+  const subjectRef = user.subjectId;
+  const subjectId =
+    subjectRef
+      ? typeof subjectRef === "object" && subjectRef._id
+        ? subjectRef._id.toString()
+        : subjectRef.toString()
+      : null;
+  const subjectName =
+    subjectRef && typeof subjectRef === "object" && subjectRef.name ? subjectRef.name : null;
+
   return {
     id: user._id.toString(),
     name: user.name,
@@ -30,6 +41,9 @@ function mapUser(user) {
     role: user.role,
     isActive: user.role === "superadmin" ? true : user.isActive,
     permissions: resolveRolePermissions(user),
+    staffType: user.staffType || null,
+    subjectId,
+    subjectName,
     createdAt: user.createdAt,
   };
 }
@@ -50,7 +64,10 @@ router.get(
       }
 
       if (type === "staff") {
-        const users = await User.find({ role: "staff" }).select("-password").sort({ createdAt: -1 });
+        const users = await User.find({ role: "staff" })
+          .select("-password")
+          .populate("subjectId", "name")
+          .sort({ createdAt: -1 });
         return res.json(users.map(mapUser));
       }
 
@@ -74,9 +91,24 @@ router.post(
   superAdminOnly,
   async (req, res) => {
     try {
-      const { name, email, password, role, permissions } = req.body;
+      const { name, email, password, role, permissions, staffType, subjectId } = req.body;
       if (!name?.trim() || !email?.trim() || !password || !role) {
         return res.status(400).json({ message: "Name, email, password, and role are required." });
+      }
+
+      if (role === "staff") {
+        if (!staffType || !["physical", "subject"].includes(staffType)) {
+          return res.status(400).json({ message: "Staff type must be physical or subject." });
+        }
+        if (staffType === "subject") {
+          if (!subjectId) {
+            return res.status(400).json({ message: "Subject is required for subject staff." });
+          }
+          const subject = await Subject.findById(subjectId);
+          if (!subject) {
+            return res.status(400).json({ message: "Selected subject not found." });
+          }
+        }
       }
 
       const existing = await User.findOne({ email: email.toLowerCase() });
@@ -89,7 +121,7 @@ router.post(
       }
 
       const hashed = await bcrypt.hash(password, 10);
-      const user = await User.create({
+      const userData = {
         name: name.trim(),
         email: email.toLowerCase(),
         password: hashed,
@@ -97,7 +129,17 @@ router.post(
         isActive: false,
         permissions: sanitizePermissions(role, permissions),
         createdBy: req.user.id,
-      });
+      };
+
+      if (role === "staff") {
+        userData.staffType = staffType;
+        userData.subjectId = staffType === "subject" ? subjectId : null;
+      }
+
+      const user = await User.create(userData);
+      if (role === "staff" && user.subjectId) {
+        await user.populate("subjectId", "name");
+      }
 
       res.status(201).json(mapUser(user));
     } catch (error) {
@@ -114,7 +156,7 @@ router.patch(
   superAdminOnly,
   async (req, res) => {
     try {
-      const { name, email, password } = req.body;
+      const { name, email, password, staffType, subjectId } = req.body;
 
       const user = await User.findById(req.params.id);
       if (!user) {
@@ -150,7 +192,37 @@ router.patch(
         user.password = await bcrypt.hash(password, 10);
       }
 
+      if (user.role === "staff") {
+        if (staffType !== undefined) {
+          if (!["physical", "subject"].includes(staffType)) {
+            return res.status(400).json({ message: "Staff type must be physical or subject." });
+          }
+          user.staffType = staffType;
+          if (staffType === "physical") {
+            user.subjectId = null;
+          }
+        }
+
+        if (subjectId !== undefined || user.staffType === "subject") {
+          const effectiveStaffType = staffType ?? user.staffType;
+          if (effectiveStaffType === "subject") {
+            const effectiveSubjectId = subjectId ?? user.subjectId?.toString();
+            if (!effectiveSubjectId) {
+              return res.status(400).json({ message: "Subject is required for subject staff." });
+            }
+            const subject = await Subject.findById(effectiveSubjectId);
+            if (!subject) {
+              return res.status(400).json({ message: "Selected subject not found." });
+            }
+            user.subjectId = effectiveSubjectId;
+          }
+        }
+      }
+
       await user.save();
+      if (user.subjectId) {
+        await user.populate("subjectId", "name");
+      }
       res.json(mapUser(user));
     } catch (error) {
       res.status(500).json({ message: error.message });

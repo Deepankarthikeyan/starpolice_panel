@@ -148,25 +148,55 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
           <nav className="spa-sidebar-nav" aria-label="Main navigation">
             <p className="spa-sidebar-nav-label">Menu</p>
             <ul className="spa-sidebar-menu">
-              {menuList.map((item) => {
-                const itemPath = item.to ? `${basePath}/${item.to}` : "#";
-                const isActive = currentSlug === item.to;
+              {menuList
+                .filter((item) => !("section" in item && item.section === "master"))
+                .map((item) => {
+                  const itemPath = item.to ? `${basePath}/${item.to}` : "#";
+                  const isActive = currentSlug === item.to || location.pathname.includes(item.to);
 
-                return (
-                  <li key={item.title} className={isActive ? "is-active" : ""}>
-                    <Link
-                      to={itemPath}
-                      className="spa-sidebar-link"
-                      title={item.title}
-                      onClick={closeMobileMenu}
-                    >
-                      <span className="spa-sidebar-link-icon">{item.iconStyle}</span>
-                      <span className="spa-sidebar-link-text">{item.title}</span>
-                    </Link>
-                  </li>
-                );
-              })}
+                  return (
+                    <li key={item.title} className={isActive ? "is-active" : ""}>
+                      <Link
+                        to={itemPath}
+                        className="spa-sidebar-link"
+                        title={item.title}
+                        onClick={closeMobileMenu}
+                      >
+                        <span className="spa-sidebar-link-icon">{item.iconStyle}</span>
+                        <span className="spa-sidebar-link-text">{item.title}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
             </ul>
+
+            {menuList.some((item) => "section" in item && item.section === "master") && (
+              <>
+                <p className="spa-sidebar-nav-label">Master</p>
+                <ul className="spa-sidebar-menu">
+                  {menuList
+                    .filter((item) => "section" in item && item.section === "master")
+                    .map((item) => {
+                      const itemPath = item.to ? `${basePath}/${item.to}` : "#";
+                      const isActive = location.pathname.includes(item.to);
+
+                      return (
+                        <li key={item.title} className={isActive ? "is-active" : ""}>
+                          <Link
+                            to={itemPath}
+                            className="spa-sidebar-link"
+                            title={item.title}
+                            onClick={closeMobileMenu}
+                          >
+                            <span className="spa-sidebar-link-icon">{item.iconStyle}</span>
+                            <span className="spa-sidebar-link-text">{item.title}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                </ul>
+              </>
+            )}
           </nav>
 
           <div className="spa-sidebar-footer">

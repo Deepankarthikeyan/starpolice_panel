@@ -1,6 +1,7 @@
 export type UserRole = "superadmin" | "admin" | "staff" | "student";
 export type PanelType = "admin" | "staff" | "student";
 export type PermissionKey = string;
+export type StaffType = "physical" | "subject";
 
 export type FileCategory = "video" | "pdf" | "image" | "document";
 
@@ -22,6 +23,16 @@ export interface ManagedUser {
   role: UserRole;
   isActive: boolean;
   permissions: PermissionKey[];
+  staffType?: StaffType | null;
+  subjectId?: string | null;
+  subjectName?: string | null;
+  createdAt: string;
+}
+
+export interface Subject {
+  id: string;
+  name: string;
+  isActive: boolean;
   createdAt: string;
 }
 

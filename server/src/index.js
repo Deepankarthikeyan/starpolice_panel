@@ -16,6 +16,7 @@ import leadRoutes from "./routes/leads.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import studentPerformanceRoutes from "./routes/studentPerformance.js";
 import studentAttendanceRoutes from "./routes/studentAttendance.js";
+import subjectRoutes from "./routes/subjects.js";
 import { uploadDir } from "./middleware/upload.js";
 import { backfillAttendancePermission } from "./migrations/backfillAttendancePermission.js";
 import { stripLeadsFromStaff } from "./migrations/stripLeadsFromStaff.js";
@@ -52,6 +53,7 @@ app.use("/api/leads", leadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/student-performance", studentPerformanceRoutes);
 app.use("/api/student-attendance", studentAttendanceRoutes);
+app.use("/api/subjects", subjectRoutes);
 
 app.use((error, _req, res, _next) => {
   res.status(500).json({ message: error.message || "Server error" });
