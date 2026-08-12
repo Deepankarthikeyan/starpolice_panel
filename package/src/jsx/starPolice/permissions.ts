@@ -38,6 +38,19 @@ export function defaultPermissionsForRole(role: "admin" | "staff" | "student") {
   return [...ALL_STUDENT_PERMISSION_KEYS];
 }
 
+export function getEffectivePermissions(
+  user: { role: string; permissions?: string[] } | null | undefined
+) {
+  if (!user) return [];
+  if (user.role === "superadmin") return [...ALL_ADMIN_PERMISSION_KEYS];
+  if (user.permissions?.length) return user.permissions;
+  if (user.role === "admin" || user.role === "staff") {
+    return defaultPermissionsForRole(user.role);
+  }
+  if (user.role === "student") return defaultPermissionsForRole("student");
+  return [];
+}
+
 export function hasPermission(
   user: { role: string; permissions?: string[] } | null | undefined,
   permission: PermissionKey
@@ -47,5 +60,5 @@ export function hasPermission(
     return user.role === "superadmin";
   }
   if (user.role === "superadmin") return true;
-  return (user.permissions || []).includes(permission);
+  return getEffectivePermissions(user).includes(permission);
 }

@@ -17,6 +17,7 @@ import dashboardRoutes from "./routes/dashboard.js";
 import studentPerformanceRoutes from "./routes/studentPerformance.js";
 import studentAttendanceRoutes from "./routes/studentAttendance.js";
 import { uploadDir } from "./middleware/upload.js";
+import { backfillAttendancePermission } from "./migrations/backfillAttendancePermission.js";
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ app.use((error, _req, res, _next) => {
 
 async function start() {
   await connectDB(process.env.MONGODB_URI);
+  await backfillAttendancePermission();
   app.listen(PORT, () => {
     console.log(`API server running on http://localhost:${PORT}`);
   });

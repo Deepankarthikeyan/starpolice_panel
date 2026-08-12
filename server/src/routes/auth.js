@@ -3,24 +3,12 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { authRequired } from "../middleware/auth.js";
-import { defaultPermissionsForRole } from "../permissions.js";
+import { getEffectivePermissions } from "../permissions.js";
 
 const router = express.Router();
 
 function resolveRolePermissions(user) {
-  if (user.role === "superadmin") {
-    return defaultPermissionsForRole("admin");
-  }
-  if (user.permissions?.length) {
-    return user.permissions;
-  }
-  if (user.role === "student") {
-    return defaultPermissionsForRole("student");
-  }
-  if (user.role === "staff") {
-    return defaultPermissionsForRole("staff");
-  }
-  return defaultPermissionsForRole("admin");
+  return getEffectivePermissions(user);
 }
 
 function createToken(user, panel) {

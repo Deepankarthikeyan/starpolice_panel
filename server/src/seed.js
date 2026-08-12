@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import { connectDB } from "./config/db.js";
 import User from "./models/User.js";
+import { defaultPermissionsForRole } from "./permissions.js";
 
 dotenv.config();
 
@@ -45,13 +46,7 @@ async function seed() {
   console.log("Seeded student: student@starpolice.academy / student123");
 
   const staffPassword = await bcrypt.hash("staff123", 10);
-  const adminPermissions = [
-    "admin:dashboard",
-    "admin:uploads",
-    "admin:messages",
-    "admin:calendar",
-    "admin:performance",
-  ];
+  const staffPermissions = defaultPermissionsForRole("staff");
   await User.findOneAndUpdate(
     { email: "staff@starpolice.academy" },
     {
@@ -60,7 +55,7 @@ async function seed() {
       password: staffPassword,
       role: "staff",
       isActive: true,
-      permissions: adminPermissions,
+      permissions: staffPermissions,
     },
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
