@@ -100,10 +100,10 @@ function PerformanceSummaryCard({
   clickable?: boolean;
 }) {
   const content = (
-    <div className="card-body">
-      <p className="text-muted mb-1">{label}</p>
-      <h4 className="mb-0">{value}</h4>
-      {subtext && <small className="text-muted">{subtext}</small>}
+    <div className="card-body spa-performance-card-body">
+      <p className="spa-performance-card-label text-muted mb-2">{label}</p>
+      <p className="spa-performance-card-value mb-1">{value}</p>
+      {subtext && <p className="spa-performance-card-subtext text-muted mb-0">{subtext}</p>}
     </div>
   );
 

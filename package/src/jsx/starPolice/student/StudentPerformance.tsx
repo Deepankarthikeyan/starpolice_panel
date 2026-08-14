@@ -59,7 +59,7 @@ const StudentPerformance = () => {
               </small>
             </div>
             <div className="card-body">
-              <p className="text-muted mb-0">
+              <p className="spa-performance-intro text-muted mb-0">
                 Tap a card below to view your attendance, physical exam, or written exam performance.
               </p>
             </div>
