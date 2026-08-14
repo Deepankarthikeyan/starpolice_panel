@@ -1019,3 +1019,15 @@
   border-bottom-color: var(--primary, #123d73);
   background: transparent;
 }
+
+.spa-performance-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.spa-performance-card:hover,
+.spa-performance-card.is-active {
+  border-color: var(--primary, #123d73);
+  box-shadow: 0 0 0 1px rgba(18, 61, 115, 0.12);
+}

@@ -1,11 +1,10 @@
-import { FormEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
 import { hasPermission } from "../permissions";
 import { getPanelMotherMenu } from "../panelLabels";
 import { notify } from "../toast";
-import PhysicalRecordCard from "../shared/PhysicalRecordCard";
 import {
   buildPerformanceWhatsAppMessage,
   buildWhatsAppLink,
@@ -14,13 +13,7 @@ import {
   type StudentPerformanceDetail,
 } from "./examDefaults";
 import {
-  emptyPerformanceForm,
-  getCardTypeFromGender,
-  overallPerformanceBadgeClass,
   overallPerformanceLabel,
-  recordToForm,
-  suggestOverallPerformance,
-  type StudentPerformanceRecord,
   type StudentPerformanceSummary,
 } from "./performanceDefaults";
 
@@ -35,15 +28,7 @@ type SortKey =
 
 type SortDir = "asc" | "desc";
 
-type PerformanceDetailTab = "overview" | "attendance" | "physical" | "written" | "overall";
-
-const PERFORMANCE_DETAIL_TABS: { key: PerformanceDetailTab; label: string }[] = [
-  { key: "overview", label: "Overview" },
-  { key: "attendance", label: "Attendance" },
-  { key: "physical", label: "Physical" },
-  { key: "written", label: "Written Exam" },
-  { key: "overall", label: "Overall" },
-];
+type PerformanceSection = "attendance" | "physical" | "written";
 
 function compareValues(a: string | number | null | undefined, b: string | number | null | undefined) {
   if (a === null || a === undefined) return 1;
@@ -55,23 +40,10 @@ function compareValues(a: string | number | null | undefined, b: string | number
 function ExamMarksTable({
   title,
   exams,
-  onChange,
-  readOnly = false,
 }: {
   title: string;
   exams: StudentExamMarkEntry[];
-  onChange?: (next: StudentExamMarkEntry[]) => void;
-  readOnly?: boolean;
 }) {
-  const setMark = (examId: string, key: "scoredMarks" | "remarks", value: string) => {
-    if (!onChange) return;
-    onChange(
-      exams.map((exam) =>
-        exam.examId === examId ? { ...exam, [key]: key === "scoredMarks" ? value : value } : exam
-      )
-    );
-  };
-
   return (
     <div className="card mb-4">
       <div className="card-header">
@@ -82,7 +54,7 @@ function ExamMarksTable({
           <p className="text-muted mb-0">No exams configured. Add exams under Master → Exams.</p>
         ) : (
           <div className="table-responsive">
-            <table className="table table-striped align-middle">
+            <table className="table table-striped align-middle mb-0">
               <thead>
                 <tr>
                   <th>Exam</th>
@@ -98,31 +70,8 @@ function ExamMarksTable({
                     <td>{exam.name}</td>
                     <td>{exam.subjectName || "—"}</td>
                     <td>{exam.totalMarks}</td>
-                    <td>
-                      {readOnly ? (
-                        exam.scoredMarks || "—"
-                      ) : (
-                        <input
-                          type="number"
-                          min={0}
-                          max={exam.totalMarks}
-                          className="form-control form-control-sm"
-                          value={exam.scoredMarks}
-                          onChange={(e) => setMark(exam.examId, "scoredMarks", e.target.value)}
-                        />
-                      )}
-                    </td>
-                    <td>
-                      {readOnly ? (
-                        exam.remarks || "—"
-                      ) : (
-                        <input
-                          className="form-control form-control-sm"
-                          value={exam.remarks}
-                          onChange={(e) => setMark(exam.examId, "remarks", e.target.value)}
-                        />
-                      )}
-                    </td>
+                    <td>{exam.scoredMarks === "" || exam.scoredMarks === null || exam.scoredMarks === undefined ? "—" : exam.scoredMarks}</td>
+                    <td>{exam.remarks || "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -134,6 +83,50 @@ function ExamMarksTable({
   );
 }
 
+function PerformanceSummaryCard({
+  label,
+  value,
+  subtext,
+  active,
+  onClick,
+  clickable = true,
+}: {
+  label: string;
+  value: string;
+  subtext?: string;
+  active?: boolean;
+  onClick?: () => void;
+  clickable?: boolean;
+}) {
+  const content = (
+    <div className="card-body">
+      <p className="text-muted mb-1">{label}</p>
+      <h4 className="mb-0">{value}</h4>
+      {subtext && <small className="text-muted">{subtext}</small>}
+    </div>
+  );
+
+  if (!clickable) {
+    return (
+      <div className="col-md-3 col-sm-6">
+        <div className="card h-100 spa-performance-card">{content}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="col-md-3 col-sm-6">
+      <button
+        type="button"
+        className={`card h-100 w-100 text-start spa-performance-card ${active ? "is-active" : ""}`}
+        onClick={onClick}
+      >
+        {content}
+      </button>
+    </div>
+  );
+}
+
 const StudentPerformance = () => {
   const { auth } = useContext(ThemeContext);
   const canManage = hasPermission(auth, "admin:performance");
@@ -141,7 +134,6 @@ const StudentPerformance = () => {
 
   const [students, setStudents] = useState<StudentPerformanceSummary[]>([]);
   const [detail, setDetail] = useState<StudentPerformanceDetail | null>(null);
-  const [form, setForm] = useState<StudentPerformanceRecord | null>(null);
   const [physicalExams, setPhysicalExams] = useState<StudentExamMarkEntry[]>([]);
   const [writtenExams, setWrittenExams] = useState<StudentExamMarkEntry[]>([]);
   const [search, setSearch] = useState("");
@@ -149,10 +141,9 @@ const StudentPerformance = () => {
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [loading, setLoading] = useState(false);
   const [listLoading, setListLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [listError, setListError] = useState("");
-  const [detailTab, setDetailTab] = useState<PerformanceDetailTab>("overview");
+  const [activeSection, setActiveSection] = useState<PerformanceSection>("attendance");
 
   const loadStudents = async () => {
     setListLoading(true);
@@ -208,25 +199,10 @@ const StudentPerformance = () => {
     setError("");
     try {
       const data = await api.getStudentPerformanceDetail(studentOnboardingId);
-      const student = students.find((item) => item.studentOnboardingId === studentOnboardingId);
-      const cardType =
-        data.performance.cardType || getCardTypeFromGender(student?.gender || data.student.gender);
-      const nextForm = data.performance.hasRecord
-        ? { ...recordToForm(data.performance as StudentPerformanceRecord), hasRecord: true }
-        : {
-            ...emptyPerformanceForm(studentOnboardingId, cardType, {
-              studentId: data.student.studentId,
-              fullName: data.student.fullName,
-              batch: data.student.batch,
-              gender: data.student.gender,
-            }),
-            hasRecord: false,
-          };
       setDetail(data);
-      setForm(nextForm);
       setPhysicalExams(data.physicalExams);
       setWrittenExams(data.writtenExams);
-      setDetailTab("overview");
+      setActiveSection("attendance");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to load student performance.";
       setError(message);
@@ -238,63 +214,25 @@ const StudentPerformance = () => {
 
   const closeDetail = () => {
     setDetail(null);
-    setForm(null);
     setPhysicalExams([]);
     setWrittenExams([]);
-    setDetailTab("overview");
+    setActiveSection("attendance");
     setError("");
   };
 
   const attendanceStats = useMemo(() => {
     if (!detail) {
-      return { present: 0, absent: 0, late: 0, leave: 0, unmarked: 0 };
+      return { present: 0, absent: 0, late: 0, leave: 0 };
     }
-    const stats = { present: 0, absent: 0, late: 0, leave: 0, unmarked: 0 };
+    const stats = { present: 0, absent: 0, late: 0, leave: 0 };
     detail.attendance.forEach((item) => {
       if (item.status === "present") stats.present += 1;
       else if (item.status === "absent") stats.absent += 1;
       else if (item.status === "late") stats.late += 1;
       else if (item.status === "leave") stats.leave += 1;
-      else stats.unmarked += 1;
     });
     return stats;
   }, [detail]);
-
-  const saveAll = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!detail || !form) return;
-    setSaving(true);
-    setError("");
-    try {
-      const suggested = suggestOverallPerformance(form.events);
-      const payload = {
-        ...form,
-        overallPerformance: form.overallPerformance || suggested,
-      };
-      await api.saveStudentPerformance(form.studentOnboardingId, payload);
-
-      const marks = [...physicalExams, ...writtenExams]
-        .filter((exam) => exam.scoredMarks !== "" && exam.scoredMarks !== null && exam.scoredMarks !== undefined)
-        .map((exam) => ({
-          examId: exam.examId,
-          scoredMarks: Number(exam.scoredMarks),
-          remarks: exam.remarks || "",
-        }));
-      if (marks.length > 0) {
-        await api.saveStudentExamMarks(form.studentOnboardingId, marks);
-      }
-
-      notify.success("Student performance saved.");
-      await loadStudents();
-      await openStudent(form.studentOnboardingId);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to save performance.";
-      setError(message);
-      notify.error(err, "Failed to save performance.");
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handlePrint = () => {
     window.print();
@@ -328,7 +266,7 @@ const StudentPerformance = () => {
     <>
       <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu="Student Performance" pageContent="" />
 
-      {!detail || !form ? (
+      {!detail ? (
         <div className="card">
           <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 spa-no-print">
             <h4 className="card-title mb-0">Student Performance Overview</h4>
@@ -448,21 +386,6 @@ const StudentPerformance = () => {
                 </button>
               </div>
             </div>
-            <div className="card-body pt-0">
-              <ul className="nav nav-tabs spa-performance-tabs flex-wrap">
-                {PERFORMANCE_DETAIL_TABS.map((tab) => (
-                  <li className="nav-item" key={tab.key}>
-                    <button
-                      type="button"
-                      className={`nav-link ${detailTab === tab.key ? "active" : ""}`}
-                      onClick={() => setDetailTab(tab.key)}
-                    >
-                      {tab.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
 
           <div className="spa-print-only mb-3">
@@ -477,110 +400,43 @@ const StudentPerformance = () => {
           {loading ? (
             <p className="text-muted">Loading...</p>
           ) : (
-            <form onSubmit={saveAll}>
-              {(detailTab === "overview" || detailTab === "overall") && (
-                <div className="row mb-4">
-                  <div className="col-md-3">
-                    <div className="card h-100">
-                      <div className="card-body">
-                        <p className="text-muted mb-1">Attendance</p>
-                        <h4 className="mb-0">{formatPercent(detail.summary.attendancePercent)}</h4>
-                        <small className="text-muted">
-                          {detail.summary.attendancePresent}/{detail.summary.attendanceTotal} days
-                        </small>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-3">
-                    <div className="card h-100">
-                      <div className="card-body">
-                        <p className="text-muted mb-1">Physical Exam</p>
-                        <h4 className="mb-0">{formatPercent(detail.summary.physicalExamPercent)}</h4>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-3">
-                    <div className="card h-100">
-                      <div className="card-body">
-                        <p className="text-muted mb-1">Written Exam</p>
-                        <h4 className="mb-0">{formatPercent(detail.summary.writtenExamPercent)}</h4>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-md-3">
-                    <div className="card h-100">
-                      <div className="card-body">
-                        <p className="text-muted mb-1">Overall Performance</p>
-                        <h4 className="mb-0">{formatPercent(detail.summary.overallPercent)}</h4>
-                        {detail.summary.overallPerformance && (
-                          <span
-                            className={`badge ${overallPerformanceBadgeClass(detail.summary.overallPerformance as never)}`}
-                          >
-                            {overallPerformanceLabel(detail.summary.overallPerformance as never)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+            <>
+              <div className="row mb-4 g-3">
+                <PerformanceSummaryCard
+                  label="Attendance"
+                  value={formatPercent(detail.summary.attendancePercent)}
+                  subtext={`${detail.summary.attendancePresent}/${detail.summary.attendanceTotal} days`}
+                  active={activeSection === "attendance"}
+                  onClick={() => setActiveSection("attendance")}
+                />
+                <PerformanceSummaryCard
+                  label="Physical Exam"
+                  value={formatPercent(detail.summary.physicalExamPercent)}
+                  active={activeSection === "physical"}
+                  onClick={() => setActiveSection("physical")}
+                />
+                <PerformanceSummaryCard
+                  label="Written Exam"
+                  value={formatPercent(detail.summary.writtenExamPercent)}
+                  active={activeSection === "written"}
+                  onClick={() => setActiveSection("written")}
+                />
+                <PerformanceSummaryCard
+                  label="Overall Performance"
+                  value={formatPercent(detail.summary.overallPercent)}
+                  subtext={
+                    detail.summary.overallPerformance
+                      ? overallPerformanceLabel(detail.summary.overallPerformance as never)
+                      : undefined
+                  }
+                  clickable={false}
+                />
+              </div>
 
-              {detailTab === "overview" && (
-                <div className="card mb-4">
-                  <div className="card-header">
-                    <h5 className="card-title mb-0">Performance Snapshot</h5>
-                  </div>
-                  <div className="card-body">
-                    <p className="text-muted mb-3">
-                      Use the tabs above to view attendance, physical exam, written exam, and overall performance in
-                      detail.
-                    </p>
-                    <div className="row g-3">
-                      <div className="col-md-6">
-                        <button
-                          type="button"
-                          className="btn btn-outline-primary w-100"
-                          onClick={() => setDetailTab("attendance")}
-                        >
-                          View Attendance Performance
-                        </button>
-                      </div>
-                      <div className="col-md-6">
-                        <button
-                          type="button"
-                          className="btn btn-outline-primary w-100"
-                          onClick={() => setDetailTab("physical")}
-                        >
-                          View Physical Performance
-                        </button>
-                      </div>
-                      <div className="col-md-6">
-                        <button
-                          type="button"
-                          className="btn btn-outline-primary w-100"
-                          onClick={() => setDetailTab("written")}
-                        >
-                          View Written Exam Performance
-                        </button>
-                      </div>
-                      <div className="col-md-6">
-                        <button
-                          type="button"
-                          className="btn btn-outline-primary w-100"
-                          onClick={() => setDetailTab("overall")}
-                        >
-                          View Overall Performance
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {detailTab === "attendance" && (
+              {activeSection === "attendance" && (
                 <div className="card mb-4">
                   <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <h5 className="card-title mb-0">Attendance Performance</h5>
+                    <h5 className="card-title mb-0">Attendance List</h5>
                     <span className="badge bg-primary">{formatPercent(detail.summary.attendancePercent)}</span>
                   </div>
                   <div className="card-body">
@@ -594,7 +450,7 @@ const StudentPerformance = () => {
                       <p className="text-muted mb-0">No attendance records yet.</p>
                     ) : (
                       <div className="table-responsive">
-                        <table className="table table-sm table-striped">
+                        <table className="table table-sm table-striped mb-0">
                           <thead>
                             <tr>
                               <th>Date</th>
@@ -616,104 +472,14 @@ const StudentPerformance = () => {
                 </div>
               )}
 
-              {detailTab === "physical" && (
-                <>
-                  <ExamMarksTable
-                    title="Physical Exam Marks"
-                    exams={physicalExams}
-                    onChange={setPhysicalExams}
-                  />
-                  <div className="card mb-4">
-                    <div className="card-header">
-                      <h5 className="card-title mb-0">Physical Efficiency Record Card</h5>
-                    </div>
-                    <div className="card-body">
-                      <PhysicalRecordCard form={form} onChange={setForm} />
-                    </div>
-                  </div>
-                </>
+              {activeSection === "physical" && (
+                <ExamMarksTable title="Physical Exam Performance List" exams={physicalExams} />
               )}
 
-              {detailTab === "written" && (
-                <ExamMarksTable title="Written Exam Performance" exams={writtenExams} onChange={setWrittenExams} />
+              {activeSection === "written" && (
+                <ExamMarksTable title="Written Exam Performance List" exams={writtenExams} />
               )}
-
-              {detailTab === "overall" && (
-                <div className="card mb-4">
-                  <div className="card-header">
-                    <h5 className="card-title mb-0">Overall Performance Summary</h5>
-                  </div>
-                  <div className="card-body">
-                    <div className="table-responsive">
-                      <table className="table table-bordered mb-0">
-                        <thead>
-                          <tr>
-                            <th>Area</th>
-                            <th>Score</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>Attendance Performance</td>
-                            <td>{formatPercent(detail.summary.attendancePercent)}</td>
-                          </tr>
-                          <tr>
-                            <td>Physical Exam Performance</td>
-                            <td>{formatPercent(detail.summary.physicalExamPercent)}</td>
-                          </tr>
-                          <tr>
-                            <td>Written Exam Performance</td>
-                            <td>{formatPercent(detail.summary.writtenExamPercent)}</td>
-                          </tr>
-                          <tr>
-                            <td>Physical Efficiency Rating</td>
-                            <td>
-                              {detail.summary.overallPerformance
-                                ? overallPerformanceLabel(detail.summary.overallPerformance as never)
-                                : "Not rated"}
-                            </td>
-                          </tr>
-                          <tr className="table-active">
-                            <td>
-                              <strong>Overall Performance</strong>
-                            </td>
-                            <td>
-                              <strong>{formatPercent(detail.summary.overallPercent)}</strong>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    {form.trainerRemarks && (
-                      <div className="mt-3">
-                        <p className="text-muted mb-1">Trainer Remarks</p>
-                        <p className="mb-0">{form.trainerRemarks}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {detailTab !== "overview" && detailTab !== "attendance" && (
-                <div className="d-flex flex-wrap gap-2 spa-no-print">
-                  <button type="submit" className="btn btn-primary" disabled={saving}>
-                    {saving ? "Saving..." : "Save Performance"}
-                  </button>
-                  {detailTab === "physical" && (
-                    <button
-                      type="button"
-                      className="btn btn-outline-info"
-                      onClick={() => {
-                        const suggested = suggestOverallPerformance(form.events);
-                        if (suggested) setForm({ ...form, overallPerformance: suggested });
-                      }}
-                    >
-                      Auto-suggest overall rating
-                    </button>
-                  )}
-                </div>
-              )}
-            </form>
+            </>
           )}
         </div>
       )}
