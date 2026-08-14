@@ -16,6 +16,7 @@ import {
   overallPerformanceLabel,
   type StudentPerformanceSummary,
 } from "./performanceDefaults";
+import { AttendancePerformanceList } from "../shared/PerformanceDetailPanels";
 
 type SortKey =
   | "studentId"
@@ -220,20 +221,6 @@ const StudentPerformance = () => {
     setError("");
   };
 
-  const attendanceStats = useMemo(() => {
-    if (!detail) {
-      return { present: 0, absent: 0, late: 0, leave: 0 };
-    }
-    const stats = { present: 0, absent: 0, late: 0, leave: 0 };
-    detail.attendance.forEach((item) => {
-      if (item.status === "present") stats.present += 1;
-      else if (item.status === "absent") stats.absent += 1;
-      else if (item.status === "late") stats.late += 1;
-      else if (item.status === "leave") stats.leave += 1;
-    });
-    return stats;
-  }, [detail]);
-
   const handlePrint = () => {
     window.print();
   };
@@ -433,43 +420,11 @@ const StudentPerformance = () => {
                 />
               </div>
 
-              {activeSection === "attendance" && (
-                <div className="card mb-4">
-                  <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <h5 className="card-title mb-0">Attendance List</h5>
-                    <span className="badge bg-primary">{formatPercent(detail.summary.attendancePercent)}</span>
-                  </div>
-                  <div className="card-body">
-                    <div className="d-flex flex-wrap gap-2 mb-3">
-                      <span className="badge badge-success">Present {attendanceStats.present}</span>
-                      <span className="badge badge-danger">Absent {attendanceStats.absent}</span>
-                      <span className="badge badge-warning">Late {attendanceStats.late}</span>
-                      <span className="badge badge-info">Leave {attendanceStats.leave}</span>
-                    </div>
-                    {detail.attendance.length === 0 ? (
-                      <p className="text-muted mb-0">No attendance records yet.</p>
-                    ) : (
-                      <div className="table-responsive">
-                        <table className="table table-sm table-striped mb-0">
-                          <thead>
-                            <tr>
-                              <th>Date</th>
-                              <th>Status</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {detail.attendance.map((item) => (
-                              <tr key={item.date}>
-                                <td>{item.date}</td>
-                                <td className="text-capitalize">{item.status || "Not marked"}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                </div>
+              {activeSection === "attendance" && detail && (
+                <AttendancePerformanceList
+                  attendance={detail.attendance}
+                  attendancePercent={detail.summary.attendancePercent}
+                />
               )}
 
               {activeSection === "physical" && (

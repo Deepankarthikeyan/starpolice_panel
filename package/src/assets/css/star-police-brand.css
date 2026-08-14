@@ -1031,3 +1031,15 @@
   border-color: var(--primary, #123d73);
   box-shadow: 0 0 0 1px rgba(18, 61, 115, 0.12);
 }
+
+.spa-attendance-filter-badge {
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.spa-attendance-filter-badge:hover,
+.spa-attendance-filter-badge.is-active {
+  opacity: 1;
+  box-shadow: 0 0 0 2px rgba(18, 61, 115, 0.2);
+}
