@@ -300,6 +300,110 @@ router.get("/me", authRequired, attachUser, async (req, res) => {
   }
 });
 
+async function buildStudentPerformanceDetail(student) {
+  const performance = await StudentPerformance.findOne({ studentOnboardingId: student._id });
+  const exams = await Exam.find({ isActive: true })
+    .populate("subjectId", "name")
+    .sort({ examType: 1, name: 1 });
+  const marks = await StudentExamMark.find({ studentOnboardingId: student._id });
+  const marksByExamId = new Map(marks.map((mark) => [mark.examId.toString(), mark]));
+  const attendanceRecords = await StudentAttendance.find({ studentOnboardingId: student._id });
+
+  const physicalExams = exams.filter((exam) => exam.examType === "physical_exam");
+  const writtenExams = exams.filter((exam) => exam.examType === "written_exam");
+  const attendancePercent = computeAttendancePercent(attendanceRecords);
+  const physicalExamPercent = computeExamPercent(physicalExams, marksByExamId);
+  const writtenExamPercent = computeExamPercent(writtenExams, marksByExamId);
+  const overallPercent = computeOverallPercent(
+    attendancePercent,
+    physicalExamPercent,
+    writtenExamPercent,
+    performance?.overallPerformance
+  );
+
+  const cardType = performance?.cardType || getCardTypeFromGender(student.gender);
+  const performancePayload = performance
+    ? { hasRecord: true, ...mapPerformance(performance, student) }
+    : {
+        hasRecord: false,
+        studentOnboardingId: student._id.toString(),
+        userId: student.userId?.toString() || null,
+        cardType,
+        recordYear: new Date().getFullYear(),
+        events: defaultEvents(cardType),
+        student: {
+          studentId: student.studentId,
+          firstName: student.firstName,
+          middleName: student.middleName,
+          lastName: student.lastName,
+          fullName: fullStudentName(student),
+          batch: student.batch,
+          gender: student.gender,
+          dateOfBirth: student.dateOfBirth,
+        },
+      };
+
+  const mapExamWithMark = (exam) => {
+    const mark = marksByExamId.get(exam._id.toString());
+    return {
+      examId: exam._id.toString(),
+      name: exam.name,
+      examType: exam.examType,
+      subjectName: exam.subjectId?.name || null,
+      totalMarks: exam.totalMarks,
+      scoredMarks: mark?.scoredMarks ?? "",
+      remarks: mark?.remarks || "",
+      markId: mark?._id.toString() || null,
+    };
+  };
+
+  return {
+    student: {
+      studentOnboardingId: student._id.toString(),
+      studentId: student.studentId,
+      fullName: fullStudentName(student),
+      batch: student.batch,
+      gender: student.gender,
+      mobileNumber: student.mobileNumber || "",
+      dateOfBirth: student.dateOfBirth,
+    },
+    summary: {
+      attendancePercent,
+      attendanceTotal: attendanceRecords.length,
+      attendancePresent: attendanceRecords.filter(
+        (item) => item.status === "present" || item.status === "late"
+      ).length,
+      physicalExamPercent,
+      writtenExamPercent,
+      overallPercent,
+      overallPerformance: performance?.overallPerformance || "",
+    },
+    attendance: attendanceRecords
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .map((item) => ({ date: item.date, status: item.status })),
+    physicalExams: physicalExams.map(mapExamWithMark),
+    writtenExams: writtenExams.map(mapExamWithMark),
+    performance: performancePayload,
+  };
+}
+
+router.get("/me/detail", authRequired, attachUser, async (req, res) => {
+  try {
+    if (req.currentUser.role !== "student") {
+      return res.status(403).json({ message: "Student panel access required." });
+    }
+
+    const student = await StudentOnboarding.findOne({ userId: req.currentUser._id });
+    if (!student) {
+      return res.status(404).json({ message: "Student profile not found." });
+    }
+
+    res.json(await buildStudentPerformanceDetail(student));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.get("/by-student/:studentOnboardingId/detail", adminGuard, async (req, res) => {
   try {
     const student = await StudentOnboarding.findById(req.params.studentOnboardingId);
@@ -307,90 +411,7 @@ router.get("/by-student/:studentOnboardingId/detail", adminGuard, async (req, re
       return res.status(404).json({ message: "Student not found." });
     }
 
-    const performance = await StudentPerformance.findOne({ studentOnboardingId: student._id });
-    const exams = await Exam.find({ isActive: true })
-      .populate("subjectId", "name")
-      .sort({ examType: 1, name: 1 });
-    const marks = await StudentExamMark.find({ studentOnboardingId: student._id });
-    const marksByExamId = new Map(marks.map((mark) => [mark.examId.toString(), mark]));
-    const attendanceRecords = await StudentAttendance.find({ studentOnboardingId: student._id });
-
-    const physicalExams = exams.filter((exam) => exam.examType === "physical_exam");
-    const writtenExams = exams.filter((exam) => exam.examType === "written_exam");
-    const attendancePercent = computeAttendancePercent(attendanceRecords);
-    const physicalExamPercent = computeExamPercent(physicalExams, marksByExamId);
-    const writtenExamPercent = computeExamPercent(writtenExams, marksByExamId);
-    const overallPercent = computeOverallPercent(
-      attendancePercent,
-      physicalExamPercent,
-      writtenExamPercent,
-      performance?.overallPerformance
-    );
-
-    const cardType = performance?.cardType || getCardTypeFromGender(student.gender);
-    const performancePayload = performance
-      ? { hasRecord: true, ...mapPerformance(performance, student) }
-      : {
-          hasRecord: false,
-          studentOnboardingId: student._id.toString(),
-          userId: student.userId?.toString() || null,
-          cardType,
-          recordYear: new Date().getFullYear(),
-          events: defaultEvents(cardType),
-          student: {
-            studentId: student.studentId,
-            firstName: student.firstName,
-            middleName: student.middleName,
-            lastName: student.lastName,
-            fullName: fullStudentName(student),
-            batch: student.batch,
-            gender: student.gender,
-            dateOfBirth: student.dateOfBirth,
-          },
-        };
-
-    const mapExamWithMark = (exam) => {
-      const mark = marksByExamId.get(exam._id.toString());
-      return {
-        examId: exam._id.toString(),
-        name: exam.name,
-        examType: exam.examType,
-        subjectName: exam.subjectId?.name || null,
-        totalMarks: exam.totalMarks,
-        scoredMarks: mark?.scoredMarks ?? "",
-        remarks: mark?.remarks || "",
-        markId: mark?._id.toString() || null,
-      };
-    };
-
-    res.json({
-      student: {
-        studentOnboardingId: student._id.toString(),
-        studentId: student.studentId,
-        fullName: fullStudentName(student),
-        batch: student.batch,
-        gender: student.gender,
-        mobileNumber: student.mobileNumber || "",
-        dateOfBirth: student.dateOfBirth,
-      },
-      summary: {
-        attendancePercent,
-        attendanceTotal: attendanceRecords.length,
-        attendancePresent: attendanceRecords.filter(
-          (item) => item.status === "present" || item.status === "late"
-        ).length,
-        physicalExamPercent,
-        writtenExamPercent,
-        overallPercent,
-        overallPerformance: performance?.overallPerformance || "",
-      },
-      attendance: attendanceRecords
-        .sort((a, b) => b.date.localeCompare(a.date))
-        .map((item) => ({ date: item.date, status: item.status })),
-      physicalExams: physicalExams.map(mapExamWithMark),
-      writtenExams: writtenExams.map(mapExamWithMark),
-      performance: performancePayload,
-    });
+    res.json(await buildStudentPerformanceDetail(student));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

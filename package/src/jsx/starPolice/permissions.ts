@@ -16,7 +16,7 @@ export const STUDENT_PERMISSIONS = [
   { key: "student:materials", label: "Study Materials", description: "View uploaded study materials" },
   { key: "student:messages", label: "Admin Interaction", description: "Chat with admins" },
   { key: "student:calendar", label: "Monthly Calendar", description: "View the monthly calendar" },
-  { key: "student:performance", label: "Physical Performance", description: "View physical efficiency record" },
+  { key: "student:performance", label: "My Performance", description: "View attendance, exam, and overall performance" },
 ] as const;
 
 export type AdminPermissionKey = (typeof ADMIN_PERMISSIONS)[number]["key"];

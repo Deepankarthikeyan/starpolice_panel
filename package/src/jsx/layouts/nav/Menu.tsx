@@ -103,7 +103,7 @@ const StudentMenuList = (auth?: AuthUser | null) => {
       permission: "student:calendar" as const,
     },
     {
-      title: "Physical Performance",
+      title: "My Performance",
       iconStyle: <i className="material-symbols-outlined">fitness_center</i>,
       to: "performance",
       permission: "student:performance" as const,

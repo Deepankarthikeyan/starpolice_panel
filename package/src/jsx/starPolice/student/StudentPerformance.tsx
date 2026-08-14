@@ -1,100 +1,77 @@
 import { useEffect, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { api } from "../api";
-import PhysicalRecordCard from "../shared/PhysicalRecordCard";
+import type { StudentPerformanceDetail } from "../admin/examDefaults";
 import {
-  emptyPerformanceForm,
-  getCardTypeFromGender,
-  overallPerformanceBadgeClass,
-  overallPerformanceLabel,
-  recordToForm,
-  type StudentPerformanceRecord,
-} from "../admin/performanceDefaults";
+  PerformanceDetailPanels,
+  type PerformanceSection,
+} from "../shared/PerformanceDetailPanels";
 
 const StudentPerformance = () => {
-  const [form, setForm] = useState<StudentPerformanceRecord | null>(null);
+  const [detail, setDetail] = useState<StudentPerformanceDetail | null>(null);
+  const [activeSection, setActiveSection] = useState<PerformanceSection>("attendance");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     api
-      .getMyStudentPerformance()
-      .then((record) => {
-        if (record.hasRecord) {
-          setForm({ ...recordToForm(record), hasRecord: true });
-          return;
-        }
-        const cardType = record.cardType || getCardTypeFromGender(record.student?.gender);
-        setForm({
-          ...emptyPerformanceForm(record.student?.studentOnboardingId || "", cardType, record.student),
-          hasRecord: false,
-        });
+      .getMyStudentPerformanceDetail()
+      .then((data) => {
+        setDetail(data);
+        setActiveSection("attendance");
       })
-      .catch(console.error)
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : "Failed to load your performance.";
+        setError(message);
+      })
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <>
-      <PageTitle motherMenu="Student Panel" activeMenu="Physical Performance" pageContent="" />
+      <PageTitle motherMenu="Student Panel" activeMenu="My Performance" pageContent="" />
 
       {loading ? (
         <div className="card">
           <div className="card-body">
-            <p className="text-muted mb-0">Loading your physical performance record...</p>
+            <p className="text-muted mb-0">Loading your performance...</p>
           </div>
         </div>
-      ) : !form ? (
+      ) : error ? (
         <div className="card">
           <div className="card-body">
-            <p className="text-muted mb-0">Unable to load your performance record.</p>
+            <p className="text-danger mb-0">{error}</p>
+          </div>
+        </div>
+      ) : !detail ? (
+        <div className="card">
+          <div className="card-body">
+            <p className="text-muted mb-0">Unable to load your performance.</p>
           </div>
         </div>
       ) : (
-        <>
-          <div className="row mb-3">
-            <div className="col-md-4 col-sm-6">
-              <div className="card">
-                <div className="card-body">
-                  <h6 className="text-muted">Overall Performance</h6>
-                  <span className={`badge ${overallPerformanceBadgeClass(form.overallPerformance)}`}>
-                    {form.overallPerformance ? overallPerformanceLabel(form.overallPerformance) : "Not rated yet"}
-                  </span>
-                </div>
-              </div>
+        <div className="spa-performance-detail">
+          <div className="card mb-4">
+            <div className="card-header">
+              <h4 className="card-title mb-0">My Performance</h4>
+              <small className="text-muted">
+                {detail.student.fullName} · {detail.student.studentId} · Batch {detail.student.batch || "—"}
+              </small>
             </div>
-            <div className="col-md-4 col-sm-6">
-              <div className="card">
-                <div className="card-body">
-                  <h6 className="text-muted">Record Year</h6>
-                  <h4 className="mb-0">{form.recordYear}</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4 col-sm-6">
-              <div className="card">
-                <div className="card-body">
-                  <h6 className="text-muted">Card Type</h6>
-                  <h4 className="mb-0 text-capitalize">{form.cardType}</h4>
-                </div>
-              </div>
+            <div className="card-body">
+              <p className="text-muted mb-0">
+                Tap a card below to view your attendance, physical exam, or written exam performance.
+              </p>
             </div>
           </div>
 
-          <div className="card">
-            <div className="card-header">
-              <h4 className="card-title mb-0">TNUSRB Physical Efficiency Record</h4>
-            </div>
-            <div className="card-body">
-              {!form.hasRecord && (
-                <div className="alert alert-info">
-                  Your physical director has not published your performance record yet. The form below shows the
-                  benchmark standards for your category.
-                </div>
-              )}
-              <PhysicalRecordCard form={form} readOnly />
-            </div>
-          </div>
-        </>
+          <PerformanceDetailPanels
+            detail={detail}
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+            showPhysicalRecord
+          />
+        </div>
       )}
     </>
   );

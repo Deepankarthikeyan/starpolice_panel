@@ -512,6 +512,10 @@ export const api = {
     );
   },
 
+  getMyStudentPerformanceDetail() {
+    return request<StudentPerformanceDetail>("/api/student-performance/me/detail");
+  },
+
   getTodayStudentAttendance() {
     return request<StudentAttendanceDayResponse>("/api/student-attendance/today");
   },
