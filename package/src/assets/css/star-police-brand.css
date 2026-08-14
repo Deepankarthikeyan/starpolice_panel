@@ -1006,3 +1006,16 @@
 .spa-sort-btn:hover {
   color: var(--primary, #123d73);
 }
+
+.spa-performance-tabs .nav-link {
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--bs-secondary-color, #6c757d);
+  font-weight: 500;
+}
+
+.spa-performance-tabs .nav-link.active {
+  color: var(--primary, #123d73);
+  border-bottom-color: var(--primary, #123d73);
+  background: transparent;
+}
