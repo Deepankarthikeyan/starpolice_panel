@@ -9,8 +9,8 @@ import { ExamMarksTable } from "../shared/ExamMarksTable";
 import PhysicalRecordCard from "../shared/PhysicalRecordCard";
 import {
   buildPerformanceFormFromDetail,
-  getEventsForCardType,
   getTodayAttendanceStatus,
+  mergeEventsWithDefaults,
   suggestOverallPerformance,
   type StudentPerformanceRecord,
 } from "./performanceDefaults";
@@ -147,7 +147,7 @@ const ExamMarksEntry = ({ examType }: ExamMarksEntryProps) => {
         recordDate: todayDateString(),
         overallPerformance:
           performanceForm.overallPerformance ||
-          suggestOverallPerformance(getEventsForCardType(performanceForm.events, performanceForm.cardType)),
+          suggestOverallPerformance(mergeEventsWithDefaults(performanceForm.events, "all")),
       };
       await api.saveStudentPerformance(detail.student.studentOnboardingId, payload);
 

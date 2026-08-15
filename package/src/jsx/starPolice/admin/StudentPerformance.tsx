@@ -15,8 +15,8 @@ import {
 import { todayDateString } from "./attendanceDefaults";
 import {
   buildPerformanceFormFromDetail,
-  getEventsForCardType,
   getTodayAttendanceStatus,
+  mergeEventsWithDefaults,
   overallPerformanceLabel,
   suggestOverallPerformance,
   type StudentPerformanceRecord,
@@ -195,7 +195,7 @@ const StudentPerformance = () => {
         recordDate: todayDateString(),
         overallPerformance:
           performanceForm.overallPerformance ||
-          suggestOverallPerformance(getEventsForCardType(performanceForm.events, performanceForm.cardType)),
+          suggestOverallPerformance(mergeEventsWithDefaults(performanceForm.events, "all")),
       };
       await api.saveStudentPerformance(detail.student.studentOnboardingId, payload);
 

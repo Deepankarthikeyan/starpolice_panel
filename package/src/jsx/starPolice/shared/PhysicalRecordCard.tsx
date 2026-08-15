@@ -4,7 +4,7 @@ import type {
   StudentPerformanceRecord,
 } from "../admin/performanceDefaults";
 import {
-  getEventDefinitions,
+  ALL_EVENT_DEFINITIONS,
   isStarChecked,
   mergeEventsWithDefaults,
   overallPerformanceLabel,
@@ -39,7 +39,7 @@ function setStarField(
   onChange?: (next: StudentPerformanceRecord) => void
 ) {
   if (!onChange) return;
-  const events = mergeEventsWithDefaults(form.events, form.cardType).map((event) => {
+  const events = mergeEventsWithDefaults(form.events, "all").map((event) => {
     if (event.eventKey !== eventKey) return event;
     if (type === "single") {
       return { ...event, singleStar: checked ? "1" : "", doubleStar: checked ? "" : event.doubleStar };
@@ -51,7 +51,7 @@ function setStarField(
 
 function getEventForDefinition(form: StudentPerformanceRecord, definition: PerformanceEventDefinition) {
   return (
-    mergeEventsWithDefaults(form.events, form.cardType).find((event) => event.eventKey === definition.eventKey) || {
+    mergeEventsWithDefaults(form.events, "all").find((event) => event.eventKey === definition.eventKey) || {
       eventKey: definition.eventKey,
       performance: "",
       singleStar: "",
@@ -77,7 +77,7 @@ export default function PhysicalRecordCard({
 }: PhysicalRecordCardProps) {
   const cardType: PerformanceCardType = form.cardType;
   const isMaleCard = cardType === "male";
-  const definitions = getEventDefinitions(cardType);
+  const definitions = ALL_EVENT_DEFINITIONS;
   const recordDate = form.recordDate || todayDateString();
   const studentName = form.student?.fullName || "—";
   const registerNo = form.student?.studentId || "—";
@@ -260,7 +260,7 @@ export default function PhysicalRecordCard({
                         value={event.remarks}
                         onChange={(e) => {
                           if (!onChange) return;
-                          const events = mergeEventsWithDefaults(form.events, form.cardType).map((item) =>
+                          const events = mergeEventsWithDefaults(form.events, "all").map((item) =>
                             item.eventKey === definition.eventKey ? { ...item, remarks: e.target.value } : item
                           );
                           onChange({ ...form, events });
@@ -316,7 +316,7 @@ export default function PhysicalRecordCard({
               className="btn btn-sm btn-outline-info mt-2"
               onClick={() => {
                 if (!onChange) return;
-                const suggested = suggestOverallPerformance(mergeEventsWithDefaults(form.events, form.cardType));
+                const suggested = suggestOverallPerformance(mergeEventsWithDefaults(form.events, "all"));
                 if (suggested) setField(form, "overallPerformance", suggested, onChange);
               }}
             >

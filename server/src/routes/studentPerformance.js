@@ -164,7 +164,7 @@ function mapPerformance(item, student) {
     weightKg: item.weightKg,
     chestNormalCm: item.chestNormalCm,
     chestExpansionCm: item.chestExpansionCm,
-    events: mergeEventsWithDefaults(item.events || [], item.cardType),
+    events: mergeEventsWithDefaults(item.events || [], "all"),
     overallPerformance: item.overallPerformance,
     trainerRemarks: item.trainerRemarks,
     createdAt: item.createdAt,
@@ -299,7 +299,7 @@ router.get("/me", authRequired, attachUser, async (req, res) => {
           dateOfBirth: student.dateOfBirth,
         },
         cardType: getCardTypeFromGender(student.gender),
-        events: defaultEvents(getCardTypeFromGender(student.gender)),
+        events: defaultEvents("all"),
       });
     }
 
@@ -339,7 +339,7 @@ async function buildStudentPerformanceDetail(student) {
         userId: student.userId?.toString() || null,
         cardType,
         recordYear: new Date().getFullYear(),
-        events: defaultEvents(cardType),
+        events: defaultEvents("all"),
         student: {
           studentId: student.studentId,
           firstName: student.firstName,
@@ -488,7 +488,7 @@ router.get("/by-student/:studentOnboardingId", adminGuard, async (req, res) => {
         userId: student.userId?.toString() || null,
         cardType,
         recordYear: new Date().getFullYear(),
-        events: defaultEvents(cardType),
+        events: defaultEvents("all"),
         student: {
           studentId: student.studentId,
           firstName: student.firstName,
@@ -517,7 +517,7 @@ router.put("/by-student/:studentOnboardingId", adminGuard, async (req, res) => {
 
     const payload = pickPerformanceFields(req.body);
     const cardType = payload.cardType || getCardTypeFromGender(student.gender);
-    payload.events = mergeEventsWithDefaults(payload.events, cardType);
+    payload.events = mergeEventsWithDefaults(payload.events, "all");
 
     const performance = await StudentPerformance.findOneAndUpdate(
       { studentOnboardingId: student._id },

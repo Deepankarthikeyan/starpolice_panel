@@ -164,8 +164,8 @@ export function mergeEventsWithDefaults(
   });
 }
 
-export function defaultEvents(cardType: PerformanceCardType = "male"): PerformanceEvent[] {
-  return mergeEventsWithDefaults([], cardType);
+export function defaultEvents(): PerformanceEvent[] {
+  return mergeEventsWithDefaults([], "all");
 }
 
 export function emptyPerformanceForm(
@@ -183,7 +183,7 @@ export function emptyPerformanceForm(
     weightKg: "",
     chestNormalCm: "",
     chestExpansionCm: "",
-    events: defaultEvents(cardType),
+    events: defaultEvents(),
     overallPerformance: "",
     trainerRemarks: "",
     student,
@@ -237,7 +237,7 @@ export function suggestOverallPerformance(events: PerformanceEvent[]): OverallPe
 export function recordToForm(record: StudentPerformanceRecord): StudentPerformanceRecord {
   return {
     ...record,
-    events: mergeEventsWithDefaults(record.events, record.cardType),
+    events: mergeEventsWithDefaults(record.events, "all"),
   };
 }
 

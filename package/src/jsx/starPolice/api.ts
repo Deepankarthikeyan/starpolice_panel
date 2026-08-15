@@ -578,7 +578,7 @@ function onboardingToEmptyPerformance(record: StudentOnboardingRecord) {
     weightKg: "",
     chestNormalCm: "",
     chestExpansionCm: "",
-    events: defaultEvents(cardType),
+    events: defaultEvents(),
     overallPerformance: "" as const,
     trainerRemarks: "",
     student: {
