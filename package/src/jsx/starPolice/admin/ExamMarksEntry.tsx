@@ -57,6 +57,16 @@ const ExamMarksEntry = ({ examType }: ExamMarksEntryProps) => {
   const [listError, setListError] = useState("");
 
   const percentKey = examType === "physical_exam" ? "physicalExamPercent" : "writtenExamPercent";
+  const isStaff = auth?.role === "staff" && auth.panel === "staff";
+  const staffSubjectIds = auth?.subjectIds || [];
+  const staffExamTypes = auth?.staffExamTypes || [];
+
+  const filterExamsByStaffSubjects = (examList: StudentExamMarkEntry[]) => {
+    if (!isStaff || staffSubjectIds.length === 0) {
+      return examList;
+    }
+    return examList.filter((exam) => exam.subjectId && staffSubjectIds.includes(exam.subjectId));
+  };
 
   const loadStudents = async () => {
     setListLoading(true);
@@ -118,7 +128,7 @@ const ExamMarksEntry = ({ examType }: ExamMarksEntryProps) => {
       if (examType === "physical_exam") {
         setPerformanceForm(buildPerformanceFormFromDetail(data));
       } else {
-        setExams(data.writtenExams);
+        setExams(filterExamsByStaffSubjects(data.writtenExams));
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to load student exam marks.";
@@ -198,6 +208,17 @@ const ExamMarksEntry = ({ examType }: ExamMarksEntryProps) => {
       <>
         <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu={pageTitle} pageContent="" />
         <div className="alert alert-warning">You do not have permission to manage exam marks.</div>
+      </>
+    );
+  }
+
+  if (isStaff && !staffExamTypes.includes(examType)) {
+    return (
+      <>
+        <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu={pageTitle} pageContent="" />
+        <div className="alert alert-warning">
+          You do not have any assigned subjects for {pageTitle.toLowerCase()}. Contact the super admin to update your subjects.
+        </div>
       </>
     );
   }

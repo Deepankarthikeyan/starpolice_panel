@@ -12,7 +12,7 @@ import {
 } from "../permissions";
 import { getPanelMotherMenu, formatAccountType } from "../panelLabels";
 import { notify } from "../toast";
-import type { ManagedUser, StaffType, Subject } from "../types";
+import type { ManagedUser, Subject } from "../types";
 import { SubjectMultiSelect } from "./SubjectMultiSelect";
 
 type CreateAccountType = "student" | "admin" | "staff";
@@ -75,14 +75,12 @@ const UserManagement = () => {
   const [createPermissions, setCreatePermissions] = useState<string[]>(
     defaultPermissionsForRole("student")
   );
-  const [createStaffType, setCreateStaffType] = useState<StaffType>("physical");
   const [createSubjectIds, setCreateSubjectIds] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
   const [editPermissions, setEditPermissions] = useState<string[]>([]);
   const [editingProfileUser, setEditingProfileUser] = useState<ManagedUser | null>(null);
   const [editingSubjectsUser, setEditingSubjectsUser] = useState<ManagedUser | null>(null);
-  const [subjectsStaffType, setSubjectsStaffType] = useState<StaffType>("physical");
   const [subjectsSelectedIds, setSubjectsSelectedIds] = useState<string[]>([]);
   const [editName, setEditName] = useState("");
   const [editEmail, setEditEmail] = useState("");
@@ -119,7 +117,6 @@ const UserManagement = () => {
   useEffect(() => {
     setCreatePermissions(defaultPermissionsForRole(createAccountType));
     if (createAccountType !== "staff") {
-      setCreateStaffType("physical");
       setCreateSubjectIds([]);
       return;
     }
@@ -131,8 +128,8 @@ const UserManagement = () => {
     setLoading(true);
     setError("");
     try {
-      if (createAccountType === "staff" && createStaffType === "subject" && createSubjectIds.length === 0) {
-        setError("Please select at least one subject for subject staff.");
+      if (createAccountType === "staff" && createSubjectIds.length === 0) {
+        setError("Please select at least one subject for this staff member.");
         setLoading(false);
         return;
       }
@@ -143,13 +140,11 @@ const UserManagement = () => {
         password,
         createAccountType,
         createPermissions,
-        createAccountType === "staff" ? createStaffType : undefined,
-        createAccountType === "staff" && createStaffType === "subject" ? createSubjectIds : undefined
+        createAccountType === "staff" ? createSubjectIds : undefined
       );
       setName("");
       setEmail("");
       setPassword("");
-      setCreateStaffType("physical");
       setCreateSubjectIds([]);
       setCreatePermissions(defaultPermissionsForRole(createAccountType));
       await loadUsers();
@@ -189,7 +184,6 @@ const UserManagement = () => {
   const openEditSubjects = async (user: ManagedUser) => {
     await refreshSubjects();
     setEditingSubjectsUser(user);
-    setSubjectsStaffType(user.staffType || "physical");
     setSubjectsSelectedIds(user.subjectIds || []);
     setError("");
   };
@@ -200,15 +194,14 @@ const UserManagement = () => {
     setLoading(true);
     setError("");
     try {
-      if (subjectsStaffType === "subject" && subjectsSelectedIds.length === 0) {
-        setError("Please select at least one subject for subject staff.");
+      if (subjectsSelectedIds.length === 0) {
+        setError("Please select at least one subject for this staff member.");
         setLoading(false);
         return;
       }
 
       await api.updateUser(editingSubjectsUser.id, {
-        staffType: subjectsStaffType,
-        subjectIds: subjectsStaffType === "subject" ? subjectsSelectedIds : [],
+        subjectIds: subjectsSelectedIds,
       });
       setEditingSubjectsUser(null);
       await loadUsers();
@@ -266,16 +259,12 @@ const UserManagement = () => {
     }
   };
 
-  const formatStaffType = (user: ManagedUser) => {
+  const formatStaffSubjects = (user: ManagedUser) => {
     if (user.role !== "staff") return "—";
-    if (user.staffType === "physical") return "Physical Staff";
-    if (user.staffType === "subject") {
-      if (user.subjectNames?.length) {
-        return `Subject Staff — ${user.subjectNames.join(", ")}`;
-      }
-      return "Subject Staff";
+    if (user.subjectNames?.length) {
+      return user.subjectNames.join(", ");
     }
-    return "—";
+    return "No subjects assigned";
   };
 
   const renderTable = (
@@ -311,7 +300,7 @@ const UserManagement = () => {
                 <td>
                   <span className="badge bg-secondary">{formatAccountType(user.role)}</span>
                 </td>
-                {showStaffDetails && <td>{formatStaffType(user)}</td>}
+                {showStaffDetails && <td>{formatStaffSubjects(user)}</td>}
                 <td>
                   <span className={`badge ${user.isActive ? "bg-success" : "bg-warning"}`}>
                     {user.isActive ? "Active" : "Pending"}
@@ -455,37 +444,18 @@ const UserManagement = () => {
                 </div>
 
                 {createAccountType === "staff" && (
-                  <>
-                    <div className="mb-3">
-                      <label className="form-label">Staff Type</label>
-                      <select
-                        className="form-select"
-                        value={createStaffType}
-                        onChange={(e) => {
-                          const nextType = e.target.value as StaffType;
-                          setCreateStaffType(nextType);
-                          if (nextType === "physical") {
-                            setCreateSubjectIds([]);
-                          }
-                        }}
-                      >
-                        <option value="physical">Physical Staff</option>
-                        <option value="subject">Subject Staff</option>
-                      </select>
-                    </div>
-
-                    {createStaffType === "subject" && (
-                      <div className="mb-3">
-                        <label className="form-label">Subjects</label>
-                        <SubjectMultiSelect
-                          name="create-staff-subjects"
-                          subjects={subjects}
-                          selectedIds={createSubjectIds}
-                          onChange={setCreateSubjectIds}
-                        />
-                      </div>
-                    )}
-                  </>
+                  <div className="mb-3">
+                    <label className="form-label">Subjects</label>
+                    <p className="text-muted small mb-2">
+                      Select the subjects this staff member can manage in the staff panel.
+                    </p>
+                    <SubjectMultiSelect
+                      name="create-staff-subjects"
+                      subjects={subjects}
+                      selectedIds={createSubjectIds}
+                      onChange={setCreateSubjectIds}
+                    />
+                  </div>
                 )}
 
                 <div className="mb-3">
@@ -618,34 +588,18 @@ const UserManagement = () => {
                   />
                 </div>
                 <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label">Staff Type</label>
-                    <select
-                      className="form-select"
-                      value={subjectsStaffType}
-                      onChange={(e) => {
-                        const nextType = e.target.value as StaffType;
-                        setSubjectsStaffType(nextType);
-                        if (nextType === "physical") {
-                          setSubjectsSelectedIds([]);
-                        }
-                      }}
-                    >
-                      <option value="physical">Physical Staff</option>
-                      <option value="subject">Subject Staff</option>
-                    </select>
+                  <div className="mb-0">
+                    <label className="form-label">Subjects</label>
+                    <p className="text-muted small mb-2">
+                      Update which subjects this staff member can access in the staff panel.
+                    </p>
+                    <SubjectMultiSelect
+                      name="edit-staff-subjects"
+                      subjects={subjects}
+                      selectedIds={subjectsSelectedIds}
+                      onChange={setSubjectsSelectedIds}
+                    />
                   </div>
-                  {subjectsStaffType === "subject" && (
-                    <div className="mb-0">
-                      <label className="form-label">Subjects</label>
-                      <SubjectMultiSelect
-                        name="edit-staff-subjects"
-                        subjects={subjects}
-                        selectedIds={subjectsSelectedIds}
-                        onChange={setSubjectsSelectedIds}
-                      />
-                    </div>
-                  )}
                 </div>
                 <div className="modal-footer">
                   <button

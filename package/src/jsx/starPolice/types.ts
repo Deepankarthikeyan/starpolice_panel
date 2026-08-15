@@ -2,6 +2,7 @@ export type UserRole = "superadmin" | "admin" | "staff" | "student";
 export type PanelType = "admin" | "staff" | "student";
 export type PermissionKey = string;
 export type StaffType = "physical" | "subject";
+export type ExamType = "physical_exam" | "written_exam";
 
 export type FileCategory = "video" | "pdf" | "image" | "document";
 
@@ -14,6 +15,9 @@ export interface AuthUser {
   permissions: PermissionKey[];
   panel: PanelType;
   token: string;
+  subjectIds?: string[];
+  subjectNames?: string[];
+  staffExamTypes?: ExamType[];
 }
 
 export interface ManagedUser {

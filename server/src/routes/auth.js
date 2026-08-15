@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Exam from "../models/Exam.js";
 import { authRequired } from "../middleware/auth.js";
 import { getEffectivePermissions } from "../permissions.js";
 
@@ -11,7 +12,47 @@ function resolveRolePermissions(user) {
   return getEffectivePermissions(user);
 }
 
-function createToken(user, panel) {
+function mapSubjectRefs(subjectRefs) {
+  const subjectIds = [];
+  const subjectNames = [];
+
+  if (!subjectRefs?.length) {
+    return { subjectIds, subjectNames };
+  }
+
+  for (const ref of subjectRefs) {
+    if (ref && typeof ref === "object" && ref._id) {
+      subjectIds.push(ref._id.toString());
+      if (ref.name) subjectNames.push(ref.name);
+    } else if (ref) {
+      subjectIds.push(ref.toString());
+    }
+  }
+
+  return { subjectIds, subjectNames };
+}
+
+async function getStaffAuthFields(user) {
+  if (user.role !== "staff") {
+    return { subjectIds: [], subjectNames: [], staffExamTypes: [] };
+  }
+
+  if (!user.populated("subjectIds")) {
+    await user.populate("subjectIds", "name");
+  }
+
+  const { subjectIds, subjectNames } = mapSubjectRefs(user.subjectIds);
+  if (!subjectIds.length) {
+    return { subjectIds, subjectNames, staffExamTypes: [] };
+  }
+
+  const exams = await Exam.find({ subjectId: { $in: subjectIds }, isActive: true }).select("examType");
+  const staffExamTypes = [...new Set(exams.map((exam) => exam.examType))];
+
+  return { subjectIds, subjectNames, staffExamTypes };
+}
+
+function createToken(user, panel, staffFields = {}) {
   const permissions = resolveRolePermissions(user);
 
   return jwt.sign(
@@ -23,14 +64,16 @@ function createToken(user, panel) {
       panel,
       isActive: user.role === "superadmin" ? true : user.isActive,
       permissions,
+      ...staffFields,
     },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
 }
 
-function publicUser(user, token, panel) {
+async function publicUser(user, token, panel) {
   const permissions = resolveRolePermissions(user);
+  const staffFields = await getStaffAuthFields(user);
 
   return {
     id: user._id.toString(),
@@ -41,6 +84,7 @@ function publicUser(user, token, panel) {
     permissions,
     panel,
     token,
+    ...staffFields,
   };
 }
 
@@ -100,8 +144,9 @@ router.post("/register", async (req, res) => {
       isActive,
     });
 
-    const token = createToken(user, "admin");
-    res.status(201).json(publicUser(user, token, "admin"));
+    const staffFields = await getStaffAuthFields(user);
+    const token = createToken(user, "admin", staffFields);
+    res.status(201).json(await publicUser(user, token, "admin"));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -158,8 +203,9 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid panel." });
     }
 
-    const token = createToken(user, panel);
-    res.json(publicUser(user, token, panel));
+    const staffFields = await getStaffAuthFields(user);
+    const token = createToken(user, panel, staffFields);
+    res.json(await publicUser(user, token, panel));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -172,6 +218,7 @@ router.get("/me", authRequired, async (req, res) => {
   }
 
   const permissions = resolveRolePermissions(user);
+  const staffFields = await getStaffAuthFields(user);
 
   res.json({
     id: user._id.toString(),
@@ -181,6 +228,7 @@ router.get("/me", authRequired, async (req, res) => {
     isActive: user.role === "superadmin" ? true : user.isActive,
     permissions,
     panel: req.user.panel,
+    ...staffFields,
   });
 });
 

@@ -1,7 +1,10 @@
 import type { AuthUser, PanelType } from "../../starPolice/types";
 import { hasPermission } from "../../starPolice/permissions";
 
-const AdminMenuList = (auth?: AuthUser | null) => {
+const AdminMenuList = (auth?: AuthUser | null, panel: PanelType = "admin") => {
+  const isStaff = panel === "staff" && auth?.role === "staff";
+  const staffExamTypes = auth?.staffExamTypes || [];
+
   const items = [
     {
       title: "Dashboard",
@@ -38,18 +41,21 @@ const AdminMenuList = (auth?: AuthUser | null) => {
       iconStyle: <i className="material-symbols-outlined">fitness_center</i>,
       to: "student-performance",
       permission: "admin:performance" as const,
+      staffOnly: false,
     },
     {
       title: "Physical Exam",
       iconStyle: <i className="material-symbols-outlined">sports_score</i>,
       to: "physical-exam",
       permission: "admin:performance" as const,
+      examType: "physical_exam" as const,
     },
     {
       title: "Written Exam",
       iconStyle: <i className="material-symbols-outlined">edit_note</i>,
       to: "written-exam",
       permission: "admin:performance" as const,
+      examType: "written_exam" as const,
     },
     {
       title: "Student Attendance",
@@ -85,7 +91,18 @@ const AdminMenuList = (auth?: AuthUser | null) => {
     },
   ];
 
-  return items.filter((item) => hasPermission(auth, item.permission));
+  return items.filter((item) => {
+    if (!hasPermission(auth, item.permission)) {
+      return false;
+    }
+    if (isStaff && item.examType) {
+      return staffExamTypes.includes(item.examType);
+    }
+    if (isStaff && item.to === "student-performance") {
+      return false;
+    }
+    return true;
+  });
 };
 
 const StudentMenuList = (auth?: AuthUser | null) => {
@@ -126,6 +143,6 @@ const StudentMenuList = (auth?: AuthUser | null) => {
 };
 
 export const getMenuList = (panel: PanelType = "admin", auth?: AuthUser | null) =>
-  panel === "student" ? StudentMenuList(auth) : AdminMenuList(auth);
+  panel === "student" ? StudentMenuList(auth) : AdminMenuList(auth, panel);
 
 export const MenuList = AdminMenuList();

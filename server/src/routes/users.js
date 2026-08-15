@@ -62,7 +62,7 @@ function mapUser(user) {
 
 async function validateSubjectIds(subjectIds) {
   if (!Array.isArray(subjectIds) || subjectIds.length === 0) {
-    return { error: "At least one subject is required for subject staff." };
+    return { error: "At least one subject is required for staff." };
   }
 
   const uniqueIds = [...new Set(subjectIds.filter(Boolean))];
@@ -117,7 +117,7 @@ router.post(
   superAdminOnly,
   async (req, res) => {
     try {
-      const { name, email, password, role, permissions, staffType, subjectIds } = req.body;
+      const { name, email, password, role, permissions, subjectIds } = req.body;
       if (!name?.trim() || !email?.trim() || !password || !role) {
         return res.status(400).json({ message: "Name, email, password, and role are required." });
       }
@@ -125,16 +125,11 @@ router.post(
       let validatedSubjectIds = [];
 
       if (role === "staff") {
-        if (!staffType || !["physical", "subject"].includes(staffType)) {
-          return res.status(400).json({ message: "Staff type must be physical or subject." });
+        const validation = await validateSubjectIds(subjectIds);
+        if (validation.error) {
+          return res.status(400).json({ message: validation.error });
         }
-        if (staffType === "subject") {
-          const validation = await validateSubjectIds(subjectIds);
-          if (validation.error) {
-            return res.status(400).json({ message: validation.error });
-          }
-          validatedSubjectIds = validation.ids;
-        }
+        validatedSubjectIds = validation.ids;
       }
 
       const existing = await User.findOne({ email: email.toLowerCase() });
@@ -158,8 +153,8 @@ router.post(
       };
 
       if (role === "staff") {
-        userData.staffType = staffType;
-        userData.subjectIds = staffType === "subject" ? validatedSubjectIds : [];
+        userData.staffType = "subject";
+        userData.subjectIds = validatedSubjectIds;
       }
 
       const user = await User.create(userData);
@@ -182,7 +177,7 @@ router.patch(
   superAdminOnly,
   async (req, res) => {
     try {
-      const { name, email, password, staffType, subjectIds } = req.body;
+      const { name, email, password, subjectIds } = req.body;
 
       const user = await User.findById(req.params.id);
       if (!user) {
@@ -219,27 +214,15 @@ router.patch(
       }
 
       if (user.role === "staff") {
-        if (staffType !== undefined) {
-          if (!["physical", "subject"].includes(staffType)) {
-            return res.status(400).json({ message: "Staff type must be physical or subject." });
+        if (subjectIds !== undefined) {
+          const validation = await validateSubjectIds(subjectIds);
+          if (validation.error) {
+            return res.status(400).json({ message: validation.error });
           }
-          user.staffType = staffType;
-          if (staffType === "physical") {
-            user.subjectIds = [];
-          }
-        }
-
-        const effectiveStaffType = staffType ?? user.staffType;
-        if (effectiveStaffType === "subject") {
-          if (subjectIds !== undefined) {
-            const validation = await validateSubjectIds(subjectIds);
-            if (validation.error) {
-              return res.status(400).json({ message: validation.error });
-            }
-            user.subjectIds = validation.ids;
-          } else if (!user.subjectIds?.length) {
-            return res.status(400).json({ message: "At least one subject is required for subject staff." });
-          }
+          user.subjectIds = validation.ids;
+          user.staffType = "subject";
+        } else if (!user.subjectIds?.length) {
+          return res.status(400).json({ message: "At least one subject is required for staff." });
         }
       }
 

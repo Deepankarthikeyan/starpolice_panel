@@ -358,6 +358,7 @@ async function buildStudentPerformanceDetail(student) {
       examId: exam._id.toString(),
       name: exam.name,
       examType: exam.examType,
+      subjectId: exam.subjectId?._id?.toString() || null,
       subjectName: exam.subjectId?.name || null,
       totalMarks: exam.totalMarks,
       scoredMarks: mark?.scoredMarks ?? "",

@@ -167,12 +167,11 @@ export const api = {
     password: string,
     role: "admin" | "staff" | "student",
     permissions?: string[],
-    staffType?: "physical" | "subject",
     subjectIds?: string[]
   ) {
     return request<ManagedUser>("/api/users", {
       method: "POST",
-      body: JSON.stringify({ name, email, password, role, permissions, staffType, subjectIds }),
+      body: JSON.stringify({ name, email, password, role, permissions, subjectIds }),
     });
   },
 
@@ -182,7 +181,6 @@ export const api = {
       name?: string;
       email?: string;
       password?: string;
-      staffType?: "physical" | "subject";
       subjectIds?: string[];
     }
   ) {

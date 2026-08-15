@@ -17,6 +17,7 @@ export interface StudentExamMarkEntry {
   examId: string;
   name: string;
   examType: ExamType;
+  subjectId?: string | null;
   subjectName?: string | null;
   totalMarks: number;
   scoredMarks: number | string;

@@ -242,6 +242,21 @@ async function seed() {
 
   const subjectMap = await seedSubjects(superadmin._id);
   const examMap = await seedExams(subjectMap, superadmin._id);
+  const writtenSubjectIds = [
+    subjectMap.get("General Knowledge")?._id,
+    subjectMap.get("English")?._id,
+    subjectMap.get("Tamil")?._id,
+  ].filter(Boolean);
+
+  await User.findOneAndUpdate(
+    { email: "staff@starpolice.academy" },
+    {
+      staffType: "subject",
+      subjectIds: writtenSubjectIds,
+    }
+  );
+  console.log("Seeded staff subjects: General Knowledge, English, Tamil");
+
   const studentMap = await seedStudents(superadmin._id, studentUser._id);
   await seedSampleMarks(studentMap, examMap);
 
