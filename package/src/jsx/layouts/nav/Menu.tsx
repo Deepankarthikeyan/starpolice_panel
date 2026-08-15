@@ -41,7 +41,6 @@ const AdminMenuList = (auth?: AuthUser | null, panel: PanelType = "admin") => {
       iconStyle: <i className="material-symbols-outlined">fitness_center</i>,
       to: "student-performance",
       permission: "admin:performance" as const,
-      staffOnly: false,
     },
     {
       title: "Physical Exam",
