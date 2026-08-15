@@ -330,25 +330,20 @@ export function PerformanceDetailPanels({
         />
       )}
 
-      {activeSection === "physical" && (
-        <>
-          <ExamMarksTable title="Physical Exam Performance List" exams={detail.physicalExams} />
-          {showPhysicalRecord && (
-            <div className="card mb-4">
-              <div className="card-header">
-                <h5 className="card-title mb-0">Physical Efficiency Record Card</h5>
-              </div>
-              <div className="card-body">
-                <PhysicalRecordCard
-                  form={performanceForm}
-                  readOnly={physicalRecordReadOnly}
-                  onChange={onPhysicalRecordChange}
-                  attendanceStats={attendanceStats}
-                />
-              </div>
-            </div>
-          )}
-        </>
+      {activeSection === "physical" && showPhysicalRecord && (
+        <div className="card mb-4">
+          <div className="card-header">
+            <h5 className="card-title mb-0">Physical Efficiency Record Card</h5>
+          </div>
+          <div className="card-body">
+            <PhysicalRecordCard
+              form={performanceForm}
+              readOnly={physicalRecordReadOnly}
+              onChange={onPhysicalRecordChange}
+              attendanceStats={attendanceStats}
+            />
+          </div>
+        </div>
       )}
 
       {activeSection === "written" && (

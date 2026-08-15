@@ -95,7 +95,6 @@ const StudentPerformance = () => {
 
   const [students, setStudents] = useState<StudentPerformanceSummary[]>([]);
   const [detail, setDetail] = useState<StudentPerformanceDetail | null>(null);
-  const [physicalExams, setPhysicalExams] = useState<StudentExamMarkEntry[]>([]);
   const [writtenExams, setWrittenExams] = useState<StudentExamMarkEntry[]>([]);
   const [performanceForm, setPerformanceForm] = useState<StudentPerformanceRecord | null>(null);
   const [search, setSearch] = useState("");
@@ -163,7 +162,6 @@ const StudentPerformance = () => {
     try {
       const data = await api.getStudentPerformanceDetail(studentOnboardingId);
       setDetail(data);
-      setPhysicalExams(data.physicalExams);
       setWrittenExams(data.writtenExams);
       setPerformanceForm(buildPerformanceFormFromDetail(data));
       setActiveSection("attendance");
@@ -178,7 +176,6 @@ const StudentPerformance = () => {
 
   const closeDetail = () => {
     setDetail(null);
-    setPhysicalExams([]);
     setWrittenExams([]);
     setPerformanceForm(null);
     setActiveSection("attendance");
@@ -199,17 +196,6 @@ const StudentPerformance = () => {
       };
       await api.saveStudentPerformance(detail.student.studentOnboardingId, payload);
 
-      const marks = physicalExams
-        .filter((exam) => exam.scoredMarks !== "" && exam.scoredMarks !== null && exam.scoredMarks !== undefined)
-        .map((exam) => ({
-          examId: exam.examId,
-          scoredMarks: Number(exam.scoredMarks),
-          remarks: exam.remarks || "",
-        }));
-      if (marks.length > 0) {
-        await api.saveStudentExamMarks(detail.student.studentOnboardingId, marks);
-      }
-
       notify.success("Physical exam record saved.");
       await loadStudents();
       await openStudent(detail.student.studentOnboardingId);
@@ -223,14 +209,13 @@ const StudentPerformance = () => {
     }
   };
 
-  const saveExamMarks = async (event: FormEvent, examType: "physical" | "written") => {
+  const saveWrittenExamMarks = async (event: FormEvent) => {
     event.preventDefault();
     if (!detail) return;
-    const examList = examType === "physical" ? physicalExams : writtenExams;
     setSaving(true);
     setError("");
     try {
-      const marks = examList
+      const marks = writtenExams
         .filter((exam) => exam.scoredMarks !== "" && exam.scoredMarks !== null && exam.scoredMarks !== undefined)
         .map((exam) => ({
           examId: exam.examId,
@@ -242,10 +227,10 @@ const StudentPerformance = () => {
         await api.saveStudentExamMarks(detail.student.studentOnboardingId, marks);
       }
 
-      notify.success(`${examType === "physical" ? "Physical" : "Written"} exam marks saved.`);
+      notify.success("Written exam marks saved.");
       await loadStudents();
       await openStudent(detail.student.studentOnboardingId);
-      setActiveSection(examType);
+      setActiveSection("written");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to save exam marks.";
       setError(message);
@@ -468,11 +453,6 @@ const StudentPerformance = () => {
                     onChange={setPerformanceForm}
                     attendanceStats={computeAttendanceStats(detail.attendance)}
                   />
-                  <ExamMarksTable
-                    title="Physical Exam Marks"
-                    exams={physicalExams}
-                    onChange={setPhysicalExams}
-                  />
                   <button type="submit" className="btn btn-primary spa-no-print" disabled={saving}>
                     {saving ? "Saving..." : "Save Physical Exam Record"}
                   </button>
@@ -480,7 +460,7 @@ const StudentPerformance = () => {
               )}
 
               {activeSection === "written" && (
-                <form onSubmit={(event) => saveExamMarks(event, "written")}>
+                <form onSubmit={saveWrittenExamMarks}>
                   <ExamMarksTable
                     title="Written Exam Performance"
                     exams={writtenExams}
