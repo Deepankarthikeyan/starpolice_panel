@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
 import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
@@ -17,6 +17,7 @@ import {
   type StudentPerformanceSummary,
 } from "./performanceDefaults";
 import { AttendancePerformanceList } from "../shared/PerformanceDetailPanels";
+import { ExamMarksTable } from "../shared/ExamMarksTable";
 
 type SortKey =
   | "studentId"
@@ -36,52 +37,6 @@ function compareValues(a: string | number | null | undefined, b: string | number
   if (b === null || b === undefined) return -1;
   if (typeof a === "number" && typeof b === "number") return a - b;
   return String(a).localeCompare(String(b), undefined, { sensitivity: "base" });
-}
-
-function ExamMarksTable({
-  title,
-  exams,
-}: {
-  title: string;
-  exams: StudentExamMarkEntry[];
-}) {
-  return (
-    <div className="card mb-4">
-      <div className="card-header">
-        <h5 className="card-title mb-0">{title}</h5>
-      </div>
-      <div className="card-body">
-        {exams.length === 0 ? (
-          <p className="text-muted mb-0">No exams configured. Add exams under Master → Exams.</p>
-        ) : (
-          <div className="table-responsive">
-            <table className="table table-striped align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Exam</th>
-                  <th>Subject</th>
-                  <th>Out of</th>
-                  <th>Scored</th>
-                  <th>Remarks</th>
-                </tr>
-              </thead>
-              <tbody>
-                {exams.map((exam) => (
-                  <tr key={exam.examId}>
-                    <td>{exam.name}</td>
-                    <td>{exam.subjectName || "—"}</td>
-                    <td>{exam.totalMarks}</td>
-                    <td>{exam.scoredMarks === "" || exam.scoredMarks === null || exam.scoredMarks === undefined ? "—" : exam.scoredMarks}</td>
-                    <td>{exam.remarks || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
-  );
 }
 
 function PerformanceSummaryCard({
@@ -141,6 +96,7 @@ const StudentPerformance = () => {
   const [sortKey, setSortKey] = useState<SortKey>("fullName");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [listLoading, setListLoading] = useState(true);
   const [error, setError] = useState("");
   const [listError, setListError] = useState("");
@@ -219,6 +175,38 @@ const StudentPerformance = () => {
     setWrittenExams([]);
     setActiveSection("attendance");
     setError("");
+  };
+
+  const saveExamMarks = async (event: FormEvent, examType: "physical" | "written") => {
+    event.preventDefault();
+    if (!detail) return;
+    const examList = examType === "physical" ? physicalExams : writtenExams;
+    setSaving(true);
+    setError("");
+    try {
+      const marks = examList
+        .filter((exam) => exam.scoredMarks !== "" && exam.scoredMarks !== null && exam.scoredMarks !== undefined)
+        .map((exam) => ({
+          examId: exam.examId,
+          scoredMarks: Number(exam.scoredMarks),
+          remarks: exam.remarks || "",
+        }));
+
+      if (marks.length > 0) {
+        await api.saveStudentExamMarks(detail.student.studentOnboardingId, marks);
+      }
+
+      notify.success(`${examType === "physical" ? "Physical" : "Written"} exam marks saved.`);
+      await loadStudents();
+      await openStudent(detail.student.studentOnboardingId);
+      setActiveSection(examType);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save exam marks.";
+      setError(message);
+      notify.error(err, "Failed to save exam marks.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handlePrint = () => {
@@ -428,11 +416,29 @@ const StudentPerformance = () => {
               )}
 
               {activeSection === "physical" && (
-                <ExamMarksTable title="Physical Exam Performance List" exams={physicalExams} />
+                <form onSubmit={(event) => saveExamMarks(event, "physical")}>
+                  <ExamMarksTable
+                    title="Physical Exam Performance"
+                    exams={physicalExams}
+                    onChange={setPhysicalExams}
+                  />
+                  <button type="submit" className="btn btn-primary spa-no-print" disabled={saving}>
+                    {saving ? "Saving..." : "Save Physical Exam Marks"}
+                  </button>
+                </form>
               )}
 
               {activeSection === "written" && (
-                <ExamMarksTable title="Written Exam Performance List" exams={writtenExams} />
+                <form onSubmit={(event) => saveExamMarks(event, "written")}>
+                  <ExamMarksTable
+                    title="Written Exam Performance"
+                    exams={writtenExams}
+                    onChange={setWrittenExams}
+                  />
+                  <button type="submit" className="btn btn-primary spa-no-print" disabled={saving}>
+                    {saving ? "Saving..." : "Save Written Exam Marks"}
+                  </button>
+                </form>
               )}
             </>
           )}

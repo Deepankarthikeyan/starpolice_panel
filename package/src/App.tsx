@@ -19,6 +19,12 @@ const StudentPerformanceAdmin = lazy(() => import("./jsx/starPolice/admin/Studen
 const StudentAttendance = lazy(() => import("./jsx/starPolice/admin/StudentAttendance"));
 const SubjectManagement = lazy(() => import("./jsx/starPolice/admin/SubjectManagement"));
 const ExamManagement = lazy(() => import("./jsx/starPolice/admin/ExamManagement"));
+const PhysicalExamEntry = lazy(() =>
+  import("./jsx/starPolice/admin/ExamMarksEntry").then((m) => ({ default: m.PhysicalExamEntry }))
+);
+const WrittenExamEntry = lazy(() =>
+  import("./jsx/starPolice/admin/ExamMarksEntry").then((m) => ({ default: m.WrittenExamEntry }))
+);
 const StudentDashboard = lazy(() => import("./jsx/starPolice/student/StudentDashboard"));
 const StudentMaterials = lazy(() => import("./jsx/starPolice/student/StudentMaterials"));
 const StudentInteraction = lazy(() => import("./jsx/starPolice/student/StudentInteraction"));
@@ -118,6 +124,8 @@ function App() {
             <Route path="student-onboarding" element={<StudentOnboarding />} />
             <Route path="leads" element={<Leads />} />
             <Route path="student-performance" element={<StudentPerformanceAdmin />} />
+            <Route path="physical-exam" element={<PhysicalExamEntry />} />
+            <Route path="written-exam" element={<WrittenExamEntry />} />
             <Route path="student-attendance" element={<StudentAttendance />} />
             <Route path="master/subjects" element={<SubjectManagement />} />
             <Route path="master/exams" element={<ExamManagement />} />
@@ -133,6 +141,8 @@ function App() {
             <Route path="student-interaction" element={<AdminStudentInteraction />} />
             <Route path="monthly-calendar" element={<MonthlyCalendar />} />
             <Route path="student-performance" element={<StudentPerformanceAdmin />} />
+            <Route path="physical-exam" element={<PhysicalExamEntry />} />
+            <Route path="written-exam" element={<WrittenExamEntry />} />
             <Route path="student-attendance" element={<StudentAttendance />} />
             <Route path="profile" element={<PanelProfile />} />
             <Route path="inbox" element={<PanelInbox />} />

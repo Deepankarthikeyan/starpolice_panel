@@ -40,6 +40,18 @@ const AdminMenuList = (auth?: AuthUser | null) => {
       permission: "admin:performance" as const,
     },
     {
+      title: "Physical Exam",
+      iconStyle: <i className="material-symbols-outlined">sports_score</i>,
+      to: "physical-exam",
+      permission: "admin:performance" as const,
+    },
+    {
+      title: "Written Exam",
+      iconStyle: <i className="material-symbols-outlined">edit_note</i>,
+      to: "written-exam",
+      permission: "admin:performance" as const,
+    },
+    {
       title: "Student Attendance",
       iconStyle: <i className="material-symbols-outlined">fact_check</i>,
       to: "student-attendance",
