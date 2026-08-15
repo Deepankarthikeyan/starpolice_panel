@@ -164,8 +164,8 @@ export function mergeEventsWithDefaults(
   });
 }
 
-export function defaultEvents(cardType?: PerformanceCardType): PerformanceEvent[] {
-  return mergeEventsWithDefaults([], cardType ?? "all");
+export function defaultEvents(cardType: PerformanceCardType = "male"): PerformanceEvent[] {
+  return mergeEventsWithDefaults([], cardType);
 }
 
 export function emptyPerformanceForm(
@@ -237,7 +237,7 @@ export function suggestOverallPerformance(events: PerformanceEvent[]): OverallPe
 export function recordToForm(record: StudentPerformanceRecord): StudentPerformanceRecord {
   return {
     ...record,
-    events: mergeEventsWithDefaults(record.events, "all"),
+    events: mergeEventsWithDefaults(record.events, record.cardType),
   };
 }
 

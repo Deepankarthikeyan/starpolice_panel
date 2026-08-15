@@ -164,7 +164,7 @@ function mapPerformance(item, student) {
     weightKg: item.weightKg,
     chestNormalCm: item.chestNormalCm,
     chestExpansionCm: item.chestExpansionCm,
-    events: mergeEventsWithDefaults(item.events || [], "all"),
+    events: mergeEventsWithDefaults(item.events || [], item.cardType),
     overallPerformance: item.overallPerformance,
     trainerRemarks: item.trainerRemarks,
     createdAt: item.createdAt,
@@ -339,7 +339,7 @@ async function buildStudentPerformanceDetail(student) {
         userId: student.userId?.toString() || null,
         cardType,
         recordYear: new Date().getFullYear(),
-        events: defaultEvents("all"),
+        events: defaultEvents(cardType),
         student: {
           studentId: student.studentId,
           firstName: student.firstName,
@@ -488,7 +488,7 @@ router.get("/by-student/:studentOnboardingId", adminGuard, async (req, res) => {
         userId: student.userId?.toString() || null,
         cardType,
         recordYear: new Date().getFullYear(),
-        events: defaultEvents("all"),
+        events: defaultEvents(cardType),
         student: {
           studentId: student.studentId,
           firstName: student.firstName,
@@ -517,7 +517,7 @@ router.put("/by-student/:studentOnboardingId", adminGuard, async (req, res) => {
 
     const payload = pickPerformanceFields(req.body);
     const cardType = payload.cardType || getCardTypeFromGender(student.gender);
-    payload.events = mergeEventsWithDefaults(payload.events, "all");
+    payload.events = mergeEventsWithDefaults(payload.events, cardType);
 
     const performance = await StudentPerformance.findOneAndUpdate(
       { studentOnboardingId: student._id },
