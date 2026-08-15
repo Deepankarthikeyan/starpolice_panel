@@ -6,6 +6,13 @@ import { hasPermission } from "../permissions";
 import { getPanelMotherMenu } from "../panelLabels";
 import { notify } from "../toast";
 import { ExamMarksTable } from "../shared/ExamMarksTable";
+import PhysicalRecordCard from "../shared/PhysicalRecordCard";
+import {
+  buildPerformanceFormFromDetail,
+  computeAttendanceStats,
+  suggestOverallPerformance,
+  type StudentPerformanceRecord,
+} from "./performanceDefaults";
 import {
   examTypeLabel,
   formatPercent,
@@ -37,6 +44,7 @@ const ExamMarksEntry = ({ examType }: ExamMarksEntryProps) => {
   const [students, setStudents] = useState<StudentPerformanceSummary[]>([]);
   const [detail, setDetail] = useState<StudentPerformanceDetail | null>(null);
   const [exams, setExams] = useState<StudentExamMarkEntry[]>([]);
+  const [performanceForm, setPerformanceForm] = useState<StudentPerformanceRecord | null>(null);
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("fullName");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -106,6 +114,9 @@ const ExamMarksEntry = ({ examType }: ExamMarksEntryProps) => {
       const data = await api.getStudentPerformanceDetail(studentOnboardingId);
       setDetail(data);
       setExams(examType === "physical_exam" ? data.physicalExams : data.writtenExams);
+      if (examType === "physical_exam") {
+        setPerformanceForm(buildPerformanceFormFromDetail(data));
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to load student exam marks.";
       setError(message);
@@ -118,7 +129,45 @@ const ExamMarksEntry = ({ examType }: ExamMarksEntryProps) => {
   const closeDetail = () => {
     setDetail(null);
     setExams([]);
+    setPerformanceForm(null);
     setError("");
+  };
+
+  const savePhysicalRecord = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!detail || !performanceForm) return;
+    setSaving(true);
+    setError("");
+    try {
+      const payload = {
+        ...performanceForm,
+        overallPerformance:
+          performanceForm.overallPerformance ||
+          suggestOverallPerformance(performanceForm.events),
+      };
+      await api.saveStudentPerformance(detail.student.studentOnboardingId, payload);
+
+      const marks = exams
+        .filter((exam) => exam.scoredMarks !== "" && exam.scoredMarks !== null && exam.scoredMarks !== undefined)
+        .map((exam) => ({
+          examId: exam.examId,
+          scoredMarks: Number(exam.scoredMarks),
+          remarks: exam.remarks || "",
+        }));
+      if (marks.length > 0) {
+        await api.saveStudentExamMarks(detail.student.studentOnboardingId, marks);
+      }
+
+      notify.success("Physical exam record saved.");
+      await loadStudents();
+      await openStudent(detail.student.studentOnboardingId);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save physical exam record.";
+      setError(message);
+      notify.error(err, "Failed to save physical exam record.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const saveMarks = async (event: FormEvent) => {
@@ -262,6 +311,18 @@ const ExamMarksEntry = ({ examType }: ExamMarksEntryProps) => {
 
           {loading ? (
             <p className="text-muted">Loading...</p>
+          ) : examType === "physical_exam" && performanceForm && detail ? (
+            <form onSubmit={savePhysicalRecord}>
+              <PhysicalRecordCard
+                form={performanceForm}
+                onChange={setPerformanceForm}
+                attendanceStats={computeAttendanceStats(detail.attendance)}
+              />
+              <ExamMarksTable title="Physical Exam Marks" exams={exams} onChange={setExams} />
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? "Saving..." : "Save Physical Exam Record"}
+              </button>
+            </form>
           ) : (
             <form onSubmit={saveMarks}>
               <ExamMarksTable

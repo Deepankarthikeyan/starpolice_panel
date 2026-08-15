@@ -9,6 +9,8 @@ import {
   type AttendanceStatus,
 } from "../admin/attendanceDefaults";
 import {
+  buildPerformanceFormFromDetail,
+  computeAttendanceStats,
   overallPerformanceLabel,
   recordToForm,
   type StudentPerformanceRecord,
@@ -268,16 +270,24 @@ export function PerformanceDetailPanels({
   activeSection,
   onSectionChange,
   showPhysicalRecord = false,
+  physicalRecordReadOnly = true,
+  physicalRecordForm,
+  onPhysicalRecordChange,
 }: {
   detail: StudentPerformanceDetail;
   activeSection: PerformanceSection;
   onSectionChange: (section: PerformanceSection) => void;
   showPhysicalRecord?: boolean;
+  physicalRecordReadOnly?: boolean;
+  physicalRecordForm?: StudentPerformanceRecord | null;
+  onPhysicalRecordChange?: (next: StudentPerformanceRecord) => void;
 }) {
-  const performanceForm: StudentPerformanceRecord | null =
-    detail.performance.hasRecord && detail.performance
+  const performanceForm: StudentPerformanceRecord =
+    physicalRecordForm ||
+    (detail.performance.hasRecord && detail.performance
       ? recordToForm(detail.performance as StudentPerformanceRecord)
-      : null;
+      : buildPerformanceFormFromDetail(detail));
+  const attendanceStats = computeAttendanceStats(detail.attendance);
 
   return (
     <>
@@ -323,13 +333,18 @@ export function PerformanceDetailPanels({
       {activeSection === "physical" && (
         <>
           <ExamMarksTable title="Physical Exam Performance List" exams={detail.physicalExams} />
-          {showPhysicalRecord && performanceForm && (
+          {showPhysicalRecord && (
             <div className="card mb-4">
               <div className="card-header">
                 <h5 className="card-title mb-0">Physical Efficiency Record Card</h5>
               </div>
               <div className="card-body">
-                <PhysicalRecordCard form={performanceForm} readOnly />
+                <PhysicalRecordCard
+                  form={performanceForm}
+                  readOnly={physicalRecordReadOnly}
+                  onChange={onPhysicalRecordChange}
+                  attendanceStats={attendanceStats}
+                />
               </div>
             </div>
           )}

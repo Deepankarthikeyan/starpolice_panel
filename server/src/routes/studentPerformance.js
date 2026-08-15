@@ -57,7 +57,12 @@ function getCardTypeFromGender(gender = "") {
   return "male";
 }
 
-function mergeEventsWithDefaults(saved = []) {
+function getEventDefinitions(cardType = "male") {
+  return cardType === "female" ? FEMALE_EVENTS : MALE_EVENTS;
+}
+
+function mergeEventsWithDefaults(saved = [], cardType = "male") {
+  const definitions = getEventDefinitions(cardType);
   const byKey = new Map(saved.map((event) => [event.eventKey, event]));
   const legacySprint = byKey.get("sprint_run");
   if (legacySprint) {
@@ -70,7 +75,7 @@ function mergeEventsWithDefaults(saved = []) {
     byKey.delete("sprint_run");
   }
 
-  return ALL_EVENTS.map((definition) => {
+  return definitions.map((definition) => {
     const existing = byKey.get(definition.eventKey);
     return existing
       ? { ...existing }
@@ -84,8 +89,8 @@ function mergeEventsWithDefaults(saved = []) {
   });
 }
 
-function defaultEvents() {
-  return mergeEventsWithDefaults();
+function defaultEvents(cardType = "male") {
+  return mergeEventsWithDefaults([], cardType);
 }
 
 function fullStudentName(student) {
@@ -156,7 +161,7 @@ function mapPerformance(item, student) {
     weightKg: item.weightKg,
     chestNormalCm: item.chestNormalCm,
     chestExpansionCm: item.chestExpansionCm,
-    events: mergeEventsWithDefaults(item.events || []),
+    events: mergeEventsWithDefaults(item.events || [], item.cardType),
     overallPerformance: item.overallPerformance,
     trainerRemarks: item.trainerRemarks,
     createdAt: item.createdAt,
@@ -508,7 +513,7 @@ router.put("/by-student/:studentOnboardingId", adminGuard, async (req, res) => {
 
     const payload = pickPerformanceFields(req.body);
     const cardType = payload.cardType || getCardTypeFromGender(student.gender);
-    payload.events = mergeEventsWithDefaults(payload.events);
+    payload.events = mergeEventsWithDefaults(payload.events, cardType);
 
     const performance = await StudentPerformance.findOneAndUpdate(
       { studentOnboardingId: student._id },

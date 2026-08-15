@@ -13,11 +13,16 @@ import {
   type StudentPerformanceDetail,
 } from "./examDefaults";
 import {
+  buildPerformanceFormFromDetail,
+  computeAttendanceStats,
   overallPerformanceLabel,
+  suggestOverallPerformance,
+  type StudentPerformanceRecord,
   type StudentPerformanceSummary,
 } from "./performanceDefaults";
 import { AttendancePerformanceList } from "../shared/PerformanceDetailPanels";
 import { ExamMarksTable } from "../shared/ExamMarksTable";
+import PhysicalRecordCard from "../shared/PhysicalRecordCard";
 
 type SortKey =
   | "studentId"
@@ -92,6 +97,7 @@ const StudentPerformance = () => {
   const [detail, setDetail] = useState<StudentPerformanceDetail | null>(null);
   const [physicalExams, setPhysicalExams] = useState<StudentExamMarkEntry[]>([]);
   const [writtenExams, setWrittenExams] = useState<StudentExamMarkEntry[]>([]);
+  const [performanceForm, setPerformanceForm] = useState<StudentPerformanceRecord | null>(null);
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("fullName");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -159,6 +165,7 @@ const StudentPerformance = () => {
       setDetail(data);
       setPhysicalExams(data.physicalExams);
       setWrittenExams(data.writtenExams);
+      setPerformanceForm(buildPerformanceFormFromDetail(data));
       setActiveSection("attendance");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to load student performance.";
@@ -173,8 +180,47 @@ const StudentPerformance = () => {
     setDetail(null);
     setPhysicalExams([]);
     setWrittenExams([]);
+    setPerformanceForm(null);
     setActiveSection("attendance");
     setError("");
+  };
+
+  const savePhysicalRecord = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!detail || !performanceForm) return;
+    setSaving(true);
+    setError("");
+    try {
+      const payload = {
+        ...performanceForm,
+        overallPerformance:
+          performanceForm.overallPerformance ||
+          suggestOverallPerformance(performanceForm.events),
+      };
+      await api.saveStudentPerformance(detail.student.studentOnboardingId, payload);
+
+      const marks = physicalExams
+        .filter((exam) => exam.scoredMarks !== "" && exam.scoredMarks !== null && exam.scoredMarks !== undefined)
+        .map((exam) => ({
+          examId: exam.examId,
+          scoredMarks: Number(exam.scoredMarks),
+          remarks: exam.remarks || "",
+        }));
+      if (marks.length > 0) {
+        await api.saveStudentExamMarks(detail.student.studentOnboardingId, marks);
+      }
+
+      notify.success("Physical exam record saved.");
+      await loadStudents();
+      await openStudent(detail.student.studentOnboardingId);
+      setActiveSection("physical");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save physical exam record.";
+      setError(message);
+      notify.error(err, "Failed to save physical exam record.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const saveExamMarks = async (event: FormEvent, examType: "physical" | "written") => {
@@ -415,15 +461,20 @@ const StudentPerformance = () => {
                 />
               )}
 
-              {activeSection === "physical" && (
-                <form onSubmit={(event) => saveExamMarks(event, "physical")}>
+              {activeSection === "physical" && performanceForm && detail && (
+                <form onSubmit={savePhysicalRecord}>
+                  <PhysicalRecordCard
+                    form={performanceForm}
+                    onChange={setPerformanceForm}
+                    attendanceStats={computeAttendanceStats(detail.attendance)}
+                  />
                   <ExamMarksTable
-                    title="Physical Exam Performance"
+                    title="Physical Exam Marks"
                     exams={physicalExams}
                     onChange={setPhysicalExams}
                   />
                   <button type="submit" className="btn btn-primary spa-no-print" disabled={saving}>
-                    {saving ? "Saving..." : "Save Physical Exam Marks"}
+                    {saving ? "Saving..." : "Save Physical Exam Record"}
                   </button>
                 </form>
               )}

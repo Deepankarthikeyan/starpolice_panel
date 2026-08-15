@@ -115,11 +115,15 @@ export function getCardTypeFromGender(gender = ""): PerformanceCardType {
   return "male";
 }
 
-export function getEventDefinitions(_cardType?: PerformanceCardType) {
-  return ALL_EVENT_DEFINITIONS;
+export function getEventDefinitions(cardType: PerformanceCardType = "male") {
+  return cardType === "female" ? FEMALE_EVENT_DEFINITIONS : MALE_EVENT_DEFINITIONS;
 }
 
-export function mergeEventsWithDefaults(saved: PerformanceEvent[] = []): PerformanceEvent[] {
+export function mergeEventsWithDefaults(
+  saved: PerformanceEvent[] = [],
+  cardType: PerformanceCardType = "male"
+): PerformanceEvent[] {
+  const definitions = getEventDefinitions(cardType);
   const byKey = new Map(saved.map((event) => [event.eventKey, event]));
 
   // Migrate legacy sprint_run key from older records
@@ -134,7 +138,7 @@ export function mergeEventsWithDefaults(saved: PerformanceEvent[] = []): Perform
     byKey.delete("sprint_run");
   }
 
-  return ALL_EVENT_DEFINITIONS.map((definition) => {
+  return definitions.map((definition) => {
     const existing = byKey.get(definition.eventKey);
     return existing
       ? { ...existing }
@@ -148,8 +152,8 @@ export function mergeEventsWithDefaults(saved: PerformanceEvent[] = []): Perform
   });
 }
 
-export function defaultEvents(_cardType?: PerformanceCardType): PerformanceEvent[] {
-  return mergeEventsWithDefaults();
+export function defaultEvents(cardType: PerformanceCardType = "male"): PerformanceEvent[] {
+  return mergeEventsWithDefaults([], cardType);
 }
 
 export function emptyPerformanceForm(
@@ -220,6 +224,49 @@ export function suggestOverallPerformance(events: PerformanceEvent[]): OverallPe
 export function recordToForm(record: StudentPerformanceRecord): StudentPerformanceRecord {
   return {
     ...record,
-    events: mergeEventsWithDefaults(record.events),
+    events: mergeEventsWithDefaults(record.events, record.cardType),
   };
+}
+
+export function buildPerformanceFormFromDetail(detail: {
+  student: {
+    studentOnboardingId: string;
+    studentId: string;
+    fullName: string;
+    batch: string;
+    gender: string;
+    dateOfBirth?: string;
+  };
+  performance: StudentPerformanceRecord & { hasRecord?: boolean };
+}): StudentPerformanceRecord {
+  const { student, performance } = detail;
+  const studentInfo = {
+    studentOnboardingId: student.studentOnboardingId,
+    studentId: student.studentId,
+    fullName: student.fullName,
+    batch: student.batch,
+    gender: student.gender,
+    dateOfBirth: student.dateOfBirth,
+  };
+  const cardType = performance.cardType || getCardTypeFromGender(student.gender);
+
+  if (performance.hasRecord) {
+    return recordToForm({
+      ...(performance as StudentPerformanceRecord),
+      cardType,
+      student: studentInfo,
+    });
+  }
+
+  return emptyPerformanceForm(student.studentOnboardingId, cardType, studentInfo);
+}
+
+export function computeAttendanceStats(attendance: Array<{ status: string }>) {
+  const stats = { present: 0, absent: 0, leave: 0 };
+  attendance.forEach((item) => {
+    if (item.status === "present" || item.status === "late") stats.present += 1;
+    else if (item.status === "absent") stats.absent += 1;
+    else if (item.status === "leave") stats.leave += 1;
+  });
+  return stats;
 }

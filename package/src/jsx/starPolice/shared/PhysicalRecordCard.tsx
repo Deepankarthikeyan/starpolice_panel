@@ -9,13 +9,21 @@ import {
   mergeEventsWithDefaults,
   overallPerformanceLabel,
   OVERALL_PERFORMANCE_OPTIONS,
+  suggestOverallPerformance,
   type PerformanceEventDefinition,
 } from "../admin/performanceDefaults";
+
+export interface PhysicalRecordAttendanceStats {
+  present: number;
+  absent: number;
+  leave: number;
+}
 
 interface PhysicalRecordCardProps {
   form: StudentPerformanceRecord;
   readOnly?: boolean;
   onChange?: (next: StudentPerformanceRecord) => void;
+  attendanceStats?: PhysicalRecordAttendanceStats;
 }
 
 function setField<K extends keyof StudentPerformanceRecord>(
@@ -36,7 +44,7 @@ function setStarField(
   onChange?: (next: StudentPerformanceRecord) => void
 ) {
   if (!onChange) return;
-  const events = mergeEventsWithDefaults(form.events).map((event) => {
+  const events = mergeEventsWithDefaults(form.events, form.cardType).map((event) => {
     if (event.eventKey !== eventKey) return event;
     if (type === "single") {
       return { ...event, singleStar: checked ? "1" : "", doubleStar: checked ? "" : event.doubleStar };
@@ -48,7 +56,7 @@ function setStarField(
 
 function getEventForDefinition(form: StudentPerformanceRecord, definition: PerformanceEventDefinition) {
   return (
-    mergeEventsWithDefaults(form.events).find((event) => event.eventKey === definition.eventKey) || {
+    mergeEventsWithDefaults(form.events, form.cardType).find((event) => event.eventKey === definition.eventKey) || {
       eventKey: definition.eventKey,
       performance: "",
       singleStar: "",
@@ -66,9 +74,15 @@ function eventIcon(eventKey: string) {
   return "sports";
 }
 
-export default function PhysicalRecordCard({ form, readOnly = false, onChange }: PhysicalRecordCardProps) {
+export default function PhysicalRecordCard({
+  form,
+  readOnly = false,
+  onChange,
+  attendanceStats,
+}: PhysicalRecordCardProps) {
   const cardType: PerformanceCardType = form.cardType;
-  const definitions = getEventDefinitions();
+  const definitions = getEventDefinitions(cardType);
+  const isMaleCard = cardType === "male";
   const studentName = form.student?.fullName || "—";
   const registerNo = form.student?.studentId || "—";
   const batch = form.student?.batch || "—";
@@ -153,30 +167,34 @@ export default function PhysicalRecordCard({ form, readOnly = false, onChange }:
             />
           )}
         </div>
-        <div>
-          <span className="physical-record-label">Chest Normal (cm)</span>
-          {readOnly ? (
-            <div className="physical-record-value">{form.chestNormalCm || "—"}</div>
-          ) : (
-            <input
-              className="form-control form-control-sm"
-              value={form.chestNormalCm}
-              onChange={(e) => setField(form, "chestNormalCm", e.target.value, onChange)}
-            />
-          )}
-        </div>
-        <div>
-          <span className="physical-record-label">Chest Expansion (cm)</span>
-          {readOnly ? (
-            <div className="physical-record-value">{form.chestExpansionCm || "—"}</div>
-          ) : (
-            <input
-              className="form-control form-control-sm"
-              value={form.chestExpansionCm}
-              onChange={(e) => setField(form, "chestExpansionCm", e.target.value, onChange)}
-            />
-          )}
-        </div>
+        {isMaleCard && (
+          <>
+            <div>
+              <span className="physical-record-label">Chest Normal (cm)</span>
+              {readOnly ? (
+                <div className="physical-record-value">{form.chestNormalCm || "—"}</div>
+              ) : (
+                <input
+                  className="form-control form-control-sm"
+                  value={form.chestNormalCm}
+                  onChange={(e) => setField(form, "chestNormalCm", e.target.value, onChange)}
+                />
+              )}
+            </div>
+            <div>
+              <span className="physical-record-label">Chest Expansion (cm)</span>
+              {readOnly ? (
+                <div className="physical-record-value">{form.chestExpansionCm || "—"}</div>
+              ) : (
+                <input
+                  className="form-control form-control-sm"
+                  value={form.chestExpansionCm}
+                  onChange={(e) => setField(form, "chestExpansionCm", e.target.value, onChange)}
+                />
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="table-responsive">
@@ -242,7 +260,7 @@ export default function PhysicalRecordCard({ form, readOnly = false, onChange }:
                           value={event.remarks}
                           onChange={(e) => {
                             if (!onChange) return;
-                            const events = mergeEventsWithDefaults(form.events).map((item) =>
+                            const events = mergeEventsWithDefaults(form.events, form.cardType).map((item) =>
                               item.eventKey === definition.eventKey
                                 ? { ...item, remarks: e.target.value }
                                 : item
@@ -260,22 +278,72 @@ export default function PhysicalRecordCard({ form, readOnly = false, onChange }:
       </div>
 
       <div className="physical-record-footer">
+        <div className="physical-record-attendance">
+          <strong>ATTENDANCE</strong>
+          <div className="physical-record-attendance-fields">
+            <label>
+              Present
+              <input
+                className="form-control form-control-sm"
+                value={attendanceStats?.present ?? 0}
+                disabled
+                readOnly
+              />
+            </label>
+            <label>
+              Absent
+              <input
+                className="form-control form-control-sm"
+                value={attendanceStats?.absent ?? 0}
+                disabled
+                readOnly
+              />
+            </label>
+            <label>
+              Leave
+              <input
+                className="form-control form-control-sm"
+                value={attendanceStats?.leave ?? 0}
+                disabled
+                readOnly
+              />
+            </label>
+          </div>
+          <small className="text-muted d-block mt-1">Attendance is entered by staff and shown here as read-only.</small>
+        </div>
         <div className="physical-record-overall">
           <strong>OVERALL PERFORMANCE</strong>
           <div className="physical-record-overall-options">
             {OVERALL_PERFORMANCE_OPTIONS.map((option) => (
               <label key={option.value} className="physical-record-checkbox">
                 <input
-                  type="radio"
-                  name="overallPerformance"
+                  type="checkbox"
+                  className="form-check-input"
                   checked={form.overallPerformance === option.value}
                   disabled={readOnly}
-                  onChange={() => setField(form, "overallPerformance", option.value as OverallPerformance, onChange)}
+                  onChange={() => {
+                    if (!onChange || readOnly) return;
+                    const next = form.overallPerformance === option.value ? "" : option.value;
+                    setField(form, "overallPerformance", next as OverallPerformance, onChange);
+                  }}
                 />
                 <span>{option.label}</span>
               </label>
             ))}
           </div>
+          {!readOnly && (
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-info mt-2"
+              onClick={() => {
+                if (!onChange) return;
+                const suggested = suggestOverallPerformance(mergeEventsWithDefaults(form.events, form.cardType));
+                if (suggested) setField(form, "overallPerformance", suggested, onChange);
+              }}
+            >
+              Auto-suggest from stars
+            </button>
+          )}
           {readOnly && form.overallPerformance && (
             <div className="mt-2">
               <span className="badge badge-primary">{overallPerformanceLabel(form.overallPerformance)}</span>
