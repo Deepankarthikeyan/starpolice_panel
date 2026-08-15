@@ -57,11 +57,13 @@ function getCardTypeFromGender(gender = "") {
   return "male";
 }
 
-function getEventDefinitions(cardType = "male") {
-  return cardType === "female" ? FEMALE_EVENTS : MALE_EVENTS;
+function getEventDefinitions(cardType = "all") {
+  if (cardType === "female") return FEMALE_EVENTS;
+  if (cardType === "male") return MALE_EVENTS;
+  return ALL_EVENTS;
 }
 
-function mergeEventsWithDefaults(saved = [], cardType = "male") {
+function mergeEventsWithDefaults(saved = [], cardType = "all") {
   const definitions = getEventDefinitions(cardType);
   const byKey = new Map(saved.map((event) => [event.eventKey, event]));
   const legacySprint = byKey.get("sprint_run");
@@ -89,7 +91,7 @@ function mergeEventsWithDefaults(saved = [], cardType = "male") {
   });
 }
 
-function defaultEvents(cardType = "male") {
+function defaultEvents(cardType = "all") {
   return mergeEventsWithDefaults([], cardType);
 }
 
@@ -156,12 +158,13 @@ function mapPerformance(item, student) {
     userId: item.userId?.toString() || null,
     cardType: item.cardType,
     recordYear: item.recordYear,
+    recordDate: item.recordDate || new Date().toISOString().slice(0, 10),
     age: item.age,
     heightCm: item.heightCm,
     weightKg: item.weightKg,
     chestNormalCm: item.chestNormalCm,
     chestExpansionCm: item.chestExpansionCm,
-    events: mergeEventsWithDefaults(item.events || [], item.cardType),
+    events: mergeEventsWithDefaults(item.events || [], "all"),
     overallPerformance: item.overallPerformance,
     trainerRemarks: item.trainerRemarks,
     createdAt: item.createdAt,
@@ -185,6 +188,7 @@ function pickPerformanceFields(body) {
   return {
     cardType: body.cardType,
     recordYear: body.recordYear ? Number(body.recordYear) : new Date().getFullYear(),
+    recordDate: body.recordDate || new Date().toISOString().slice(0, 10),
     age: body.age || "",
     heightCm: body.heightCm || "",
     weightKg: body.weightKg || "",
@@ -335,7 +339,7 @@ async function buildStudentPerformanceDetail(student) {
         userId: student.userId?.toString() || null,
         cardType,
         recordYear: new Date().getFullYear(),
-        events: defaultEvents(cardType),
+        events: defaultEvents("all"),
         student: {
           studentId: student.studentId,
           firstName: student.firstName,
@@ -484,7 +488,7 @@ router.get("/by-student/:studentOnboardingId", adminGuard, async (req, res) => {
         userId: student.userId?.toString() || null,
         cardType,
         recordYear: new Date().getFullYear(),
-        events: defaultEvents(cardType),
+        events: defaultEvents("all"),
         student: {
           studentId: student.studentId,
           firstName: student.firstName,
@@ -513,7 +517,7 @@ router.put("/by-student/:studentOnboardingId", adminGuard, async (req, res) => {
 
     const payload = pickPerformanceFields(req.body);
     const cardType = payload.cardType || getCardTypeFromGender(student.gender);
-    payload.events = mergeEventsWithDefaults(payload.events, cardType);
+    payload.events = mergeEventsWithDefaults(payload.events, "all");
 
     const performance = await StudentPerformance.findOneAndUpdate(
       { studentOnboardingId: student._id },

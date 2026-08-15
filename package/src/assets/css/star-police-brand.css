@@ -769,6 +769,15 @@
   margin: 0;
 }
 
+.physical-record-date {
+  font-size: 0.85rem;
+  margin-top: 0.35rem;
+}
+
+.physical-record-row-muted td {
+  opacity: 0.55;
+}
+
 .physical-record-attendance-fields input:disabled {
   background: #f3f4f6;
   color: #111827;

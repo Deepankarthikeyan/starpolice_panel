@@ -10,7 +10,7 @@ import {
 } from "../admin/attendanceDefaults";
 import {
   buildPerformanceFormFromDetail,
-  computeAttendanceStats,
+  getTodayAttendanceStatus,
   overallPerformanceLabel,
   recordToForm,
   type StudentPerformanceRecord,
@@ -287,7 +287,7 @@ export function PerformanceDetailPanels({
     (detail.performance.hasRecord && detail.performance
       ? recordToForm(detail.performance as StudentPerformanceRecord)
       : buildPerformanceFormFromDetail(detail));
-  const attendanceStats = computeAttendanceStats(detail.attendance);
+  const todayAttendanceStatus = getTodayAttendanceStatus(detail.attendance);
 
   return (
     <>
@@ -340,7 +340,7 @@ export function PerformanceDetailPanels({
               form={performanceForm}
               readOnly={physicalRecordReadOnly}
               onChange={onPhysicalRecordChange}
-              attendanceStats={attendanceStats}
+              todayAttendanceStatus={todayAttendanceStatus}
             />
           </div>
         </div>

@@ -30,6 +30,7 @@ const studentPerformanceSchema = new mongoose.Schema(
       required: true,
     },
     recordYear: { type: Number, default: () => new Date().getFullYear() },
+    recordDate: { type: String, default: () => new Date().toISOString().slice(0, 10) },
     age: { type: String, default: "" },
     heightCm: { type: String, default: "" },
     weightKg: { type: String, default: "" },

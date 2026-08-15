@@ -34,6 +34,7 @@ export interface StudentPerformanceRecord {
   userId?: string | null;
   cardType: PerformanceCardType;
   recordYear: number;
+  recordDate?: string;
   age: string;
   heightCm: string;
   weightKg: string;
@@ -115,13 +116,24 @@ export function getCardTypeFromGender(gender = ""): PerformanceCardType {
   return "male";
 }
 
-export function getEventDefinitions(cardType: PerformanceCardType = "male") {
-  return cardType === "female" ? FEMALE_EVENT_DEFINITIONS : MALE_EVENT_DEFINITIONS;
+export function getEventDefinitions(cardType?: PerformanceCardType | "all") {
+  if (cardType === "female") return FEMALE_EVENT_DEFINITIONS;
+  if (cardType === "male") return MALE_EVENT_DEFINITIONS;
+  return ALL_EVENT_DEFINITIONS;
 }
+
+export const PHYSICAL_RECORD_SECTIONS: {
+  key: PerformanceCardType;
+  title: string;
+  definitions: PerformanceEventDefinition[];
+}[] = [
+  { key: "female", title: "Female Physical Standard Events", definitions: FEMALE_EVENT_DEFINITIONS },
+  { key: "male", title: "Male Physical Standard Events", definitions: MALE_EVENT_DEFINITIONS },
+];
 
 export function mergeEventsWithDefaults(
   saved: PerformanceEvent[] = [],
-  cardType: PerformanceCardType = "male"
+  cardType?: PerformanceCardType | "all"
 ): PerformanceEvent[] {
   const definitions = getEventDefinitions(cardType);
   const byKey = new Map(saved.map((event) => [event.eventKey, event]));
@@ -152,8 +164,8 @@ export function mergeEventsWithDefaults(
   });
 }
 
-export function defaultEvents(cardType: PerformanceCardType = "male"): PerformanceEvent[] {
-  return mergeEventsWithDefaults([], cardType);
+export function defaultEvents(cardType?: PerformanceCardType): PerformanceEvent[] {
+  return mergeEventsWithDefaults([], cardType ?? "all");
 }
 
 export function emptyPerformanceForm(
@@ -165,6 +177,7 @@ export function emptyPerformanceForm(
     studentOnboardingId,
     cardType,
     recordYear: new Date().getFullYear(),
+    recordDate: new Date().toISOString().slice(0, 10),
     age: "",
     heightCm: "",
     weightKg: "",
@@ -224,7 +237,7 @@ export function suggestOverallPerformance(events: PerformanceEvent[]): OverallPe
 export function recordToForm(record: StudentPerformanceRecord): StudentPerformanceRecord {
   return {
     ...record,
-    events: mergeEventsWithDefaults(record.events, record.cardType),
+    events: mergeEventsWithDefaults(record.events, "all"),
   };
 }
 
@@ -251,14 +264,20 @@ export function buildPerformanceFormFromDetail(detail: {
   const cardType = performance.cardType || getCardTypeFromGender(student.gender);
 
   if (performance.hasRecord) {
-    return recordToForm({
-      ...(performance as StudentPerformanceRecord),
-      cardType,
-      student: studentInfo,
-    });
+    return {
+      ...recordToForm({
+        ...(performance as StudentPerformanceRecord),
+        cardType,
+        student: studentInfo,
+      }),
+      recordDate: new Date().toISOString().slice(0, 10),
+    };
   }
 
-  return emptyPerformanceForm(student.studentOnboardingId, cardType, studentInfo);
+  return {
+    ...emptyPerformanceForm(student.studentOnboardingId, cardType, studentInfo),
+    recordDate: new Date().toISOString().slice(0, 10),
+  };
 }
 
 export function computeAttendanceStats(attendance: Array<{ status: string }>) {
@@ -269,4 +288,16 @@ export function computeAttendanceStats(attendance: Array<{ status: string }>) {
     else if (item.status === "leave") stats.leave += 1;
   });
   return stats;
+}
+
+export function getEventsForCardType(events: PerformanceEvent[], cardType: PerformanceCardType) {
+  const keys = new Set(getEventDefinitions(cardType).map((definition) => definition.eventKey));
+  return events.filter((event) => keys.has(event.eventKey));
+}
+
+export function getTodayAttendanceStatus(
+  attendance: Array<{ date: string; status: string }>,
+  date = new Date().toISOString().slice(0, 10)
+) {
+  return attendance.find((item) => item.date === date)?.status || "";
 }

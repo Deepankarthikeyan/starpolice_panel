@@ -12,9 +12,11 @@ import {
   type StudentExamMarkEntry,
   type StudentPerformanceDetail,
 } from "./examDefaults";
+import { todayDateString } from "./attendanceDefaults";
 import {
   buildPerformanceFormFromDetail,
-  computeAttendanceStats,
+  getEventsForCardType,
+  getTodayAttendanceStatus,
   overallPerformanceLabel,
   suggestOverallPerformance,
   type StudentPerformanceRecord,
@@ -190,9 +192,10 @@ const StudentPerformance = () => {
     try {
       const payload = {
         ...performanceForm,
+        recordDate: todayDateString(),
         overallPerformance:
           performanceForm.overallPerformance ||
-          suggestOverallPerformance(performanceForm.events),
+          suggestOverallPerformance(getEventsForCardType(performanceForm.events, performanceForm.cardType)),
       };
       await api.saveStudentPerformance(detail.student.studentOnboardingId, payload);
 
@@ -451,7 +454,7 @@ const StudentPerformance = () => {
                   <PhysicalRecordCard
                     form={performanceForm}
                     onChange={setPerformanceForm}
-                    attendanceStats={computeAttendanceStats(detail.attendance)}
+                    todayAttendanceStatus={getTodayAttendanceStatus(detail.attendance)}
                   />
                   <button type="submit" className="btn btn-primary spa-no-print" disabled={saving}>
                     {saving ? "Saving..." : "Save Physical Exam Record"}
