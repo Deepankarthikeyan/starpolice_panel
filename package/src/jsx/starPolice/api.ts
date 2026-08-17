@@ -134,6 +134,56 @@ async function request<T>(path: string, options: RequestInit = {}, panel?: Panel
   return data as T;
 }
 
+function uploadWithProgress<T>(
+  path: string,
+  formData: FormData,
+  onProgress: (percent: number) => void,
+  panel?: PanelType,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const token = getToken(panel);
+    const resolvedPanel = panel || resolvePanelFromPath(window.location.pathname);
+
+    xhr.open("POST", `${API_BASE}${path}`);
+    if (token) {
+      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    }
+
+    xhr.upload.addEventListener("progress", (event) => {
+      if (event.lengthComputable) {
+        onProgress(Math.min(100, Math.round((event.loaded / event.total) * 100)));
+      }
+    });
+
+    xhr.addEventListener("load", () => {
+      let data: { message?: string } = {};
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch {
+        reject(new Error("Invalid response"));
+        return;
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(data as T);
+        return;
+      }
+
+      const message = data.message || "Request failed";
+      if (isSessionInvalid(xhr.status, message)) {
+        handleInvalidSession(resolvedPanel);
+      }
+      reject(new Error(message));
+    });
+
+    xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+    xhr.addEventListener("abort", () => reject(new Error("Upload cancelled")));
+
+    xhr.send(formData);
+  });
+}
+
 export const api = {
   getSetupStatus() {
     return request<SetupStatus>("/api/auth/setup");
@@ -277,12 +327,23 @@ export const api = {
     return request<UploadedFile[]>(`/api/uploads${query}`);
   },
 
-  uploadFiles(date: string, category: string, title: string, files: File[]) {
+  uploadFiles(
+    date: string,
+    category: string,
+    title: string,
+    files: File[],
+    onProgress?: (percent: number) => void,
+  ) {
     const formData = new FormData();
     formData.append("date", date);
     formData.append("category", category);
     formData.append("title", title);
     files.forEach((file) => formData.append("files", file));
+
+    if (onProgress) {
+      return uploadWithProgress<UploadedFile[]>("/api/uploads", formData, onProgress);
+    }
+
     return request<UploadedFile[]>("/api/uploads", {
       method: "POST",
       body: formData,

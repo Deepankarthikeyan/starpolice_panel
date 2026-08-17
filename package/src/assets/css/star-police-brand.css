@@ -330,6 +330,67 @@
   text-align: center;
 }
 
+.daywise-upload-progress {
+  padding: 0.5rem 0.25rem;
+}
+
+.daywise-upload-progress-ring {
+  position: relative;
+  width: 7.5rem;
+  height: 7.5rem;
+  margin: 0 auto 1rem;
+}
+
+.daywise-upload-progress-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.daywise-upload-progress-track,
+.daywise-upload-progress-fill {
+  fill: none;
+  stroke-width: 8;
+}
+
+.daywise-upload-progress-track {
+  stroke: rgba(var(--primary-rgb, 18, 61, 115), 0.15);
+}
+
+.daywise-upload-progress-fill {
+  stroke: var(--primary, #123d73);
+  stroke-linecap: round;
+  stroke-dasharray: 326.73;
+  transition: stroke-dashoffset 0.2s ease;
+}
+
+.daywise-upload-progress-percent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary, #123d73);
+}
+
+.daywise-upload-progress-title {
+  font-weight: 600;
+  color: var(--primary, #123d73);
+}
+
+.daywise-upload-progress-bar {
+  height: 0.65rem;
+  border-radius: 999px;
+  background: rgba(var(--primary-rgb, 18, 61, 115), 0.12);
+}
+
+.daywise-upload-progress-bar .progress-bar {
+  background-color: var(--primary, #123d73);
+  border-radius: 999px;
+}
+
 .daywise-upload-form .form-select,
 .daywise-upload-form .form-control {
   border-radius: 0.5rem;
