@@ -25,6 +25,8 @@ const DaywiseUpload = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | FileCategory>("all");
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadingFileCount, setUploadingFileCount] = useState(0);
   const [error, setError] = useState("");
   const [titleError, setTitleError] = useState(false);
   const errorRef = useRef<HTMLDivElement>(null);
@@ -89,12 +91,19 @@ const DaywiseUpload = () => {
       return;
     }
 
+    const fileList = Array.from(files);
+
     setLoading(true);
+    setUploadProgress(0);
+    setUploadingFileCount(fileList.length);
     setError("");
     setTitleError(false);
 
     try {
-      await api.uploadFiles(dateKey, category, trimmedTitle, Array.from(files));
+      await api.uploadFiles(dateKey, category, trimmedTitle, fileList, (percent) => {
+        setUploadProgress(percent);
+      });
+      setUploadProgress(100);
       await loadUploads();
       setTitle("");
       notify.success("Files uploaded successfully.");
@@ -104,6 +113,8 @@ const DaywiseUpload = () => {
       notify.error(err, "Upload failed");
     } finally {
       setLoading(false);
+      setUploadProgress(0);
+      setUploadingFileCount(0);
     }
   };
 
@@ -187,20 +198,55 @@ const DaywiseUpload = () => {
                   </select>
 
                   <div className="daywise-upload-dropzone">
-                    <p className="text-muted small mb-3">
-                      Upload videos, PDFs, images, and documents for the selected day.
-                    </p>
-                    <input
-                      type="file"
-                      className="form-control"
-                      accept={categoryAccept[category]}
-                      multiple
-                      disabled={loading}
-                      onChange={(event) => {
-                        void handleFiles(event.target.files, event.target);
-                        event.target.value = "";
-                      }}
-                    />
+                    {loading ? (
+                      <div className="daywise-upload-progress" aria-live="polite">
+                        <div className="daywise-upload-progress-ring">
+                          <svg viewBox="0 0 120 120" aria-hidden="true">
+                            <circle className="daywise-upload-progress-track" cx="60" cy="60" r="52" />
+                            <circle
+                              className="daywise-upload-progress-fill"
+                              cx="60"
+                              cy="60"
+                              r="52"
+                              style={{
+                                strokeDashoffset: 326.73 - (326.73 * uploadProgress) / 100,
+                              }}
+                            />
+                          </svg>
+                          <span className="daywise-upload-progress-percent">{uploadProgress}%</span>
+                        </div>
+                        <p className="daywise-upload-progress-title mb-1">Uploading files...</p>
+                        <p className="daywise-upload-progress-meta text-muted small mb-3">
+                          {uploadingFileCount} file{uploadingFileCount === 1 ? "" : "s"} selected
+                        </p>
+                        <div className="progress daywise-upload-progress-bar">
+                          <div
+                            className="progress-bar progress-bar-striped progress-bar-animated"
+                            role="progressbar"
+                            style={{ width: `${uploadProgress}%` }}
+                            aria-valuenow={uploadProgress}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-muted small mb-3">
+                          Upload videos, PDFs, images, and documents for the selected day.
+                        </p>
+                        <input
+                          type="file"
+                          className="form-control"
+                          accept={categoryAccept[category]}
+                          multiple
+                          onChange={(event) => {
+                            void handleFiles(event.target.files, event.target);
+                            event.target.value = "";
+                          }}
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
