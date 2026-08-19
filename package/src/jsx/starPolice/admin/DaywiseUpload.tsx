@@ -6,6 +6,7 @@ import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
 import { getPanelMotherMenu } from "../panelLabels";
 import { notify } from "../toast";
+import { FileUploadProgress, FileUploadProgressOverlay } from "../shared/FileUploadProgress";
 import { UploadPreviewButton } from "../shared/UploadFilePreview";
 import type { FileCategory, UploadedFile } from "../types";
 
@@ -25,6 +26,8 @@ const DaywiseUpload = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | FileCategory>("all");
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadingFileNames, setUploadingFileNames] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [titleError, setTitleError] = useState(false);
   const errorRef = useRef<HTMLDivElement>(null);
@@ -89,13 +92,21 @@ const DaywiseUpload = () => {
       return;
     }
 
+    const fileList = Array.from(files);
+
     setLoading(true);
+    setUploadProgress(0);
+    setUploadingFileNames(fileList.map((file) => file.name));
     setError("");
     setTitleError(false);
 
     try {
-      await api.uploadFiles(dateKey, category, trimmedTitle, Array.from(files));
+      await api.uploadFiles(dateKey, category, trimmedTitle, fileList, (percent) => {
+        setUploadProgress(percent);
+      });
+      setUploadProgress(100);
       await loadUploads();
+      await new Promise((resolve) => window.setTimeout(resolve, 400));
       setTitle("");
       notify.success("Files uploaded successfully.");
     } catch (err) {
@@ -104,6 +115,8 @@ const DaywiseUpload = () => {
       notify.error(err, "Upload failed");
     } finally {
       setLoading(false);
+      setUploadProgress(0);
+      setUploadingFileNames([]);
     }
   };
 
@@ -187,20 +200,29 @@ const DaywiseUpload = () => {
                   </select>
 
                   <div className="daywise-upload-dropzone">
-                    <p className="text-muted small mb-3">
-                      Upload videos, PDFs, images, and documents for the selected day.
-                    </p>
-                    <input
-                      type="file"
-                      className="form-control"
-                      accept={categoryAccept[category]}
-                      multiple
-                      disabled={loading}
-                      onChange={(event) => {
-                        void handleFiles(event.target.files, event.target);
-                        event.target.value = "";
-                      }}
-                    />
+                    {loading ? (
+                      <FileUploadProgress
+                        percent={uploadProgress}
+                        fileCount={uploadingFileNames.length}
+                        fileNames={uploadingFileNames}
+                      />
+                    ) : (
+                      <>
+                        <p className="text-muted small mb-3">
+                          Upload videos, PDFs, images, and documents for the selected day.
+                        </p>
+                        <input
+                          type="file"
+                          className="form-control"
+                          accept={categoryAccept[category]}
+                          multiple
+                          onChange={(event) => {
+                            void handleFiles(event.target.files, event.target);
+                            event.target.value = "";
+                          }}
+                        />
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -315,6 +337,13 @@ const DaywiseUpload = () => {
           </div>
         </div>
       </div>
+      {loading && (
+        <FileUploadProgressOverlay
+          percent={uploadProgress}
+          fileCount={uploadingFileNames.length}
+          fileNames={uploadingFileNames}
+        />
+      )}
     </>
   );
 };

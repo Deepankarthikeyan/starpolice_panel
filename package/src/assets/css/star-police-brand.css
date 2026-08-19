@@ -330,6 +330,107 @@
   text-align: center;
 }
 
+.spa-upload-progress {
+  padding: 0.5rem 0.25rem;
+}
+
+.spa-upload-progress-ring {
+  position: relative;
+  width: 7.5rem;
+  height: 7.5rem;
+  margin: 0 auto 1rem;
+}
+
+.spa-upload-progress-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.spa-upload-progress-track,
+.spa-upload-progress-fill {
+  fill: none;
+  stroke-width: 8;
+}
+
+.spa-upload-progress-track {
+  stroke: rgba(18, 61, 115, 0.15);
+}
+
+.spa-upload-progress-fill {
+  stroke: var(--primary, #123d73);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.2s ease;
+}
+
+.spa-upload-progress-percent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--primary, #123d73);
+}
+
+.spa-upload-progress-title {
+  font-weight: 600;
+  color: var(--primary, #123d73);
+}
+
+.spa-upload-progress-files {
+  list-style: none;
+  margin: 0 0 0.85rem;
+  padding: 0;
+  max-width: 18rem;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+}
+
+.spa-upload-progress-files li {
+  font-size: 0.8rem;
+  color: #5b6b7c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0.15rem 0;
+}
+
+.spa-upload-progress-bar {
+  height: 0.7rem;
+  border-radius: 999px;
+  background: rgba(18, 61, 115, 0.12);
+  overflow: hidden;
+}
+
+.spa-upload-progress-bar .progress-bar {
+  background-color: var(--primary, #123d73);
+  border-radius: 999px;
+}
+
+.spa-upload-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(8, 24, 61, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.spa-upload-overlay-card {
+  width: min(24rem, 100%);
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.75rem 1.5rem 1.5rem;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+  text-align: center;
+}
+
 .daywise-upload-form .form-select,
 .daywise-upload-form .form-control {
   border-radius: 0.5rem;

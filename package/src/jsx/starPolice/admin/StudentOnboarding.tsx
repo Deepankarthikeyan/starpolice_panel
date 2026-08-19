@@ -4,6 +4,7 @@ import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
 import { hasPermission } from "../permissions";
 import { getPanelMotherMenu } from "../panelLabels";
+import { FileUploadProgressOverlay } from "../shared/FileUploadProgress";
 import { notify } from "../toast";
 import {
   emptyStudentOnboardingForm,
@@ -119,6 +120,7 @@ const StudentOnboarding = () => {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const canManage = hasPermission(auth, "admin:onboarding");
 
@@ -178,19 +180,27 @@ const StudentOnboarding = () => {
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (form.password && form.password !== form.confirmPassword) {
+      const message = "Password and confirm password must match.";
+      setError(message);
+      notify.error(message);
+      return;
+    }
+
+    const selectedFiles = Object.values(files).filter((file): file is File => Boolean(file));
     setLoading(true);
+    setUploadProgress(selectedFiles.length ? 1 : 0);
     setError("");
     try {
-      if (form.password && form.password !== form.confirmPassword) {
-        throw new Error("Password and confirm password must match.");
-      }
+      const onProgress = selectedFiles.length ? (percent: number) => setUploadProgress(percent) : undefined;
       if (editingId) {
-        await api.updateStudentOnboarding(editingId, form, files);
+        await api.updateStudentOnboarding(editingId, form, files, onProgress);
         notify.success("Student onboarding record updated.");
       } else {
-        await api.createStudentOnboarding(form, files);
+        await api.createStudentOnboarding(form, files, onProgress);
         notify.success("Student onboarding record created.");
       }
+      setUploadProgress(100);
       await loadRecords();
       resetForm();
     } catch (err) {
@@ -199,6 +209,7 @@ const StudentOnboarding = () => {
       notify.error(err, "Failed to save student onboarding record.");
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -578,11 +589,20 @@ const StudentOnboarding = () => {
             <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading ? "Saving..." : editingId ? "Update Student" : "Create Student"}
             </button>
-            <button type="button" className="btn btn-outline-secondary" onClick={resetForm}>
+            <button type="button" className="btn btn-outline-secondary" onClick={resetForm} disabled={loading}>
               Cancel
             </button>
           </div>
         </form>
+      )}
+      {loading && Object.values(files).some(Boolean) && (
+        <FileUploadProgressOverlay
+          percent={uploadProgress}
+          fileCount={Object.values(files).filter(Boolean).length}
+          fileNames={Object.values(files)
+            .filter((file): file is File => Boolean(file))
+            .map((file) => file.name)}
+        />
       )}
     </>
   );
