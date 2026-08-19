@@ -39,7 +39,30 @@ type SortDir = "asc" | "desc";
 
 type PerformanceSection = "attendance" | "physical" | "written";
 
-function compareValues(a: string | number | null | undefined, b: string | number | null | undefined) {
+const PERCENT_SORT_KEYS = new Set<SortKey>([
+  "attendancePercent",
+  "physicalExamPercent",
+  "writtenExamPercent",
+  "overallPercent",
+]);
+
+function comparePercent(a: number | null | undefined, b: number | null | undefined) {
+  const aVal = a === null || a === undefined || Number.isNaN(Number(a)) ? null : Number(a);
+  const bVal = b === null || b === undefined || Number.isNaN(Number(b)) ? null : Number(b);
+  if (aVal === null && bVal === null) return 0;
+  if (aVal === null) return 1;
+  if (bVal === null) return -1;
+  return aVal - bVal;
+}
+
+function compareValues(
+  a: string | number | null | undefined,
+  b: string | number | null | undefined,
+  key: SortKey
+) {
+  if (PERCENT_SORT_KEYS.has(key)) {
+    return comparePercent(a as number | null | undefined, b as number | null | undefined);
+  }
   if (a === null || a === undefined) return 1;
   if (b === null || b === undefined) return -1;
   if (typeof a === "number" && typeof b === "number") return a - b;
@@ -100,8 +123,8 @@ const StudentPerformance = () => {
   const [writtenExams, setWrittenExams] = useState<StudentExamMarkEntry[]>([]);
   const [performanceForm, setPerformanceForm] = useState<StudentPerformanceRecord | null>(null);
   const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("fullName");
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [sortKey, setSortKey] = useState<SortKey>("overallPercent");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [listLoading, setListLoading] = useState(true);
@@ -141,7 +164,7 @@ const StudentPerformance = () => {
       );
     }
     rows = [...rows].sort((a, b) => {
-      const result = compareValues(a[sortKey], b[sortKey]);
+      const result = compareValues(a[sortKey], b[sortKey], sortKey);
       return sortDir === "asc" ? result : -result;
     });
     return rows;
@@ -153,10 +176,32 @@ const StudentPerformance = () => {
       return;
     }
     setSortKey(key);
-    setSortDir("asc");
+    setSortDir(PERCENT_SORT_KEYS.has(key) ? "desc" : "asc");
   };
 
   const sortIndicator = (key: SortKey) => (sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : "");
+
+  const sortOptions: { key: SortKey; dir: SortDir; label: string }[] = [
+    { key: "overallPercent", dir: "desc", label: "Overall % (High to Low)" },
+    { key: "overallPercent", dir: "asc", label: "Overall % (Low to High)" },
+    { key: "attendancePercent", dir: "desc", label: "Attendance % (High to Low)" },
+    { key: "attendancePercent", dir: "asc", label: "Attendance % (Low to High)" },
+    { key: "physicalExamPercent", dir: "desc", label: "Physical Exam % (High to Low)" },
+    { key: "physicalExamPercent", dir: "asc", label: "Physical Exam % (Low to High)" },
+    { key: "writtenExamPercent", dir: "desc", label: "Written Exam % (High to Low)" },
+    { key: "writtenExamPercent", dir: "asc", label: "Written Exam % (Low to High)" },
+    { key: "fullName", dir: "asc", label: "Student Name (A-Z)" },
+    { key: "studentId", dir: "asc", label: "Register No. (A-Z)" },
+    { key: "batch", dir: "asc", label: "Batch (A-Z)" },
+  ];
+
+  const sortSelectValue = `${sortKey}:${sortDir}`;
+
+  const handleSortSelect = (value: string) => {
+    const [key, dir] = value.split(":") as [SortKey, SortDir];
+    setSortKey(key);
+    setSortDir(dir);
+  };
 
   const openStudent = async (studentOnboardingId: string) => {
     setLoading(true);
@@ -279,14 +324,27 @@ const StudentPerformance = () => {
         <div className="card">
           <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 spa-no-print">
             <h4 className="card-title mb-0">Student Performance Overview</h4>
-            <input
-              type="search"
-              className="form-control form-control-sm"
-              style={{ maxWidth: "320px" }}
-              placeholder="Search name, register no., batch..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <div className="d-flex flex-wrap align-items-center gap-2">
+              <select
+                className="form-select form-select-sm spa-performance-sort-select"
+                value={sortSelectValue}
+                onChange={(event) => handleSortSelect(event.target.value)}
+                aria-label="Sort students"
+              >
+                {sortOptions.map((option) => (
+                  <option key={`${option.key}:${option.dir}`} value={`${option.key}:${option.dir}`}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="search"
+                className="form-control form-control-sm spa-performance-search"
+                placeholder="Search name, register no., batch..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
           </div>
           <div className="card-body">
             {listError && (
@@ -303,7 +361,7 @@ const StudentPerformance = () => {
               <p className="text-muted mb-0">No students found.</p>
             ) : (
               <div className="table-responsive">
-                <table className="table table-hover align-middle">
+                <table className="table table-striped table-hover align-middle spa-performance-overview-table">
                   <thead>
                     <tr>
                       <th>
@@ -321,24 +379,24 @@ const StudentPerformance = () => {
                           Batch{sortIndicator("batch")}
                         </button>
                       </th>
-                      <th>
+                      <th className="text-end">
                         <button type="button" className="btn btn-link p-0 spa-sort-btn" onClick={() => toggleSort("attendancePercent")}>
-                          Attendance{sortIndicator("attendancePercent")}
+                          Attendance %{sortIndicator("attendancePercent")}
                         </button>
                       </th>
-                      <th>
+                      <th className="text-end">
                         <button type="button" className="btn btn-link p-0 spa-sort-btn" onClick={() => toggleSort("physicalExamPercent")}>
-                          Physical Exam{sortIndicator("physicalExamPercent")}
+                          Physical Exam %{sortIndicator("physicalExamPercent")}
                         </button>
                       </th>
-                      <th>
+                      <th className="text-end">
                         <button type="button" className="btn btn-link p-0 spa-sort-btn" onClick={() => toggleSort("writtenExamPercent")}>
-                          Written Exam{sortIndicator("writtenExamPercent")}
+                          Written Exam %{sortIndicator("writtenExamPercent")}
                         </button>
                       </th>
-                      <th>
+                      <th className="text-end">
                         <button type="button" className="btn btn-link p-0 spa-sort-btn" onClick={() => toggleSort("overallPercent")}>
-                          Overall{sortIndicator("overallPercent")}
+                          Overall %{sortIndicator("overallPercent")}
                         </button>
                       </th>
                       <th className="spa-no-print"></th>
@@ -350,10 +408,10 @@ const StudentPerformance = () => {
                         <td>{student.studentId}</td>
                         <td>{student.fullName}</td>
                         <td>{student.batch || "—"}</td>
-                        <td>{formatPercent(student.attendancePercent)}</td>
-                        <td>{formatPercent(student.physicalExamPercent)}</td>
-                        <td>{formatPercent(student.writtenExamPercent)}</td>
-                        <td>
+                        <td className="text-end">{formatPercent(student.attendancePercent)}</td>
+                        <td className="text-end">{formatPercent(student.physicalExamPercent)}</td>
+                        <td className="text-end">{formatPercent(student.writtenExamPercent)}</td>
+                        <td className="text-end">
                           <span className="badge bg-primary">{formatPercent(student.overallPercent)}</span>
                         </td>
                         <td className="spa-no-print">
