@@ -13,6 +13,8 @@ export type PersistedUploadJob = {
   title: string;
   blob: Blob;
   createdAt: number;
+  status?: "queued" | "paused";
+  percent?: number;
 };
 
 function openDb(): Promise<IDBDatabase> {

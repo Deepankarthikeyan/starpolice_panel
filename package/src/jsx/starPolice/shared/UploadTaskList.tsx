@@ -4,6 +4,8 @@ import {
   cancelUpload,
   getUploadJobs,
   getVisibleUploadJobs,
+  pauseUpload,
+  resumeUpload,
   subscribeUploadQueue,
   type UploadJob,
 } from "../uploads/uploadQueueStore";
@@ -25,17 +27,22 @@ export function useVisibleUploadJobs() {
 export function UploadTaskRow({ job }: { job: UploadJob }) {
   const percent = Math.max(0, Math.min(100, Math.round(job.percent)));
   const isError = job.status === "error";
+  const isPaused = job.status === "paused";
+  const canPause = job.status === "uploading" || job.status === "queued";
+  const canResume = isPaused || isError;
   const label =
     job.status === "queued"
       ? "Waiting..."
       : job.status === "uploading"
         ? `Uploading ${percent}%`
-        : isError
-          ? job.error || "Upload failed"
-          : "Uploaded";
+        : isPaused
+          ? `Paused ${percent}%`
+          : isError
+            ? job.error || "Upload failed"
+            : "Uploaded";
 
   return (
-    <div className={`spa-upload-task${isError ? " is-error" : ""}`}>
+    <div className={`spa-upload-task${isError ? " is-error" : ""}${isPaused ? " is-paused" : ""}`}>
       <div className="spa-upload-task-top">
         <div className="spa-upload-task-copy">
           <div className="spa-upload-task-name" title={job.name}>
@@ -47,14 +54,41 @@ export function UploadTaskRow({ job }: { job: UploadJob }) {
             {formatSize(job.size)}
           </div>
         </div>
-        <button
-          type="button"
-          className="spa-upload-task-close"
-          aria-label={`Cancel upload ${job.name}`}
-          onClick={() => cancelUpload(job.id)}
-        >
-          ×
-        </button>
+        <div className="spa-upload-task-actions">
+          {canPause && (
+            <button
+              type="button"
+              className="spa-upload-task-btn"
+              aria-label={`Pause upload ${job.name}`}
+              title="Pause"
+              onClick={() => pauseUpload(job.id)}
+            >
+              <i className="fa fa-pause" aria-hidden="true" />
+            </button>
+          )}
+          {canResume && (
+            <button
+              type="button"
+              className="spa-upload-task-btn"
+              aria-label={`Resume upload ${job.name}`}
+              title="Resume"
+              onClick={() => resumeUpload(job.id)}
+            >
+              <i className="fa fa-play" aria-hidden="true" />
+            </button>
+          )}
+          {job.status !== "success" && (
+            <button
+              type="button"
+              className="spa-upload-task-btn spa-upload-task-close"
+              aria-label={`Cancel upload ${job.name}`}
+              title="Cancel"
+              onClick={() => cancelUpload(job.id)}
+            >
+              ×
+            </button>
+          )}
+        </div>
       </div>
       <div className="progress spa-upload-task-bar">
         <div

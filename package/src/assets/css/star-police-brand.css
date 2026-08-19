@@ -418,6 +418,18 @@
   margin: 0 0.3rem;
 }
 
+.spa-upload-task.is-paused {
+  background: #f8fafc;
+}
+
+.spa-upload-task-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+}
+
+.spa-upload-task-btn,
 .spa-upload-task-close {
   flex: 0 0 auto;
   width: 1.75rem;
@@ -427,13 +439,18 @@
   border-radius: 999px;
   background: #eef2f6;
   color: #334155;
-  font-size: 1.15rem;
+  font-size: 0.7rem;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
+.spa-upload-task-close {
+  font-size: 1.15rem;
+}
+
+.spa-upload-task-btn:hover,
 .spa-upload-task-close:hover {
   background: #e2e8f0;
   color: #0f172a;
