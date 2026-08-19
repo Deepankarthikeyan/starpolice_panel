@@ -558,6 +558,54 @@
   border-bottom: 1px solid #e4eaf1;
 }
 
+.spa-messenger-search {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e4eaf1;
+}
+
+.spa-messenger-search-wrap {
+  position: relative;
+}
+
+.spa-messenger-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  color: #6b7785;
+  pointer-events: none;
+}
+
+.spa-messenger-search .form-control {
+  border-radius: 999px;
+  padding-left: 2.35rem;
+  padding-right: 2rem;
+  font-size: 0.875rem;
+  border-color: #dbe3ec;
+  background: #fff;
+}
+
+.spa-messenger-search-clear {
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #6b7785;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.15rem 0.35rem;
+}
+
+.spa-messenger-search-empty {
+  margin: 1rem 0.5rem;
+  text-align: center;
+  color: #6b7785;
+  font-size: 0.875rem;
+}
+
 .spa-messenger-contact-list {
   overflow-y: auto;
   padding: 0.5rem;

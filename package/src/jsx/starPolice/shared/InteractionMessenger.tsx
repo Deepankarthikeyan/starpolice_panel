@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { ChatMessage, UserRole } from "../types";
 
 export type MessengerContact = {
@@ -43,10 +43,25 @@ export function InteractionMessenger({
   emptyThreadHint = "Select a chat to start messaging.",
 }: InteractionMessengerProps) {
   const [draft, setDraft] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [mobileThreadOpen, setMobileThreadOpen] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
 
   const activeContact = contacts.find((contact) => contact.id === activeContactId) ?? contacts[0] ?? null;
+
+  const filteredContacts = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return contacts;
+
+    const groupContact = contacts.find((contact) => contact.kind === "group");
+    const privateContacts = contacts.filter((contact) => contact.kind !== "group");
+    const matchedPrivate = privateContacts.filter((contact) => {
+      const haystack = `${contact.title} ${contact.subtitle ?? ""}`.toLowerCase();
+      return haystack.includes(query);
+    });
+
+    return groupContact ? [groupContact, ...matchedPrivate] : matchedPrivate;
+  }, [contacts, searchQuery]);
 
   useEffect(() => {
     if (!feedRef.current) return;
@@ -79,25 +94,54 @@ export function InteractionMessenger({
         <div className="spa-messenger-sidebar-head">
           <h5 className="mb-0">{sidebarTitle}</h5>
         </div>
+        <div className="spa-messenger-search">
+          <div className="spa-messenger-search-wrap">
+            <i className="material-symbols-outlined spa-messenger-search-icon" aria-hidden="true">
+              search
+            </i>
+            <input
+              type="search"
+              className="form-control"
+              placeholder="Search chats..."
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              aria-label="Search chats"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                className="spa-messenger-search-clear"
+                aria-label="Clear search"
+                onClick={() => setSearchQuery("")}
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
         <div className="spa-messenger-contact-list">
-          {contacts.map((contact) => (
-            <button
-              key={contact.id}
-              type="button"
-              className={`spa-messenger-contact${contact.id === activeContactId ? " is-active" : ""}`}
-              onClick={() => handleSelect(contact.id)}
-            >
-              <div className={`spa-messenger-avatar${contact.kind === "group" ? " is-group" : ""}`}>
-                {contact.initials}
-              </div>
-              <div className="spa-messenger-contact-copy">
-                <div className="spa-messenger-contact-title">{contact.title}</div>
-                {contact.subtitle && (
-                  <div className="spa-messenger-contact-subtitle">{contact.subtitle}</div>
-                )}
-              </div>
-            </button>
-          ))}
+          {filteredContacts.length === 0 ? (
+            <p className="spa-messenger-search-empty">No chats match your search.</p>
+          ) : (
+            filteredContacts.map((contact) => (
+              <button
+                key={contact.id}
+                type="button"
+                className={`spa-messenger-contact${contact.id === activeContactId ? " is-active" : ""}`}
+                onClick={() => handleSelect(contact.id)}
+              >
+                <div className={`spa-messenger-avatar${contact.kind === "group" ? " is-group" : ""}`}>
+                  {contact.initials}
+                </div>
+                <div className="spa-messenger-contact-copy">
+                  <div className="spa-messenger-contact-title">{contact.title}</div>
+                  {contact.subtitle && (
+                    <div className="spa-messenger-contact-subtitle">{contact.subtitle}</div>
+                  )}
+                </div>
+              </button>
+            ))
+          )}
         </div>
       </aside>
 
