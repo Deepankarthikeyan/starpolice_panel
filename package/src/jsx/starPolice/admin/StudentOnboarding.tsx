@@ -319,7 +319,7 @@ const StudentOnboarding = () => {
               />
             </div>
             <div className="table-responsive spa-onboarding-table-wrap">
-              <table className="table table-hover align-middle mb-0 spa-onboarding-table">
+              <table className="table table-striped table-hover align-middle mb-0 spa-onboarding-table">
                 <thead>
                   <tr>
                     <th scope="col">Student ID</th>

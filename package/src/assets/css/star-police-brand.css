@@ -1051,11 +1051,20 @@
 .spa-onboarding-table tbody td {
   vertical-align: middle;
   padding: 0.85rem 1rem;
-  background-color: #fff;
+  color: #303972;
+}
+
+.spa-onboarding-table.table-striped > tbody > tr:nth-of-type(odd) > * {
+  --bs-table-striped-color: #303972;
+  color: #303972;
+}
+
+.spa-onboarding-table.table-striped > tbody > tr:nth-of-type(even) > * {
+  color: #303972;
 }
 
 .spa-onboarding-table tbody tr:hover > td {
-  background-color: #f8f9fb;
+  color: #303972;
 }
 
 .spa-onboarding-table tbody tr:last-child td {
