@@ -39,7 +39,9 @@ const StudentInteraction = () => {
     api
       .getMessageContacts()
       .then(setRecords)
-      .catch(console.error);
+      .catch((error) => {
+        notify.error(error, "Failed to load staff list");
+      });
   }, []);
 
   const loadMessages = async () => {

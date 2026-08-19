@@ -40,7 +40,9 @@ const StaffInteraction = () => {
     api
       .getMessageContacts()
       .then(setRecords)
-      .catch(console.error);
+      .catch((error) => {
+        notify.error(error, "Failed to load contacts");
+      });
   }, []);
 
   const loadMessages = async () => {

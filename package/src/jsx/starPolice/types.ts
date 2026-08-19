@@ -75,6 +75,7 @@ export interface MessagingContact {
   name: string;
   subtitle?: string;
   role: UserRole | string;
+  isActive?: boolean;
 }
 
 export interface DashboardStats {
