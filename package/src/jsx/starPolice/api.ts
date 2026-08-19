@@ -804,6 +804,7 @@ const STUDENT_ONBOARDING_TEXT_FIELDS: Array<keyof StudentOnboardingFormState> = 
   "section",
   "admissionDate",
   "modeOfLearning",
+  "residenceType",
   "duration",
   "expectedCompletionDate",
   "emergencyContactName",

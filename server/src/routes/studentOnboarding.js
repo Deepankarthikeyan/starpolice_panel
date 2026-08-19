@@ -76,6 +76,7 @@ const TEXT_FIELDS = [
   "section",
   "admissionDate",
   "modeOfLearning",
+  "residenceType",
   "duration",
   "expectedCompletionDate",
   "emergencyContactName",
@@ -130,6 +131,15 @@ function parseBodyData(body) {
   return data;
 }
 
+const RESIDENCE_TYPES = ["Day Scholar", "Hostel"];
+
+function validateResidenceType(data) {
+  if (!data.residenceType || !RESIDENCE_TYPES.includes(data.residenceType)) {
+    return "Day Scholar or Hostel selection is required in course details.";
+  }
+  return null;
+}
+
 function mapRecord(record) {
   const item = record.toObject ? record.toObject() : record;
   return {
@@ -176,6 +186,7 @@ function mapRecord(record) {
     section: item.section,
     admissionDate: item.admissionDate,
     modeOfLearning: item.modeOfLearning,
+    residenceType: item.residenceType || "",
     duration: item.duration,
     expectedCompletionDate: item.expectedCompletionDate,
     aadhaarCardUrl: item.aadhaarCardUrl,
@@ -334,6 +345,10 @@ router.post(
       if (!data.firstName || !data.lastName) {
         return res.status(400).json({ message: "First name and last name are required." });
       }
+      const residenceError = validateResidenceType(data);
+      if (residenceError) {
+        return res.status(400).json({ message: residenceError });
+      }
 
       const studentId = await generateStudentId();
       const record = await StudentOnboarding.create({
@@ -382,6 +397,10 @@ router.put(
       }
 
       const data = parseBodyData(req.body);
+      const residenceError = validateResidenceType(data);
+      if (residenceError) {
+        return res.status(400).json({ message: residenceError });
+      }
       Object.assign(record, data, mapFileUrls(req.files));
       await record.save();
 

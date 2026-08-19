@@ -96,6 +96,11 @@ function SectionCard({ title, children }: { title: string; children: React.React
   );
 }
 
+function formatResidenceType(value: string) {
+  if (value === "Day Scholar" || value === "Hostel") return value;
+  return "—";
+}
+
 function recordToForm(record: StudentOnboardingRecord): StudentOnboardingFormState {
   return {
     ...emptyStudentOnboardingForm(),
@@ -146,7 +151,8 @@ const StudentOnboarding = () => {
         record.email.toLowerCase().includes(query) ||
         record.loginEmail.toLowerCase().includes(query) ||
         record.course.toLowerCase().includes(query) ||
-        record.batch.toLowerCase().includes(query)
+        record.batch.toLowerCase().includes(query) ||
+        (record.residenceType || "").toLowerCase().includes(query)
       );
     });
   }, [records, search]);
@@ -181,6 +187,12 @@ const StudentOnboarding = () => {
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (!form.residenceType) {
+      const message = "Please select Day Scholar or Hostel in course details.";
+      setError(message);
+      notify.error(message);
+      return;
+    }
     if (form.password && form.password !== form.confirmPassword) {
       const message = "Password and confirm password must match.";
       setError(message);
@@ -314,6 +326,7 @@ const StudentOnboarding = () => {
                     <th scope="col">Name</th>
                     <th scope="col">Course</th>
                     <th scope="col">Batch</th>
+                    <th scope="col">Day Scholar / Hostel</th>
                     <th scope="col">Email</th>
                     <th scope="col" className="spa-onboarding-actions-col spa-no-print">
                       Actions
@@ -323,7 +336,7 @@ const StudentOnboarding = () => {
                 <tbody>
                   {filteredRecords.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="spa-onboarding-empty">
+                      <td colSpan={7} className="spa-onboarding-empty">
                         No student onboarding records yet.
                       </td>
                     </tr>
@@ -334,6 +347,7 @@ const StudentOnboarding = () => {
                         <td className="spa-onboarding-name">{fullName(record)}</td>
                         <td>{record.course || "—"}</td>
                         <td>{record.batch || "—"}</td>
+                        <td>{formatResidenceType(record.residenceType)}</td>
                         <td className="spa-onboarding-email">{record.loginEmail || record.email || "—"}</td>
                         <td className="spa-onboarding-actions-col spa-no-print">
                           <div className="spa-onboarding-actions">
@@ -482,6 +496,20 @@ const StudentOnboarding = () => {
               <div className="col-md-4"><Field label="Branch/Campus"><TextInput value={form.branchCampus} onChange={(v) => setField("branchCampus", v)} /></Field></div>
               <div className="col-md-4"><Field label="Section"><TextInput value={form.section} onChange={(v) => setField("section", v)} /></Field></div>
               <div className="col-md-4"><Field label="Admission Date"><TextInput type="date" value={form.admissionDate} onChange={(v) => setField("admissionDate", v)} /></Field></div>
+              <div className="col-md-4">
+                <Field label="Day Scholar / Hostel">
+                  <select
+                    className="form-select"
+                    value={form.residenceType}
+                    onChange={(e) => setField("residenceType", e.target.value as StudentOnboardingFormState["residenceType"])}
+                    required
+                  >
+                    <option value="">Select</option>
+                    <option value="Day Scholar">Day Scholar</option>
+                    <option value="Hostel">Hostel</option>
+                  </select>
+                </Field>
+              </div>
               <div className="col-md-4">
                 <Field label="Mode of Learning">
                   <select className="form-select" value={form.modeOfLearning} onChange={(e) => setField("modeOfLearning", e.target.value)}>
