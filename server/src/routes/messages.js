@@ -80,19 +80,47 @@ function canSendMessages(user, panel) {
   return false;
 }
 
+function mapAdminContact(admin) {
+  return {
+    id: admin._id.toString(),
+    contactType: "admin",
+    name: admin.name,
+    subtitle:
+      admin.role === "superadmin"
+        ? "Super Admin"
+        : admin.isActive
+          ? admin.email
+          : `${admin.email} · Pending login`,
+    role: admin.role,
+    isActive: admin.role === "superadmin" ? true : Boolean(admin.isActive),
+  };
+}
+
+function noStaffThreadFilter() {
+  return {
+    $or: [{ threadStaffId: null }, { threadStaffId: { $exists: false } }],
+  };
+}
+
 function isAdminSideRole(role) {
   return role === "admin" || role === "superadmin";
 }
 
 function buildPrivateFilter(user, { studentUserId, staffUserId, adminUserId }) {
-  if (adminUserId) {
-    if (user.role !== "staff") {
-      return null;
-    }
+  if (adminUserId && user.role === "staff") {
     return {
       channel: "private",
       threadStaffId: user._id,
       threadAdminId: adminUserId,
+    };
+  }
+
+  if (adminUserId && user.role === "student") {
+    return {
+      channel: "private",
+      threadStudentId: user._id,
+      threadAdminId: adminUserId,
+      ...noStaffThreadFilter(),
     };
   }
 
@@ -117,13 +145,64 @@ function buildPrivateFilter(user, { studentUserId, staffUserId, adminUserId }) {
       return {
         channel: "private",
         threadStudentId: studentUserId,
-        threadStaffId: null,
-        threadAdminId: null,
+        $or: [
+          { threadAdminId: null, threadStaffId: null },
+          { threadAdminId: { $exists: false }, threadStaffId: { $exists: false } },
+          { threadAdminId: user._id },
+        ],
       };
     }
   }
 
   return null;
+}
+
+async function loadStudentContacts() {
+  const studentUsers = await User.find({ role: "student" })
+    .select("name email isActive")
+    .sort({ name: 1 });
+
+  try {
+    const linkedOnboardings = await StudentOnboarding.find({ userId: { $ne: null } })
+      .select("userId")
+      .populate("userId", "name email isActive role");
+
+    const studentMap = new Map();
+    for (const student of studentUsers) {
+      studentMap.set(student._id.toString(), student);
+    }
+    for (const record of linkedOnboardings) {
+      const linkedUser = record.userId;
+      if (linkedUser?.role === "student") {
+        studentMap.set(linkedUser._id.toString(), linkedUser);
+      }
+    }
+
+    return [...studentMap.values()]
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(mapStudentContact);
+  } catch {
+    return studentUsers.map(mapStudentContact);
+  }
+}
+
+async function loadAdminContacts() {
+  const admins = await User.find({
+    role: { $in: ["admin", "superadmin"] },
+  })
+    .select("name email role isActive")
+    .sort({ name: 1 });
+
+  return admins.map(mapAdminContact);
+}
+
+async function loadStaffContacts() {
+  const staffMembers = await User.find({ role: "staff" })
+    .select("name subjectIds isActive")
+    .populate("subjectIds", "name")
+    .sort({ name: 1 });
+
+  return staffMembers.map(mapStaffContact);
 }
 
 router.get("/contacts", authRequired, attachUser, async (req, res) => {
@@ -136,60 +215,24 @@ router.get("/contacts", authRequired, attachUser, async (req, res) => {
     }
 
     if (panel === "student") {
-      const staffMembers = await User.find({ role: "staff" })
-        .select("name subjectIds isActive")
-        .populate("subjectIds", "name")
-        .sort({ name: 1 });
+      const scope = req.query.scope === "admin" || req.query.scope === "staff" ? req.query.scope : "all";
 
-      return res.json(staffMembers.map(mapStaffContact));
+      if (scope === "admin") {
+        return res.json(await loadAdminContacts());
+      }
+
+      if (scope === "staff") {
+        return res.json(await loadStaffContacts());
+      }
+
+      return res.json([...(await loadAdminContacts()), ...(await loadStaffContacts())]);
     }
 
     if (panel === "admin" || panel === "staff") {
-      const studentUsers = await User.find({ role: "student" })
-        .select("name email isActive")
-        .sort({ name: 1 });
-
-      const linkedOnboardings = await StudentOnboarding.find({ userId: { $ne: null } })
-        .select("userId")
-        .populate("userId", "name email isActive role");
-
-      const studentMap = new Map();
-      for (const student of studentUsers) {
-        studentMap.set(student._id.toString(), student);
-      }
-      for (const record of linkedOnboardings) {
-        const linkedUser = record.userId;
-        if (linkedUser?.role === "student") {
-          studentMap.set(linkedUser._id.toString(), linkedUser);
-        }
-      }
-
-      const contacts = [...studentMap.values()]
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map(mapStudentContact);
+      const contacts = await loadStudentContacts();
 
       if (panel === "staff" || user.role === "staff") {
-        const admins = await User.find({
-          role: { $in: ["admin", "superadmin"] },
-        })
-          .select("name email role isActive")
-          .sort({ name: 1 });
-
-        contacts.push(
-          ...admins.map((admin) => ({
-            id: admin._id.toString(),
-            contactType: "admin",
-            name: admin.name,
-            subtitle:
-              admin.role === "superadmin"
-                ? "Super Admin"
-                : admin.isActive
-                  ? admin.email
-                  : `${admin.email} · Pending login`,
-            role: admin.role,
-            isActive: admin.role === "superadmin" ? true : Boolean(admin.isActive),
-          }))
-        );
+        contacts.push(...(await loadAdminContacts()));
       }
 
       return res.json(contacts);
@@ -274,15 +317,26 @@ router.post("/", authRequired, attachUser, async (req, res) => {
 
     if (resolvedChannel === "private") {
       if (user.role === "student") {
-        if (!staffUserId) {
-          return res.status(400).json({ message: "staffUserId is required for private messages." });
+        if (adminUserId) {
+          const admin = await User.findOne({
+            _id: adminUserId,
+            role: { $in: ["admin", "superadmin"] },
+          }).select("_id");
+          if (!admin) {
+            return res.status(404).json({ message: "Admin not found." });
+          }
+          threadStudentId = user._id;
+          threadAdminId = admin._id;
+        } else if (staffUserId) {
+          const staff = await User.findOne({ _id: staffUserId, role: "staff" }).select("_id");
+          if (!staff) {
+            return res.status(404).json({ message: "Staff member not found." });
+          }
+          threadStudentId = user._id;
+          threadStaffId = staff._id;
+        } else {
+          return res.status(400).json({ message: "staffUserId or adminUserId is required for private messages." });
         }
-        const staff = await User.findOne({ _id: staffUserId, role: "staff" }).select("_id");
-        if (!staff) {
-          return res.status(404).json({ message: "Staff member not found." });
-        }
-        threadStudentId = user._id;
-        threadStaffId = staff._id;
       } else if (adminUserId && user.role === "staff") {
         const admin = await User.findOne({
           _id: adminUserId,
@@ -345,6 +399,12 @@ router.post("/", authRequired, attachUser, async (req, res) => {
           type: "message",
         });
       }
+    } else if (threadAdminId && threadStudentId) {
+      await notifyUsers([threadAdminId], {
+        title: "New Student Message",
+        message: `${req.user.name}: ${message.trim().slice(0, 80)}`,
+        type: "message",
+      });
     } else if (threadStudentId) {
       await notifyUsers([threadStudentId], {
         title: "Private Message",

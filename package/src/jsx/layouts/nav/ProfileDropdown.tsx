@@ -63,7 +63,12 @@ const ProfileDropdown = () => {
     { label: "Profile", to: `${basePath}/profile`, icon: <ProfileIcon /> },
     {
       label: "Message",
-      to: auth?.panel === "student" ? `${basePath}/interaction` : `${basePath}/student-interaction`,
+      to:
+        auth?.panel === "student"
+          ? `${basePath}/admin-interaction`
+          : auth?.panel === "staff"
+            ? `${basePath}/staff-interaction`
+            : `${basePath}/student-interaction`,
       icon: <MessageIcon />,
     },
     { label: "Inbox", to: `${basePath}/inbox`, icon: <InboxIcon /> },

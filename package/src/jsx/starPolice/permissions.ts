@@ -14,7 +14,7 @@ export const ADMIN_PERMISSIONS = [
 export const STUDENT_PERMISSIONS = [
   { key: "student:dashboard", label: "Dashboard", description: "View student dashboard" },
   { key: "student:materials", label: "Study Materials", description: "View uploaded study materials" },
-  { key: "student:messages", label: "Staff Interaction", description: "Chat with staff members" },
+  { key: "student:messages", label: "Admin & Staff Interaction", description: "Chat with admins and staff" },
   { key: "student:calendar", label: "Monthly Calendar", description: "View the monthly calendar" },
   { key: "student:performance", label: "My Performance", description: "View attendance, exam, and overall performance" },
 ] as const;

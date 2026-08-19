@@ -404,8 +404,11 @@ export const api = {
     });
   },
 
-  getMessageContacts() {
-    return request<MessagingContact[]>("/api/messages/contacts");
+  getMessageContacts(scope?: "admin" | "staff") {
+    const search = new URLSearchParams();
+    if (scope) search.set("scope", scope);
+    const query = search.toString();
+    return request<MessagingContact[]>(`/api/messages/contacts${query ? `?${query}` : ""}`);
   },
 
   getMessages(params?: {

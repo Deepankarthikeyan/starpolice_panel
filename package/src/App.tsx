@@ -30,6 +30,8 @@ const WrittenExamEntry = lazy(() =>
 );
 const StudentDashboard = lazy(() => import("./jsx/starPolice/student/StudentDashboard"));
 const StudentMaterials = lazy(() => import("./jsx/starPolice/student/StudentMaterials"));
+const StudentAdminInteraction = lazy(() => import("./jsx/starPolice/student/AdminInteraction"));
+const StudentStaffInteraction = lazy(() => import("./jsx/starPolice/student/StaffInteraction"));
 const StudentInteraction = lazy(() => import("./jsx/starPolice/student/StudentInteraction"));
 const StudentCalendar = lazy(() => import("./jsx/starPolice/student/StudentCalendar"));
 const StudentPerformance = lazy(() => import("./jsx/starPolice/student/StudentPerformance"));
@@ -146,7 +148,8 @@ function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="daywise-upload" element={<DaywiseUpload />} />
-            <Route path="student-interaction" element={<StaffInteraction />} />
+            <Route path="staff-interaction" element={<StaffInteraction />} />
+            <Route path="student-interaction" element={<Navigate to="staff-interaction" replace />} />
             <Route path="monthly-calendar" element={<MonthlyCalendar />} />
             <Route path="student-performance" element={<StudentPerformanceAdmin />} />
             <Route path="physical-exam" element={<PhysicalExamEntry />} />
@@ -161,6 +164,8 @@ function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<StudentDashboard />} />
             <Route path="materials" element={<StudentMaterials />} />
+            <Route path="admin-interaction" element={<StudentAdminInteraction />} />
+            <Route path="staff-interaction" element={<StudentStaffInteraction />} />
             <Route path="interaction" element={<StudentInteraction />} />
             <Route path="calendar" element={<StudentCalendar />} />
             <Route path="performance" element={<StudentPerformance />} />

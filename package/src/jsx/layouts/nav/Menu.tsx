@@ -19,9 +19,9 @@ const AdminMenuList = (auth?: AuthUser | null, panel: PanelType = "admin") => {
       permission: "admin:uploads" as const,
     },
     {
-      title: panel === "staff" ? "Messages" : "Student Interaction",
+      title: panel === "staff" ? "Staff Interaction" : "Student Interaction",
       iconStyle: <i className="material-symbols-outlined">forum</i>,
-      to: "student-interaction",
+      to: panel === "staff" ? "staff-interaction" : "student-interaction",
       permission: "admin:messages" as const,
     },
     {
@@ -119,9 +119,15 @@ const StudentMenuList = (auth?: AuthUser | null) => {
       permission: "student:materials" as const,
     },
     {
-      title: "Staff Interaction",
+      title: "Admin Interaction",
       iconStyle: <i className="material-symbols-outlined">forum</i>,
-      to: "interaction",
+      to: "admin-interaction",
+      permission: "student:messages" as const,
+    },
+    {
+      title: "Staff Interaction",
+      iconStyle: <i className="material-symbols-outlined">chat</i>,
+      to: "staff-interaction",
       permission: "student:messages" as const,
     },
     {
