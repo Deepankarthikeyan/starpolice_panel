@@ -124,9 +124,19 @@ async function request<T>(path: string, options: RequestInit = {}, panel?: Panel
     headers,
   });
 
-  const data = await response.json().catch(() => ({}));
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json")
+    ? await response.json().catch(() => ({}))
+    : {};
   if (!response.ok) {
-    const message = data.message || "Request failed";
+    let message = data.message;
+    if (!message) {
+      if (response.status === 404) {
+        message = "API endpoint not found. The server may need to be updated.";
+      } else {
+        message = `Request failed (${response.status})`;
+      }
+    }
     if (isSessionInvalid(response.status, message)) {
       handleInvalidSession(panel);
     }

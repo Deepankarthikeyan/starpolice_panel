@@ -1,10 +1,13 @@
 import express from "express";
 import Message from "../models/Message.js";
 import User from "../models/User.js";
-import StudentOnboarding from "../models/StudentOnboarding.js";
 import { authRequired, attachUser } from "../middleware/auth.js";
 import { hasAnyPermission } from "../permissions.js";
 import { notifyAllAdmins, notifyAllStudents, notifyUsers } from "../utils/notifications.js";
+import {
+  getMessagingContacts,
+  resolveMessagePanel,
+} from "../services/messagingContacts.js";
 
 const router = express.Router();
 
@@ -23,47 +26,6 @@ function mapMessage(item) {
   };
 }
 
-function resolveMessagePanel(user, reqPanel) {
-  if (reqPanel === "student" || reqPanel === "staff" || reqPanel === "admin") {
-    return reqPanel;
-  }
-  if (user.role === "student") return "student";
-  if (user.role === "staff") return "staff";
-  return "admin";
-}
-
-function mapStudentContact(student) {
-  return {
-    id: student._id.toString(),
-    contactType: "student",
-    name: student.name,
-    subtitle: student.isActive ? student.email : `${student.email} · Pending login`,
-    role: "student",
-    isActive: Boolean(student.isActive),
-  };
-}
-
-function mapStaffContact(member) {
-  return {
-    id: member._id.toString(),
-    contactType: "staff",
-    name: member.name,
-    subtitle: member.isActive
-      ? mapSubjectNames(member.subjectIds) || "Staff member"
-      : `${mapSubjectNames(member.subjectIds) || "Staff member"} · Pending login`,
-    role: "staff",
-    isActive: Boolean(member.isActive),
-  };
-}
-
-function mapSubjectNames(subjectRefs) {
-  if (!subjectRefs?.length) return "";
-  return subjectRefs
-    .map((ref) => (ref && typeof ref === "object" && ref.name ? ref.name : null))
-    .filter(Boolean)
-    .join(", ");
-}
-
 function canViewMessages(user) {
   return (
     user.role === "superadmin" ||
@@ -78,22 +40,6 @@ function canSendMessages(user, panel) {
   }
   if (panel === "student" && hasAnyPermission(user, ["student:messages"])) return true;
   return false;
-}
-
-function mapAdminContact(admin) {
-  return {
-    id: admin._id.toString(),
-    contactType: "admin",
-    name: admin.name,
-    subtitle:
-      admin.role === "superadmin"
-        ? "Super Admin"
-        : admin.isActive
-          ? admin.email
-          : `${admin.email} · Pending login`,
-    role: admin.role,
-    isActive: admin.role === "superadmin" ? true : Boolean(admin.isActive),
-  };
 }
 
 function noStaffThreadFilter() {
@@ -157,54 +103,6 @@ function buildPrivateFilter(user, { studentUserId, staffUserId, adminUserId }) {
   return null;
 }
 
-async function loadStudentContacts() {
-  const studentUsers = await User.find({ role: "student" })
-    .select("name email isActive")
-    .sort({ name: 1 });
-
-  try {
-    const linkedOnboardings = await StudentOnboarding.find({ userId: { $ne: null } })
-      .select("userId")
-      .populate("userId", "name email isActive role");
-
-    const studentMap = new Map();
-    for (const student of studentUsers) {
-      studentMap.set(student._id.toString(), student);
-    }
-    for (const record of linkedOnboardings) {
-      const linkedUser = record.userId;
-      if (linkedUser?.role === "student") {
-        studentMap.set(linkedUser._id.toString(), linkedUser);
-      }
-    }
-
-    return [...studentMap.values()]
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map(mapStudentContact);
-  } catch {
-    return studentUsers.map(mapStudentContact);
-  }
-}
-
-async function loadAdminContacts() {
-  const admins = await User.find({
-    role: { $in: ["admin", "superadmin"] },
-  })
-    .select("name email role isActive")
-    .sort({ name: 1 });
-
-  return admins.map(mapAdminContact);
-}
-
-async function loadStaffContacts() {
-  const staffMembers = await User.find({ role: "staff" })
-    .select("name subjectIds isActive")
-    .populate("subjectIds", "name")
-    .sort({ name: 1 });
-
-  return staffMembers.map(mapStaffContact);
-}
-
 router.get("/contacts", authRequired, attachUser, async (req, res) => {
   try {
     const user = req.currentUser;
@@ -214,33 +112,11 @@ router.get("/contacts", authRequired, attachUser, async (req, res) => {
       return res.status(403).json({ message: "You do not have permission to view message contacts." });
     }
 
-    if (panel === "student") {
-      const scope = req.query.scope === "admin" || req.query.scope === "staff" ? req.query.scope : "all";
-
-      if (scope === "admin") {
-        return res.json(await loadAdminContacts());
-      }
-
-      if (scope === "staff") {
-        return res.json(await loadStaffContacts());
-      }
-
-      return res.json([...(await loadAdminContacts()), ...(await loadStaffContacts())]);
-    }
-
-    if (panel === "admin" || panel === "staff") {
-      const contacts = await loadStudentContacts();
-
-      if (panel === "staff" || user.role === "staff") {
-        contacts.push(...(await loadAdminContacts()));
-      }
-
-      return res.json(contacts);
-    }
-
-    return res.status(400).json({ message: "Unsupported panel for message contacts." });
+    const scope = req.query.scope === "admin" || req.query.scope === "staff" ? req.query.scope : "all";
+    const contacts = await getMessagingContacts(user, panel, scope);
+    return res.json(contacts);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(error.message.includes("Unsupported panel") ? 400 : 500).json({ message: error.message });
   }
 });
 
