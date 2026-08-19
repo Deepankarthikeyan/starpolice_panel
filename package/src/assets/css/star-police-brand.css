@@ -1568,6 +1568,26 @@
   max-width: 320px;
 }
 
+.spa-performance-filter-bar {
+  padding: 0 0 1rem;
+  border-bottom: 1px solid #e6e6e6;
+  margin-bottom: 1rem;
+}
+
+.spa-performance-filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6c757d;
+  margin-bottom: 0.35rem;
+}
+
+.spa-performance-filter-summary {
+  font-size: 0.875rem;
+  color: #475569;
+}
+
 .spa-performance-overview-table tbody td {
   color: #303972;
 }

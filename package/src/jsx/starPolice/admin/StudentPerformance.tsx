@@ -39,12 +39,38 @@ type SortDir = "asc" | "desc";
 
 type PerformanceSection = "attendance" | "physical" | "written";
 
+type PercentFilterKey =
+  | "attendancePercent"
+  | "physicalExamPercent"
+  | "writtenExamPercent"
+  | "overallPercent";
+
 const PERCENT_SORT_KEYS = new Set<SortKey>([
   "attendancePercent",
   "physicalExamPercent",
   "writtenExamPercent",
   "overallPercent",
 ]);
+
+const PERCENT_FILTER_OPTIONS: { value: PercentFilterKey | ""; label: string }[] = [
+  { value: "", label: "Select category" },
+  { value: "attendancePercent", label: "Attendance" },
+  { value: "physicalExamPercent", label: "Physical Exam" },
+  { value: "writtenExamPercent", label: "Written Exam" },
+  { value: "overallPercent", label: "Overall" },
+];
+
+function percentFilterLabel(key: PercentFilterKey | "") {
+  return PERCENT_FILTER_OPTIONS.find((option) => option.value === key)?.label ?? "Performance";
+}
+
+function getStudentPercent(student: StudentPerformanceSummary, key: PercentFilterKey) {
+  const value = student[key];
+  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+    return null;
+  }
+  return Number(value);
+}
 
 function comparePercent(a: number | null | undefined, b: number | null | undefined) {
   const aVal = a === null || a === undefined || Number.isNaN(Number(a)) ? null : Number(a);
@@ -125,6 +151,9 @@ const StudentPerformance = () => {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("overallPercent");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [percentFilterKey, setPercentFilterKey] = useState<PercentFilterKey | "">("");
+  const [percentMin, setPercentMin] = useState("");
+  const [percentMax, setPercentMax] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [listLoading, setListLoading] = useState(true);
@@ -163,12 +192,42 @@ const StudentPerformance = () => {
           .includes(query)
       );
     }
+
+    if (percentFilterKey && (percentMin !== "" || percentMax !== "")) {
+      const min = percentMin === "" ? 0 : Number(percentMin);
+      const max = percentMax === "" ? 100 : Number(percentMax);
+      const rangeMin = Math.min(min, max);
+      const rangeMax = Math.max(min, max);
+
+      rows = rows.filter((student) => {
+        const value = getStudentPercent(student, percentFilterKey);
+        if (value === null) return false;
+        return value >= rangeMin && value <= rangeMax;
+      });
+    }
+
     rows = [...rows].sort((a, b) => {
       const result = compareValues(a[sortKey], b[sortKey], sortKey);
       return sortDir === "asc" ? result : -result;
     });
     return rows;
-  }, [students, search, sortKey, sortDir]);
+  }, [students, search, sortKey, sortDir, percentFilterKey, percentMin, percentMax]);
+
+  const percentFilterActive =
+    Boolean(percentFilterKey) && (percentMin !== "" || percentMax !== "");
+
+  const percentFilterSummary = useMemo(() => {
+    if (!percentFilterActive || !percentFilterKey) return "";
+    const min = percentMin === "" ? "0" : percentMin;
+    const max = percentMax === "" ? "100" : percentMax;
+    return `${percentFilterLabel(percentFilterKey)}: ${min}% to ${max}%`;
+  }, [percentFilterActive, percentFilterKey, percentMin, percentMax]);
+
+  const clearPercentFilter = () => {
+    setPercentFilterKey("");
+    setPercentMin("");
+    setPercentMax("");
+  };
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -346,7 +405,79 @@ const StudentPerformance = () => {
               />
             </div>
           </div>
-          <div className="card-body">
+          <div className="card-body pt-0">
+            <div className="spa-performance-filter-bar spa-no-print">
+              <div className="row g-2 align-items-end">
+                <div className="col-md-3 col-sm-6">
+                  <label className="form-label spa-performance-filter-label" htmlFor="performance-filter-category">
+                    Show by category
+                  </label>
+                  <select
+                    id="performance-filter-category"
+                    className="form-select form-select-sm"
+                    value={percentFilterKey}
+                    onChange={(event) =>
+                      setPercentFilterKey(event.target.value as PercentFilterKey | "")
+                    }
+                  >
+                    {PERCENT_FILTER_OPTIONS.map((option) => (
+                      <option key={option.value || "all"} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-2 col-sm-3">
+                  <label className="form-label spa-performance-filter-label" htmlFor="performance-filter-min">
+                    From %
+                  </label>
+                  <input
+                    id="performance-filter-min"
+                    type="number"
+                    min={0}
+                    max={100}
+                    className="form-control form-control-sm"
+                    placeholder="10"
+                    value={percentMin}
+                    onChange={(event) => setPercentMin(event.target.value)}
+                    disabled={!percentFilterKey}
+                  />
+                </div>
+                <div className="col-md-2 col-sm-3">
+                  <label className="form-label spa-performance-filter-label" htmlFor="performance-filter-max">
+                    To %
+                  </label>
+                  <input
+                    id="performance-filter-max"
+                    type="number"
+                    min={0}
+                    max={100}
+                    className="form-control form-control-sm"
+                    placeholder="30"
+                    value={percentMax}
+                    onChange={(event) => setPercentMax(event.target.value)}
+                    disabled={!percentFilterKey}
+                  />
+                </div>
+                <div className="col-md-auto col-sm-12 d-flex align-items-end gap-2">
+                  {percentFilterActive && (
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={clearPercentFilter}
+                    >
+                      Clear range
+                    </button>
+                  )}
+                </div>
+              </div>
+              {percentFilterActive && (
+                <p className="spa-performance-filter-summary mb-0 mt-2">
+                  Showing {percentFilterSummary} · {filteredStudents.length} student
+                  {filteredStudents.length === 1 ? "" : "s"}
+                </p>
+              )}
+            </div>
             {listError && (
               <div className="alert alert-danger spa-no-print">
                 {listError}
@@ -358,7 +489,11 @@ const StudentPerformance = () => {
             {listLoading ? (
               <p className="text-muted mb-0">Loading students...</p>
             ) : !filteredStudents.length ? (
-              <p className="text-muted mb-0">No students found.</p>
+              <p className="text-muted mb-0">
+                {percentFilterActive
+                  ? "No students match this percentage range."
+                  : "No students found."}
+              </p>
             ) : (
               <div className="table-responsive">
                 <table className="table table-striped table-hover align-middle spa-performance-overview-table">
