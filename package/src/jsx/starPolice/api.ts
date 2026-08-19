@@ -848,6 +848,7 @@ function buildStudentOnboardingFormData(
   formData.append("termsAccepted", String(form.termsAccepted));
   formData.append("privacyAccepted", String(form.privacyAccepted));
   formData.append("grantLogin", String(form.grantLogin));
+  formData.append("residenceType", form.residenceType || "");
   Object.entries(files).forEach(([key, file]) => {
     if (file) {
       formData.append(key, file);

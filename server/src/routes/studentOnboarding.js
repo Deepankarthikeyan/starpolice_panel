@@ -133,8 +133,9 @@ function parseBodyData(body) {
 
 const RESIDENCE_TYPES = ["Day Scholar", "Hostel"];
 
-function validateResidenceType(data) {
-  if (!data.residenceType || !RESIDENCE_TYPES.includes(data.residenceType)) {
+function validateResidenceType(data, existingRecord = null) {
+  const value = data.residenceType || existingRecord?.residenceType || "";
+  if (!RESIDENCE_TYPES.includes(value)) {
     return "Day Scholar or Hostel selection is required in course details.";
   }
   return null;
@@ -397,9 +398,12 @@ router.put(
       }
 
       const data = parseBodyData(req.body);
-      const residenceError = validateResidenceType(data);
+      const residenceError = validateResidenceType(data, record);
       if (residenceError) {
         return res.status(400).json({ message: residenceError });
+      }
+      if (!data.residenceType && record.residenceType) {
+        data.residenceType = record.residenceType;
       }
       Object.assign(record, data, mapFileUrls(req.files));
       await record.save();
