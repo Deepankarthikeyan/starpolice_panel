@@ -1051,6 +1051,11 @@
 .spa-onboarding-table tbody td {
   vertical-align: middle;
   padding: 0.85rem 1rem;
+  background-color: #fff;
+}
+
+.spa-onboarding-table tbody tr:hover > td {
+  background-color: #f8f9fb;
 }
 
 .spa-onboarding-table tbody tr:last-child td {
