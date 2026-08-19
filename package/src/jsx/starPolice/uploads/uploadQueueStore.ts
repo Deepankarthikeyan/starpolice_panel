@@ -4,7 +4,7 @@ import {
   deletePendingUpload,
   loadPendingUploads,
   savePendingUpload,
-  type PersistedUploadJob,
+  upsertPendingMeta,
 } from "./pendingUploadDb";
 
 export const SPA_UPLOAD_COMPLETE_EVENT = "spa-upload-complete";
@@ -30,15 +30,19 @@ type InternalJob = UploadJob & {
   abort?: AbortController;
   action: JobAction;
   createdAt: number;
+  lastEmitMs: number;
 };
 
 const MAX_CONCURRENT = 3;
+const PROGRESS_EMIT_MS = 50;
 const listeners = new Set<() => void>();
 const jobs = new Map<string, InternalJob>();
 const jobOrder: string[] = [];
+const droppedIds = new Set<string>();
 let snapshot: UploadJob[] = [];
 let visibleSnapshot: UploadJob[] = [];
 let restoring = false;
+let emitFrame = 0;
 
 function toPublicJob(job: InternalJob): UploadJob {
   return {
@@ -54,13 +58,25 @@ function toPublicJob(job: InternalJob): UploadJob {
   };
 }
 
-function emit() {
+function emitNow() {
+  if (emitFrame) {
+    cancelAnimationFrame(emitFrame);
+    emitFrame = 0;
+  }
   snapshot = jobOrder
     .map((id) => jobs.get(id))
     .filter((job): job is InternalJob => Boolean(job))
     .map(toPublicJob);
   visibleSnapshot = snapshot;
   listeners.forEach((listener) => listener());
+}
+
+function emitSoon() {
+  if (emitFrame) return;
+  emitFrame = requestAnimationFrame(() => {
+    emitFrame = 0;
+    emitNow();
+  });
 }
 
 function activeCount() {
@@ -86,8 +102,8 @@ function removeJob(id: string) {
   if (index >= 0) jobOrder.splice(index, 1);
 }
 
-async function persistJob(job: InternalJob) {
-  const payload: PersistedUploadJob = {
+function persistBlob(job: InternalJob) {
+  void savePendingUpload({
     id: job.id,
     name: job.name,
     type: job.file.type,
@@ -100,12 +116,28 @@ async function persistJob(job: InternalJob) {
     createdAt: job.createdAt,
     status: job.status === "paused" ? "paused" : "queued",
     percent: job.percent,
-  };
-  try {
-    await savePendingUpload(payload);
-  } catch (err) {
-    console.error("Failed to persist upload for resume", err);
-  }
+  }).then(() => {
+    const current = jobs.get(job.id);
+    if (droppedIds.has(job.id) || !current || current.status === "success") {
+      void deletePendingUpload(job.id);
+    }
+  });
+}
+
+function persistMeta(job: InternalJob) {
+  void upsertPendingMeta({
+    id: job.id,
+    name: job.name,
+    type: job.file.type,
+    lastModified: job.file.lastModified,
+    size: job.size,
+    date: job.date,
+    category: job.category,
+    title: job.title,
+    createdAt: job.createdAt,
+    status: job.status === "paused" ? "paused" : "queued",
+    percent: job.percent,
+  });
 }
 
 async function startJob(job: InternalJob) {
@@ -115,7 +147,7 @@ async function startJob(job: InternalJob) {
   job.action = "none";
   job.percent = Math.max(job.percent, 1);
   job.abort = new AbortController();
-  emit();
+  emitNow();
 
   try {
     await api.uploadFile(job.date, job.category, job.title, job.file, {
@@ -123,7 +155,11 @@ async function startJob(job: InternalJob) {
         const current = jobs.get(job.id);
         if (!current || current.status !== "uploading") return;
         current.percent = percent;
-        emit();
+        const now = performance.now();
+        if (percent >= 100 || now - current.lastEmitMs >= PROGRESS_EMIT_MS) {
+          current.lastEmitMs = now;
+          emitSoon();
+        }
       },
       signal: job.abort.signal,
     });
@@ -133,8 +169,9 @@ async function startJob(job: InternalJob) {
     current.status = "success";
     current.percent = 100;
     current.abort = undefined;
-    emit();
-    await deletePendingUpload(job.id);
+    droppedIds.add(job.id);
+    emitNow();
+    void deletePendingUpload(job.id);
     window.dispatchEvent(
       new CustomEvent(SPA_UPLOAD_COMPLETE_EVENT, { detail: { date: job.date } })
     );
@@ -142,33 +179,30 @@ async function startJob(job: InternalJob) {
     window.setTimeout(() => {
       if (jobs.get(job.id)?.status === "success") {
         removeJob(job.id);
-        emit();
+        emitNow();
       }
-    }, 1200);
+    }, 800);
   } catch (err) {
     const current = jobs.get(job.id);
     if (!current) return;
 
-    if (current.action === "pause") {
+    if (current.action === "pause" || current.status === "paused") {
       current.status = "paused";
       current.action = "none";
       current.abort = undefined;
-      emit();
-      await persistJob(current);
+      emitNow();
+      persistMeta(current);
       return;
     }
 
     if (current.action === "cancel" || (err instanceof Error && err.message === "Upload cancelled")) {
-      removeJob(job.id);
-      await deletePendingUpload(job.id);
-      emit();
       return;
     }
 
     current.status = "error";
     current.error = err instanceof Error ? err.message : "Upload failed";
     current.abort = undefined;
-    emit();
+    emitNow();
     notify.error(err, `Failed to upload ${job.name}`);
   } finally {
     pump();
@@ -186,7 +220,7 @@ function pump() {
   pump();
 }
 
-export async function enqueueUploads({
+export function enqueueUploads({
   date,
   category,
   title,
@@ -211,12 +245,13 @@ export async function enqueueUploads({
       status: "queued",
       action: "none",
       createdAt: Date.now(),
+      lastEmitMs: 0,
     };
     jobs.set(id, job);
     jobOrder.push(id);
-    await persistJob(job);
+    persistBlob(job);
   }
-  emit();
+  emitNow();
   pump();
 }
 
@@ -224,32 +259,28 @@ export function cancelUpload(id: string) {
   const job = jobs.get(id);
   if (!job) return;
 
-  if (job.status === "uploading") {
-    job.action = "cancel";
-    job.abort?.abort();
-    return;
-  }
-
+  job.action = "cancel";
+  droppedIds.add(id);
+  const xhrAbort = job.abort;
+  job.abort = undefined;
   removeJob(id);
+  emitNow();
+  xhrAbort?.abort();
   void deletePendingUpload(id);
-  emit();
 }
 
 export function pauseUpload(id: string) {
   const job = jobs.get(id);
   if (!job) return;
+  if (job.status !== "uploading" && job.status !== "queued") return;
 
-  if (job.status === "uploading") {
-    job.action = "pause";
-    job.abort?.abort();
-    return;
-  }
-
-  if (job.status === "queued") {
-    job.status = "paused";
-    emit();
-    void persistJob(job);
-  }
+  job.action = "pause";
+  job.status = "paused";
+  const xhrAbort = job.abort;
+  job.abort = undefined;
+  emitNow();
+  xhrAbort?.abort();
+  persistMeta(job);
 }
 
 export function resumeUpload(id: string) {
@@ -261,8 +292,8 @@ export function resumeUpload(id: string) {
   job.error = undefined;
   job.action = "none";
   job.percent = 0;
-  emit();
-  void persistJob(job);
+  emitNow();
+  persistMeta(job);
   pump();
 }
 
@@ -289,10 +320,11 @@ export async function restorePendingUploads() {
         status: item.status === "paused" ? "paused" : "queued",
         action: "none",
         createdAt: item.createdAt,
+        lastEmitMs: 0,
       });
       jobOrder.push(item.id);
     }
-    emit();
+    emitNow();
     pump();
   } catch (err) {
     restoring = false;

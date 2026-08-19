@@ -107,7 +107,7 @@ const DaywiseUpload = () => {
     setTitleError(false);
 
     try {
-      await enqueueUploads({
+      enqueueUploads({
         date: dateKey,
         category,
         title: trimmedTitle,

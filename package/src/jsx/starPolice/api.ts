@@ -161,9 +161,12 @@ function uploadWithProgress<T>(
     signal?.addEventListener("abort", onAbort);
 
     xhr.upload.addEventListener("progress", (event) => {
-      if (!event.lengthComputable) return;
-      const percent = Math.round((event.loaded / event.total) * 100);
-      onProgress(Math.max(1, Math.min(99, percent)));
+      if (!event.lengthComputable || !event.total) return;
+      const percent = Math.max(1, Math.min(100, (event.loaded / event.total) * 100));
+      onProgress(percent);
+    });
+    xhr.upload.addEventListener("load", () => {
+      onProgress(100);
     });
 
     xhr.addEventListener("load", () => {

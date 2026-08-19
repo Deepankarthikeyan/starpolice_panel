@@ -466,6 +466,24 @@
 .spa-upload-task-bar .progress-bar {
   background-color: var(--primary, #123d73);
   border-radius: 999px;
+  transition: width 0.05s linear;
+}
+
+.spa-upload-task-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.spa-upload-task-confirm-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .spa-upload-tray {

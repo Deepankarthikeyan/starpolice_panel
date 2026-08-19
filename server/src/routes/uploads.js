@@ -82,10 +82,12 @@ router.post("/", authRequired, adminPanelOnly, attachUser, requirePermission("ad
     }
 
     if (saved.length) {
-      await notifyAllStudents({
+      notifyAllStudents({
         title: "New Study Material",
         message: `${saved.length} file(s) uploaded for ${date}`,
         type: "upload",
+      }).catch((error) => {
+        console.error("Failed to notify students about upload", error);
       });
     }
 
