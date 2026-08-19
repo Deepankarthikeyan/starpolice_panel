@@ -117,11 +117,23 @@ export async function getMessagingContacts(user, panel, scope = "all") {
     return [...(await loadAdminContacts()), ...(await loadStaffContacts())];
   }
 
-  if (panel === "admin" || panel === "staff") {
-    const contacts = await loadStudentContacts();
-    if (panel === "staff" || user.role === "staff") {
-      contacts.push(...(await loadAdminContacts()));
+  if (panel === "admin") {
+    if (scope === "student") {
+      return loadStudentContacts();
     }
+    if (scope === "staff") {
+      return loadStaffContacts();
+    }
+    if (scope === "admin") {
+      const contacts = await loadAdminContacts();
+      return contacts.filter((contact) => contact.id !== user._id.toString());
+    }
+    return loadStudentContacts();
+  }
+
+  if (panel === "staff") {
+    const contacts = await loadStudentContacts();
+    contacts.push(...(await loadAdminContacts()));
     return contacts;
   }
 

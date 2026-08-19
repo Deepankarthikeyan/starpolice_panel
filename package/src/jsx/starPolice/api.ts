@@ -414,7 +414,7 @@ export const api = {
     });
   },
 
-  getMessageContacts(scope?: "admin" | "staff") {
+  getMessageContacts(scope?: "admin" | "staff" | "student") {
     const search = new URLSearchParams();
     if (scope) search.set("scope", scope);
     const query = search.toString();

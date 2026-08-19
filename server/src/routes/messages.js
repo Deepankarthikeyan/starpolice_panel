@@ -52,6 +52,22 @@ function isAdminSideRole(role) {
   return role === "admin" || role === "superadmin";
 }
 
+function adminPeerThreadFilter(user, adminUserId) {
+  return {
+    channel: "private",
+    $and: [
+      {
+        $or: [
+          { threadAdminId: adminUserId, sender: user._id },
+          { threadAdminId: user._id, sender: adminUserId },
+        ],
+      },
+      { $or: [{ threadStudentId: null }, { threadStudentId: { $exists: false } }] },
+      { $or: [{ threadStaffId: null }, { threadStaffId: { $exists: false } }] },
+    ],
+  };
+}
+
 function buildPrivateFilter(user, { studentUserId, staffUserId, adminUserId }) {
   if (adminUserId && user.role === "staff") {
     return {
@@ -59,6 +75,10 @@ function buildPrivateFilter(user, { studentUserId, staffUserId, adminUserId }) {
       threadStaffId: user._id,
       threadAdminId: adminUserId,
     };
+  }
+
+  if (adminUserId && isAdminSideRole(user.role)) {
+    return adminPeerThreadFilter(user, adminUserId);
   }
 
   if (adminUserId && user.role === "student") {
@@ -75,6 +95,14 @@ function buildPrivateFilter(user, { studentUserId, staffUserId, adminUserId }) {
       channel: "private",
       threadStudentId: user._id,
       threadStaffId: staffUserId,
+    };
+  }
+
+  if (staffUserId && isAdminSideRole(user.role)) {
+    return {
+      channel: "private",
+      threadStaffId: staffUserId,
+      threadAdminId: user._id,
     };
   }
 
@@ -112,7 +140,14 @@ router.get("/contacts", authRequired, attachUser, async (req, res) => {
       return res.status(403).json({ message: "You do not have permission to view message contacts." });
     }
 
-    const scope = req.query.scope === "admin" || req.query.scope === "staff" ? req.query.scope : "all";
+    const scopeParam = req.query.scope;
+    const scope =
+      scopeParam === "admin" ||
+      scopeParam === "staff" ||
+      scopeParam === "student" ||
+      scopeParam === "all"
+        ? scopeParam
+        : "all";
     const contacts = await getMessagingContacts(user, panel, scope);
     return res.json(contacts);
   } catch (error) {
@@ -223,6 +258,22 @@ router.post("/", authRequired, attachUser, async (req, res) => {
         }
         threadStaffId = user._id;
         threadAdminId = admin._id;
+      } else if (staffUserId && isAdminSideRole(user.role)) {
+        const staff = await User.findOne({ _id: staffUserId, role: "staff" }).select("_id");
+        if (!staff) {
+          return res.status(404).json({ message: "Staff member not found." });
+        }
+        threadStaffId = staff._id;
+        threadAdminId = user._id;
+      } else if (adminUserId && isAdminSideRole(user.role)) {
+        const admin = await User.findOne({
+          _id: adminUserId,
+          role: { $in: ["admin", "superadmin"] },
+        }).select("_id");
+        if (!admin) {
+          return res.status(404).json({ message: "Admin not found." });
+        }
+        threadAdminId = admin._id;
       } else if (studentUserId && (isAdminSideRole(user.role) || user.role === "staff")) {
         const student = await User.findOne({ _id: studentUserId, role: "student" }).select("_id");
         if (!student) {
@@ -253,6 +304,15 @@ router.post("/", authRequired, attachUser, async (req, res) => {
       await notifyAllStudents({
         title: "Group Message",
         message: message.trim().slice(0, 80),
+        type: "message",
+      });
+    } else if (threadStaffId && threadAdminId && !threadStudentId) {
+      const recipients = [threadStaffId, threadAdminId].filter(
+        (id) => id.toString() !== req.user.id.toString()
+      );
+      await notifyUsers(recipients, {
+        title: "Private Message",
+        message: `${req.user.name}: ${message.trim().slice(0, 80)}`,
         type: "message",
       });
     } else if (threadStaffId && threadAdminId) {

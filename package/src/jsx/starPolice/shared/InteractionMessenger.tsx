@@ -1,6 +1,13 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { ChatMessage, UserRole } from "../types";
 
+export type InteractionAudience = "group" | "student" | "staff" | "admin";
+
+export type InteractionAudienceOption = {
+  value: InteractionAudience;
+  label: string;
+};
+
 export type MessengerContact = {
   id: string;
   kind: "group" | "private";
@@ -21,6 +28,10 @@ type InteractionMessengerProps = {
   viewerRole?: UserRole;
   sidebarTitle?: string;
   emptyThreadHint?: string;
+  audience?: InteractionAudience;
+  audienceOptions?: InteractionAudienceOption[];
+  onAudienceChange?: (audience: InteractionAudience) => void;
+  hideContactList?: boolean;
 };
 
 function isAdminSide(role: UserRole) {
@@ -43,6 +54,10 @@ export function InteractionMessenger({
   viewerRole,
   sidebarTitle = "Chats",
   emptyThreadHint = "Select a chat to start messaging.",
+  audience,
+  audienceOptions,
+  onAudienceChange,
+  hideContactList = false,
 }: InteractionMessengerProps) {
   const [draft, setDraft] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -71,6 +86,12 @@ export function InteractionMessenger({
   }, [messages, activeContactId]);
 
   useEffect(() => {
+    if (hideContactList && contacts[0]) {
+      setMobileThreadOpen(true);
+    }
+  }, [hideContactList, contacts]);
+
+  useEffect(() => {
     if (!activeContactId && contacts[0]) {
       onSelectContact(contacts[0].id);
     }
@@ -92,10 +113,30 @@ export function InteractionMessenger({
 
   return (
     <div className={`spa-messenger${mobileThreadOpen ? " is-thread-open" : ""}`}>
-      <aside className="spa-messenger-sidebar">
+      <aside className={`spa-messenger-sidebar${hideContactList ? " is-group-only" : ""}`}>
         <div className="spa-messenger-sidebar-head">
           <h5 className="mb-0">{sidebarTitle}</h5>
         </div>
+        {audienceOptions && audience && onAudienceChange && (
+          <div className="spa-messenger-audience">
+            <label className="form-label spa-messenger-audience-label" htmlFor="interaction-audience">
+              Message to
+            </label>
+            <select
+              id="interaction-audience"
+              className="form-select"
+              value={audience}
+              onChange={(event) => onAudienceChange(event.target.value as InteractionAudience)}
+            >
+              {audienceOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {!hideContactList && (
         <div className="spa-messenger-search">
           <div className="spa-messenger-search-wrap">
             <i className="material-symbols-outlined spa-messenger-search-icon" aria-hidden="true">
@@ -121,6 +162,8 @@ export function InteractionMessenger({
             )}
           </div>
         </div>
+        )}
+        {!hideContactList && (
         <div className="spa-messenger-contact-list">
           {filteredContacts.length === 0 ? (
             <p className="spa-messenger-search-empty">No chats match your search.</p>
@@ -154,6 +197,7 @@ export function InteractionMessenger({
             })
           )}
         </div>
+        )}
       </aside>
 
       <section className="spa-messenger-thread">

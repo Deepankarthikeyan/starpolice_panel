@@ -128,7 +128,8 @@ function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="daywise-upload" element={<DaywiseUpload />} />
-            <Route path="student-interaction" element={<AdminStudentInteraction />} />
+            <Route path="interaction" element={<AdminStudentInteraction />} />
+            <Route path="student-interaction" element={<Navigate to="interaction" replace />} />
             <Route path="monthly-calendar" element={<MonthlyCalendar />} />
             <Route path="user-management" element={<UserManagement />} />
             <Route path="student-onboarding" element={<StudentOnboarding />} />

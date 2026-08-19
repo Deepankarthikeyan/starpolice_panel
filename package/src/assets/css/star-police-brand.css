@@ -590,6 +590,24 @@
   border-bottom: 1px solid #e4eaf1;
 }
 
+.spa-messenger-audience {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e4eaf1;
+}
+
+.spa-messenger-audience-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6c757d;
+  margin-bottom: 0.35rem;
+}
+
+.spa-messenger-sidebar.is-group-only {
+  min-width: 14rem;
+}
+
 .spa-messenger-search {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #e4eaf1;
