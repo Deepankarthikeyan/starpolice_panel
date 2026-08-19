@@ -132,10 +132,14 @@ function parseBodyData(body) {
 
 function mapRecord(record) {
   const item = record.toObject ? record.toObject() : record;
+  const linkedUser =
+    item.userId && typeof item.userId === "object" && item.userId._id ? item.userId : null;
+
   return {
     id: item._id.toString(),
     studentId: item.studentId,
-    userId: item.userId ? item.userId.toString() : null,
+    userId: linkedUser ? linkedUser._id.toString() : item.userId ? item.userId.toString() : null,
+    loginActive: linkedUser ? Boolean(linkedUser.isActive) : false,
     firstName: item.firstName,
     middleName: item.middleName,
     lastName: item.lastName,
@@ -239,42 +243,92 @@ async function generateStudentId() {
   return `${prefix}${String(sequence).padStart(4, "0")}`;
 }
 
+function resolveLoginEmail(record) {
+  return (record.loginEmail || record.email || "").trim().toLowerCase();
+}
+
+function resolveUsername(record) {
+  return (record.username || "").trim().toLowerCase();
+}
+
+function parseGrantLogin(value) {
+  return value === "true" || value === true;
+}
+
+async function assertUniqueUsername(username, excludeUserId = null) {
+  if (!username) return;
+
+  const existing = await User.findOne({ username });
+  if (existing && existing._id.toString() !== excludeUserId?.toString()) {
+    throw new Error("Username is already registered to another account.");
+  }
+}
+
 async function syncLoginUser({ record, password, permissions, grantLogin, createdBy }) {
-  const loginEmail = record.loginEmail?.trim().toLowerCase();
-  if (!loginEmail || !password) {
+  const loginEmail = resolveLoginEmail(record);
+  const username = resolveUsername(record);
+  const fullName = [record.firstName, record.middleName, record.lastName].filter(Boolean).join(" ");
+  const studentPermissions = sanitizePermissions("student", permissions);
+
+  if (!loginEmail && !username) {
+    if (grantLogin) {
+      throw new Error("Login email is required for student panel access.");
+    }
     return null;
   }
 
-  const fullName = [record.firstName, record.middleName, record.lastName].filter(Boolean).join(" ");
-  const hashed = await bcrypt.hash(password, 10);
-  const studentPermissions = sanitizePermissions("student", permissions);
+  if (grantLogin && !password && !record.userId) {
+    throw new Error("Password is required when granting student panel login access.");
+  }
+
+  if (!loginEmail && grantLogin) {
+    throw new Error("Login email is required for student panel access.");
+  }
 
   if (record.userId) {
     const user = await User.findById(record.userId);
     if (!user) {
       record.userId = null;
     } else {
+      await assertUniqueUsername(username, user._id);
+
       user.name = fullName || user.name;
-      user.email = loginEmail;
-      user.password = hashed;
-      user.permissions = studentPermissions;
-      if (grantLogin) {
-        user.isActive = true;
+      if (loginEmail) {
+        const emailOwner = await User.findOne({ email: loginEmail });
+        if (emailOwner && emailOwner._id.toString() !== user._id.toString()) {
+          throw new Error("Login email is already registered to another account.");
+        }
+        user.email = loginEmail;
       }
+      user.username = username || null;
+      user.permissions = studentPermissions;
+      user.isActive = Boolean(grantLogin);
+
+      if (password) {
+        user.password = await bcrypt.hash(password, 10);
+      }
+
       await user.save();
       return user;
     }
   }
 
-  const existing = await User.findOne({ email: loginEmail });
-  if (existing && existing._id.toString() !== record.userId?.toString()) {
+  if (!password) {
+    return null;
+  }
+
+  const existingEmail = loginEmail ? await User.findOne({ email: loginEmail }) : null;
+  if (existingEmail) {
     throw new Error("Login email is already registered to another account.");
   }
 
+  await assertUniqueUsername(username);
+
   const user = await User.create({
-    name: fullName || loginEmail,
+    name: fullName || loginEmail || username,
     email: loginEmail,
-    password: hashed,
+    username: username || null,
+    password: await bcrypt.hash(password, 10),
     role: "student",
     isActive: Boolean(grantLogin),
     permissions: studentPermissions,
@@ -286,6 +340,38 @@ async function syncLoginUser({ record, password, permissions, grantLogin, create
   return user;
 }
 
+async function handleCredentialSync(req, record) {
+  const grantLogin = parseGrantLogin(req.body.grantLogin);
+  const password = req.body.password?.trim() || "";
+  const confirmPassword = req.body.confirmPassword?.trim() || "";
+  const hasCredentialInput =
+    grantLogin ||
+    password ||
+    confirmPassword ||
+    resolveLoginEmail(record) ||
+    resolveUsername(record);
+
+  if (!hasCredentialInput) {
+    return;
+  }
+
+  if (password || confirmPassword) {
+    if (!password || password !== confirmPassword) {
+      throw new Error("Password and confirm password must match.");
+    }
+  }
+
+  await syncLoginUser({
+    record,
+    password: password || undefined,
+    permissions: req.body.studentPermissions
+      ? JSON.parse(req.body.studentPermissions)
+      : defaultPermissionsForRole("student"),
+    grantLogin,
+    createdBy: req.user.id,
+  });
+}
+
 router.get(
   "/",
   authRequired,
@@ -294,7 +380,9 @@ router.get(
   superAdminOnly,
   async (_req, res) => {
     try {
-      const records = await StudentOnboarding.find().sort({ createdAt: -1 });
+      const records = await StudentOnboarding.find()
+        .populate("userId", "isActive email username")
+        .sort({ createdAt: -1 });
       res.json(records.map(mapRecord));
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -310,7 +398,10 @@ router.get(
   superAdminOnly,
   async (req, res) => {
     try {
-      const record = await StudentOnboarding.findById(req.params.id);
+      const record = await StudentOnboarding.findById(req.params.id).populate(
+        "userId",
+        "isActive email username"
+      );
       if (!record) {
         return res.status(404).json({ message: "Student onboarding record not found." });
       }
@@ -343,26 +434,14 @@ router.post(
         createdBy: req.user.id,
       });
 
-      const password = req.body.password?.trim();
-      const confirmPassword = req.body.confirmPassword?.trim();
-      if (password || confirmPassword) {
-        if (!password || password !== confirmPassword) {
-          return res.status(400).json({ message: "Password and confirm password must match." });
-        }
-        await syncLoginUser({
-          record,
-          password,
-          permissions: req.body.studentPermissions
-            ? JSON.parse(req.body.studentPermissions)
-            : defaultPermissionsForRole("student"),
-          grantLogin: req.body.grantLogin === "true" || req.body.grantLogin === true,
-          createdBy: req.user.id,
-        });
-      }
+      await handleCredentialSync(req, record);
 
-      res.status(201).json(mapRecord(record));
+      const saved = await StudentOnboarding.findById(record._id).populate("userId", "isActive email username");
+      res.status(201).json(mapRecord(saved));
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      const message = error.message || "Unable to save student onboarding record.";
+      const statusCode = /required|must match|already registered/i.test(message) ? 400 : 500;
+      res.status(statusCode).json({ message });
     }
   }
 );
@@ -385,30 +464,14 @@ router.put(
       Object.assign(record, data, mapFileUrls(req.files));
       await record.save();
 
-      const password = req.body.password?.trim();
-      const confirmPassword = req.body.confirmPassword?.trim();
-      if (password || confirmPassword) {
-        if (!password || password !== confirmPassword) {
-          return res.status(400).json({ message: "Password and confirm password must match." });
-        }
-        await syncLoginUser({
-          record,
-          password,
-          permissions: req.body.studentPermissions
-            ? JSON.parse(req.body.studentPermissions)
-            : defaultPermissionsForRole("student"),
-          grantLogin: req.body.grantLogin === "true" || req.body.grantLogin === true,
-          createdBy: req.user.id,
-        });
-      } else if (req.body.grantLogin === "true" || req.body.grantLogin === true) {
-        if (record.userId) {
-          await User.findByIdAndUpdate(record.userId, { isActive: true });
-        }
-      }
+      await handleCredentialSync(req, record);
 
-      res.json(mapRecord(record));
+      const saved = await StudentOnboarding.findById(record._id).populate("userId", "isActive email username");
+      res.json(mapRecord(saved));
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      const message = error.message || "Unable to update student onboarding record.";
+      const statusCode = /required|must match|already registered/i.test(message) ? 400 : 500;
+      res.status(statusCode).json({ message });
     }
   }
 );

@@ -2,6 +2,7 @@ export interface StudentOnboardingRecord {
   id: string;
   studentId: string;
   userId: string | null;
+  loginActive?: boolean;
   firstName: string;
   middleName: string;
   lastName: string;

@@ -99,9 +99,10 @@ function recordToForm(record: StudentOnboardingRecord): StudentOnboardingFormSta
   return {
     ...emptyStudentOnboardingForm(),
     ...record,
+    loginEmail: record.loginEmail || record.email || "",
     password: "",
     confirmPassword: "",
-    grantLogin: Boolean(record.userId),
+    grantLogin: Boolean(record.loginActive ?? record.userId),
   };
 }
 
@@ -187,6 +188,27 @@ const StudentOnboarding = () => {
       return;
     }
 
+    const loginEmail = form.loginEmail.trim() || form.email.trim();
+    if (form.grantLogin) {
+      if (!loginEmail) {
+        const message = "Login email is required when granting student panel access.";
+        setError(message);
+        notify.error(message);
+        return;
+      }
+      if (!editingId && !form.password) {
+        const message = "Password is required when granting student panel access.";
+        setError(message);
+        notify.error(message);
+        return;
+      }
+    }
+
+    const payload: StudentOnboardingFormState = {
+      ...form,
+      loginEmail,
+    };
+
     const selectedFiles = Object.values(files).filter((file): file is File => Boolean(file));
     setLoading(true);
     setUploadProgress(selectedFiles.length ? 1 : 0);
@@ -194,10 +216,10 @@ const StudentOnboarding = () => {
     try {
       const onProgress = selectedFiles.length ? (percent: number) => setUploadProgress(percent) : undefined;
       if (editingId) {
-        await api.updateStudentOnboarding(editingId, form, files, onProgress);
+        await api.updateStudentOnboarding(editingId, payload, files, onProgress);
         notify.success("Student onboarding record updated.");
       } else {
-        await api.createStudentOnboarding(form, files, onProgress);
+        await api.createStudentOnboarding(payload, files, onProgress);
         notify.success("Student onboarding record created.");
       }
       setUploadProgress(100);
@@ -514,10 +536,14 @@ const StudentOnboarding = () => {
           </SectionCard>
 
           <SectionCard title="9. Login Credentials">
+            <p className="text-muted small mb-3">
+              These credentials create the student panel login. Students sign in with the login email
+              (or username) and password from the student login page.
+            </p>
             <div className="row">
-              <div className="col-md-4"><Field label="Username"><TextInput value={form.username} onChange={(v) => setField("username", v)} /></Field></div>
-              <div className="col-md-4"><Field label="Email"><TextInput type="email" value={form.loginEmail} onChange={(v) => setField("loginEmail", v)} /></Field></div>
-              <div className="col-md-4"><Field label="Password"><TextInput type="password" value={form.password} onChange={(v) => setField("password", v)} placeholder={editingId ? "Leave blank to keep current" : ""} /></Field></div>
+              <div className="col-md-4"><Field label="Username"><TextInput value={form.username} onChange={(v) => setField("username", v)} placeholder="Optional login username" /></Field></div>
+              <div className="col-md-4"><Field label="Login Email"><TextInput type="email" value={form.loginEmail} onChange={(v) => setField("loginEmail", v)} placeholder="Used for student panel sign in" /></Field></div>
+              <div className="col-md-4"><Field label="Password"><TextInput type="password" value={form.password} onChange={(v) => setField("password", v)} placeholder={editingId ? "Leave blank to keep current" : "Required for panel access"} /></Field></div>
               <div className="col-md-4"><Field label="Confirm Password"><TextInput type="password" value={form.confirmPassword} onChange={(v) => setField("confirmPassword", v)} /></Field></div>
               <div className="col-md-4 d-flex align-items-end">
                 <label className="form-check mb-3">

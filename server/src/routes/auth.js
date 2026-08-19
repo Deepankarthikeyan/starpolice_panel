@@ -159,7 +159,11 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Email, password, and panel are required." });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const loginId = email.toLowerCase().trim();
+    let user = await User.findOne({ email: loginId });
+    if (!user && loginId) {
+      user = await User.findOne({ username: loginId });
+    }
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
