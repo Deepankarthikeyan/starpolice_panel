@@ -11,6 +11,7 @@ import {
   type StudentOnboardingFormState,
   type StudentOnboardingRecord,
 } from "./studentOnboardingDefaults";
+import { PasswordInput } from "../shared/PasswordInput";
 
 type FileFieldKey =
   | "profilePhoto"
@@ -517,8 +518,8 @@ const StudentOnboarding = () => {
             <div className="row">
               <div className="col-md-4"><Field label="Username"><TextInput value={form.username} onChange={(v) => setField("username", v)} /></Field></div>
               <div className="col-md-4"><Field label="Email"><TextInput type="email" value={form.loginEmail} onChange={(v) => setField("loginEmail", v)} /></Field></div>
-              <div className="col-md-4"><Field label="Password"><TextInput type="password" value={form.password} onChange={(v) => setField("password", v)} placeholder={editingId ? "Leave blank to keep current" : ""} /></Field></div>
-              <div className="col-md-4"><Field label="Confirm Password"><TextInput type="password" value={form.confirmPassword} onChange={(v) => setField("confirmPassword", v)} /></Field></div>
+              <div className="col-md-4"><Field label="Password"><PasswordInput value={form.password} onChange={(v) => setField("password", v)} placeholder={editingId ? "Leave blank to keep current" : ""} autoComplete="new-password" /></Field></div>
+              <div className="col-md-4"><Field label="Confirm Password"><PasswordInput value={form.confirmPassword} onChange={(v) => setField("confirmPassword", v)} autoComplete="new-password" /></Field></div>
               <div className="col-md-4 d-flex align-items-end">
                 <label className="form-check mb-3">
                   <input type="checkbox" className="form-check-input" checked={form.grantLogin} onChange={(e) => setField("grantLogin", e.target.checked)} />
