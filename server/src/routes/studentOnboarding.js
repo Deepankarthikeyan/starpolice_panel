@@ -119,7 +119,12 @@ function parseBodyData(body) {
   const data = {};
   for (const key of TEXT_FIELDS) {
     if (body[key] !== undefined) {
-      data[key] = String(body[key]).trim();
+      const raw = body[key];
+      let normalized = raw;
+      if (Array.isArray(raw)) {
+        normalized = raw.map((entry) => String(entry).trim()).find(Boolean) ?? raw[raw.length - 1];
+      }
+      data[key] = String(normalized).trim();
     }
   }
   if (body.termsAccepted !== undefined) {
