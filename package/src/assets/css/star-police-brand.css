@@ -534,29 +534,211 @@
   overflow-y: auto;
 }
 
-.spa-interaction-bubble {
-  max-width: 75%;
-  padding: 0.85rem 1rem;
-  margin-bottom: 0.85rem;
-  border-radius: 0.85rem;
+.spa-messenger-card {
+  overflow: hidden;
+}
+
+.spa-messenger {
+  display: grid;
+  grid-template-columns: minmax(15rem, 20rem) minmax(0, 1fr);
+  min-height: 34rem;
+  background: #fff;
+}
+
+.spa-messenger-sidebar {
+  border-right: 1px solid #e4eaf1;
   background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
-.spa-interaction-bubble.is-mine {
-  margin-left: auto;
-  background: rgba(var(--bs-primary-rgb, 77, 68, 181), 0.12);
+.spa-messenger-sidebar-head {
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid #e4eaf1;
 }
 
-.spa-interaction-bubble-head {
+.spa-messenger-contact-list {
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.spa-messenger-contact {
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.35rem;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 0;
+  border-radius: 0.85rem;
+  background: transparent;
+  text-align: left;
 }
 
-.spa-interaction-mode .btn {
-  min-width: 6.5rem;
+.spa-messenger-contact:hover,
+.spa-messenger-contact.is-active {
+  background: rgba(18, 61, 115, 0.08);
+}
+
+.spa-messenger-contact.is-active {
+  box-shadow: inset 3px 0 0 var(--primary, #123d73);
+}
+
+.spa-messenger-avatar {
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--primary, #123d73);
+}
+
+.spa-messenger-avatar.is-group {
+  background: #0f766e;
+}
+
+.spa-messenger-contact-copy {
+  min-width: 0;
+}
+
+.spa-messenger-contact-title,
+.spa-messenger-thread-title {
+  font-weight: 700;
+  color: #1f2a37;
+}
+
+.spa-messenger-contact-subtitle,
+.spa-messenger-thread-subtitle {
+  font-size: 0.78rem;
+  color: #6b7785;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spa-messenger-thread {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.spa-messenger-thread-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #e4eaf1;
+}
+
+.spa-messenger-back {
+  border: 0;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.25rem 0.5rem 0.25rem 0;
+}
+
+.spa-messenger-feed {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 1rem;
+  background: #f3f6fa;
+}
+
+.spa-messenger-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.spa-messenger-row.is-mine {
+  justify-content: flex-end;
+}
+
+.spa-messenger-msg-avatar {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fff;
+  background: #64748b;
+}
+
+.spa-messenger-msg-avatar.is-mine {
+  background: var(--primary, #123d73);
+}
+
+.spa-messenger-bubble {
+  max-width: min(75%, 28rem);
+  padding: 0.7rem 0.85rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.spa-messenger-bubble.is-mine {
+  background: rgba(18, 61, 115, 0.12);
+}
+
+.spa-messenger-bubble-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.spa-messenger-bubble small {
+  display: block;
+  margin-top: 0.35rem;
+  color: #6b7785;
+  font-size: 0.72rem;
+}
+
+.spa-messenger-compose {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem 1rem;
+  border-top: 1px solid #e4eaf1;
+  background: #fff;
+}
+
+.spa-messenger-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20rem;
+  color: #6b7785;
+  padding: 1rem;
+  text-align: center;
+}
+
+@media only screen and (max-width: 47.9375rem) {
+  .spa-messenger {
+    grid-template-columns: 1fr;
+  }
+
+  .spa-messenger-thread {
+    display: none;
+  }
+
+  .spa-messenger.is-thread-open .spa-messenger-sidebar {
+    display: none;
+  }
+
+  .spa-messenger.is-thread-open .spa-messenger-thread {
+    display: flex;
+  }
 }
 
 .daywise-upload-form .form-select,
