@@ -1,6 +1,3 @@
-const RING_RADIUS = 52;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
-
 type FileUploadProgressProps = {
   percent: number;
   fileCount: number;
@@ -15,22 +12,6 @@ export function FileUploadProgress({ percent, fileCount, fileNames = [] }: FileU
 
   return (
     <div className="spa-upload-progress" aria-live="polite" role="status">
-      <div className="spa-upload-progress-ring">
-        <svg viewBox="0 0 120 120" aria-hidden="true">
-          <circle className="spa-upload-progress-track" cx="60" cy="60" r={RING_RADIUS} />
-          <circle
-            className="spa-upload-progress-fill"
-            cx="60"
-            cy="60"
-            r={RING_RADIUS}
-            style={{
-              strokeDasharray: RING_CIRCUMFERENCE,
-              strokeDashoffset: RING_CIRCUMFERENCE - (RING_CIRCUMFERENCE * clamped) / 100,
-            }}
-          />
-        </svg>
-        <span className="spa-upload-progress-percent">{clamped}%</span>
-      </div>
       <p className="spa-upload-progress-title mb-1">
         {finishing ? "Finishing upload..." : "Uploading files..."}
       </p>

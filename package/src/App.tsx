@@ -3,6 +3,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { ThemeContext } from "./context/ThemeContext";
 import { validateStoredSession } from "./jsx/starPolice/api";
+import { UploadQueueTray } from "./jsx/starPolice/shared/UploadTaskList";
+import { restorePendingUploads } from "./jsx/starPolice/uploads/uploadQueueStore";
 import type { AuthUser } from "./jsx/starPolice/types";
 
 const AdminLayout = lazy(() => import("./jsx/PanelLayouts").then((m) => ({ default: m.AdminLayout })));
@@ -58,6 +60,11 @@ function App() {
       setAuth(user);
     });
   }, [setAuth]);
+
+  useEffect(() => {
+    if (!auth) return;
+    void restorePendingUploads();
+  }, [auth]);
 
   useEffect(() => {
     function resizeHandler() {
@@ -164,6 +171,7 @@ function App() {
           <Route path="*" element={<Navigate to="/admin/login" replace />} />
         </Routes>
       </Suspense>
+      <UploadQueueTray />
     </Fragment>
   );
 }

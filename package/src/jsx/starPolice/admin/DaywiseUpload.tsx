@@ -6,8 +6,9 @@ import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
 import { getPanelMotherMenu } from "../panelLabels";
 import { notify } from "../toast";
-import { FileUploadProgress, FileUploadProgressOverlay } from "../shared/FileUploadProgress";
+import { UploadTaskList, useUploadJobs } from "../shared/UploadTaskList";
 import { UploadPreviewButton } from "../shared/UploadFilePreview";
+import { enqueueUploads, SPA_UPLOAD_COMPLETE_EVENT } from "../uploads/uploadQueueStore";
 import type { FileCategory, UploadedFile } from "../types";
 
 const categoryAccept: Record<FileCategory, string> = {
@@ -19,15 +20,13 @@ const categoryAccept: Record<FileCategory, string> = {
 
 const DaywiseUpload = () => {
   const { auth } = useContext(ThemeContext);
+  const uploadJobs = useUploadJobs();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<FileCategory>("video");
   const [uploads, setUploads] = useState<UploadedFile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | FileCategory>("all");
-  const [loading, setLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadingFileNames, setUploadingFileNames] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [titleError, setTitleError] = useState(false);
   const errorRef = useRef<HTMLDivElement>(null);
@@ -78,6 +77,18 @@ const DaywiseUpload = () => {
     loadUploads().catch(console.error);
   }, [dateKey]);
 
+  useEffect(() => {
+    function onComplete(event: Event) {
+      const date = (event as CustomEvent<{ date?: string }>).detail?.date;
+      if (!date || date === dateKey) {
+        loadUploads().catch(console.error);
+      }
+    }
+
+    window.addEventListener(SPA_UPLOAD_COMPLETE_EVENT, onComplete);
+    return () => window.removeEventListener(SPA_UPLOAD_COMPLETE_EVENT, onComplete);
+  }, [dateKey]);
+
   const handleFiles = async (files: FileList | null, input?: HTMLInputElement | null) => {
     if (!files?.length) return;
 
@@ -92,31 +103,20 @@ const DaywiseUpload = () => {
       return;
     }
 
-    const fileList = Array.from(files);
-
-    setLoading(true);
-    setUploadProgress(0);
-    setUploadingFileNames(fileList.map((file) => file.name));
     setError("");
     setTitleError(false);
 
     try {
-      await api.uploadFiles(dateKey, category, trimmedTitle, fileList, (percent) => {
-        setUploadProgress(percent);
+      await enqueueUploads({
+        date: dateKey,
+        category,
+        title: trimmedTitle,
+        files: Array.from(files),
       });
-      setUploadProgress(100);
-      await loadUploads();
-      await new Promise((resolve) => window.setTimeout(resolve, 400));
-      setTitle("");
-      notify.success("Files uploaded successfully.");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";
       setError(message);
       notify.error(err, "Upload failed");
-    } finally {
-      setLoading(false);
-      setUploadProgress(0);
-      setUploadingFileNames([]);
     }
   };
 
@@ -176,7 +176,6 @@ const DaywiseUpload = () => {
                       }
                     }}
                     placeholder="e.g. Morning Session Notes"
-                    disabled={loading}
                   />
                   {titleError && (
                     <div className="invalid-feedback d-block mb-3">Title is required.</div>
@@ -190,7 +189,6 @@ const DaywiseUpload = () => {
                     className="form-select mb-3"
                     value={category}
                     onChange={(event) => setCategory(event.target.value as FileCategory)}
-                    disabled={loading}
                   >
                     {Object.entries(FILE_CATEGORY_LABELS).map(([key, label]) => (
                       <option key={key} value={key}>
@@ -200,28 +198,23 @@ const DaywiseUpload = () => {
                   </select>
 
                   <div className="daywise-upload-dropzone">
-                    {loading ? (
-                      <FileUploadProgress
-                        percent={uploadProgress}
-                        fileCount={uploadingFileNames.length}
-                        fileNames={uploadingFileNames}
-                      />
-                    ) : (
-                      <>
-                        <p className="text-muted small mb-3">
-                          Upload videos, PDFs, images, and documents for the selected day.
-                        </p>
-                        <input
-                          type="file"
-                          className="form-control"
-                          accept={categoryAccept[category]}
-                          multiple
-                          onChange={(event) => {
-                            void handleFiles(event.target.files, event.target);
-                            event.target.value = "";
-                          }}
-                        />
-                      </>
+                    <p className="text-muted small mb-3">
+                      Upload videos, PDFs, images, and documents for the selected day.
+                    </p>
+                    <input
+                      type="file"
+                      className="form-control"
+                      accept={categoryAccept[category]}
+                      multiple
+                      onChange={(event) => {
+                        void handleFiles(event.target.files, event.target);
+                        event.target.value = "";
+                      }}
+                    />
+                    {uploadJobs.length > 0 && (
+                      <div className="mt-3">
+                        <UploadTaskList jobs={uploadJobs} />
+                      </div>
                     )}
                   </div>
                 </div>
@@ -337,13 +330,6 @@ const DaywiseUpload = () => {
           </div>
         </div>
       </div>
-      {loading && (
-        <FileUploadProgressOverlay
-          percent={uploadProgress}
-          fileCount={uploadingFileNames.length}
-          fileNames={uploadingFileNames}
-        />
-      )}
     </>
   );
 };

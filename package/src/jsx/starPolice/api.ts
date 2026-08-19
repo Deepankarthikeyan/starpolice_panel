@@ -140,8 +140,14 @@ function uploadWithProgress<T>(
   onProgress: (percent: number) => void,
   panel?: PanelType,
   method = "POST",
+  signal?: AbortSignal,
 ): Promise<T> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new Error("Upload cancelled"));
+      return;
+    }
+
     const xhr = new XMLHttpRequest();
     const token = getToken(panel);
     const resolvedPanel = panel || resolvePanelFromPath(window.location.pathname);
@@ -151,6 +157,9 @@ function uploadWithProgress<T>(
       xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     }
 
+    const onAbort = () => xhr.abort();
+    signal?.addEventListener("abort", onAbort);
+
     xhr.upload.addEventListener("progress", (event) => {
       if (!event.lengthComputable) return;
       const percent = Math.round((event.loaded / event.total) * 100);
@@ -158,6 +167,7 @@ function uploadWithProgress<T>(
     });
 
     xhr.addEventListener("load", () => {
+      signal?.removeEventListener("abort", onAbort);
       let data: { message?: string } = {};
       try {
         data = JSON.parse(xhr.responseText);
@@ -179,8 +189,14 @@ function uploadWithProgress<T>(
       reject(new Error(message));
     });
 
-    xhr.addEventListener("error", () => reject(new Error("Upload failed")));
-    xhr.addEventListener("abort", () => reject(new Error("Upload cancelled")));
+    xhr.addEventListener("error", () => {
+      signal?.removeEventListener("abort", onAbort);
+      reject(new Error("Upload failed"));
+    });
+    xhr.addEventListener("abort", () => {
+      signal?.removeEventListener("abort", onAbort);
+      reject(new Error("Upload cancelled"));
+    });
 
     onProgress(1);
     xhr.send(formData);
@@ -351,6 +367,31 @@ export const api = {
       method: "POST",
       body: formData,
     });
+  },
+
+  uploadFile(
+    date: string,
+    category: string,
+    title: string,
+    file: File,
+    options?: {
+      onProgress?: (percent: number) => void;
+      signal?: AbortSignal;
+    },
+  ) {
+    const formData = new FormData();
+    formData.append("date", date);
+    formData.append("category", category);
+    formData.append("title", title);
+    formData.append("files", file);
+    return uploadWithProgress<UploadedFile[]>(
+      "/api/uploads",
+      formData,
+      options?.onProgress ?? (() => undefined),
+      undefined,
+      "POST",
+      options?.signal,
+    );
   },
 
   deleteUpload(id: string) {

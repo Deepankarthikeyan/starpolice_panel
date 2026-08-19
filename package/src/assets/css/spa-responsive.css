@@ -232,3 +232,12 @@
     min-width: 40rem;
   }
 }
+
+@media only screen and (max-width: 47.9375rem) {
+  .spa-upload-tray {
+    right: 0.75rem;
+    left: 0.75rem;
+    bottom: 0.75rem;
+    width: auto;
+  }
+}
