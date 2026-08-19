@@ -48,9 +48,9 @@ const StudentLogin = ({ setAuth }: Props) => {
       </div>
       <form onSubmit={onSubmit}>
         <div className="mb-3">
-          <label className="form-label">Email</label>
+          <label className="form-label">Email or Username</label>
           <input
-            type="email"
+            type="text"
             className="form-control spa-auth-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}

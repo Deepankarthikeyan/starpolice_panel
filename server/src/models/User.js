@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     isActive: { type: Boolean, default: false },
+    username: { type: String, trim: true, lowercase: true, default: null, sparse: true, unique: true },
     permissions: { type: [String], default: [] },
     staffType: {
       type: String,

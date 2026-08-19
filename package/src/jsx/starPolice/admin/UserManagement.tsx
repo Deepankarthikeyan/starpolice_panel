@@ -439,6 +439,7 @@ const UserManagement = () => {
                     value={password}
                     onChange={setPassword}
                     required
+                    autoComplete="new-password"
                   />
                 </div>
 
@@ -549,6 +550,7 @@ const UserManagement = () => {
                       value={editPassword}
                       onChange={setEditPassword}
                       placeholder="Leave blank to keep current password"
+                      autoComplete="new-password"
                     />
                   </div>
                 </div>
