@@ -64,7 +64,17 @@ export interface ChatMessage {
   message: string;
   channel: "group" | "private";
   threadStudentId?: string | null;
+  threadStaffId?: string | null;
+  threadAdminId?: string | null;
   createdAt: string;
+}
+
+export interface MessagingContact {
+  id: string;
+  contactType: "student" | "staff" | "admin";
+  name: string;
+  subtitle?: string;
+  role: UserRole | string;
 }
 
 export interface DashboardStats {

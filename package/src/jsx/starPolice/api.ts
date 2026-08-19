@@ -5,6 +5,7 @@ import type {
   ChatMessage,
   DashboardStats,
   ManagedUser,
+  MessagingContact,
   Note,
   PanelType,
   SetupStatus,
@@ -403,10 +404,21 @@ export const api = {
     });
   },
 
-  getMessages(params?: { channel?: "group" | "private"; studentUserId?: string }) {
+  getMessageContacts() {
+    return request<MessagingContact[]>("/api/messages/contacts");
+  },
+
+  getMessages(params?: {
+    channel?: "group" | "private";
+    studentUserId?: string;
+    staffUserId?: string;
+    adminUserId?: string;
+  }) {
     const search = new URLSearchParams();
     if (params?.channel) search.set("channel", params.channel);
     if (params?.studentUserId) search.set("studentUserId", params.studentUserId);
+    if (params?.staffUserId) search.set("staffUserId", params.staffUserId);
+    if (params?.adminUserId) search.set("adminUserId", params.adminUserId);
     const query = search.toString();
     return request<ChatMessage[]>(`/api/messages${query ? `?${query}` : ""}`);
   },
@@ -416,6 +428,8 @@ export const api = {
     options?: {
       channel?: "group" | "private";
       studentUserId?: string;
+      staffUserId?: string;
+      adminUserId?: string;
     },
   ) {
     return request<ChatMessage>("/api/messages", {
@@ -424,6 +438,8 @@ export const api = {
         message,
         channel: options?.channel ?? "group",
         studentUserId: options?.studentUserId,
+        staffUserId: options?.staffUserId,
+        adminUserId: options?.adminUserId,
       }),
     });
   },

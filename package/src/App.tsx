@@ -13,6 +13,7 @@ const StudentLayout = lazy(() => import("./jsx/PanelLayouts").then((m) => ({ def
 const AdminDashboard = lazy(() => import("./jsx/starPolice/admin/AdminDashboard"));
 const DaywiseUpload = lazy(() => import("./jsx/starPolice/admin/DaywiseUpload"));
 const AdminStudentInteraction = lazy(() => import("./jsx/starPolice/admin/StudentInteraction"));
+const StaffInteraction = lazy(() => import("./jsx/starPolice/staff/StaffInteraction"));
 const MonthlyCalendar = lazy(() => import("./jsx/starPolice/admin/MonthlyCalendar"));
 const UserManagement = lazy(() => import("./jsx/starPolice/admin/UserManagement"));
 const StudentOnboarding = lazy(() => import("./jsx/starPolice/admin/StudentOnboarding"));
@@ -145,7 +146,7 @@ function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="daywise-upload" element={<DaywiseUpload />} />
-            <Route path="student-interaction" element={<AdminStudentInteraction />} />
+            <Route path="student-interaction" element={<StaffInteraction />} />
             <Route path="monthly-calendar" element={<MonthlyCalendar />} />
             <Route path="student-performance" element={<StudentPerformanceAdmin />} />
             <Route path="physical-exam" element={<PhysicalExamEntry />} />

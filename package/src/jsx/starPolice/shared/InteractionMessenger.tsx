@@ -4,9 +4,11 @@ import type { ChatMessage, UserRole } from "../types";
 export type MessengerContact = {
   id: string;
   kind: "group" | "private";
+  contactType?: "student" | "staff" | "admin";
   title: string;
   subtitle?: string;
   initials: string;
+  section?: string;
 };
 
 type InteractionMessengerProps = {
@@ -123,24 +125,33 @@ export function InteractionMessenger({
           {filteredContacts.length === 0 ? (
             <p className="spa-messenger-search-empty">No chats match your search.</p>
           ) : (
-            filteredContacts.map((contact) => (
-              <button
-                key={contact.id}
-                type="button"
-                className={`spa-messenger-contact${contact.id === activeContactId ? " is-active" : ""}`}
-                onClick={() => handleSelect(contact.id)}
-              >
-                <div className={`spa-messenger-avatar${contact.kind === "group" ? " is-group" : ""}`}>
-                  {contact.initials}
-                </div>
-                <div className="spa-messenger-contact-copy">
-                  <div className="spa-messenger-contact-title">{contact.title}</div>
-                  {contact.subtitle && (
-                    <div className="spa-messenger-contact-subtitle">{contact.subtitle}</div>
+            filteredContacts.map((contact, index) => {
+              const previousSection = index > 0 ? filteredContacts[index - 1]?.section : undefined;
+              const showSection = contact.section && contact.section !== previousSection;
+
+              return (
+                <div key={contact.id}>
+                  {showSection && (
+                    <div className="spa-messenger-section-label">{contact.section}</div>
                   )}
+                  <button
+                    type="button"
+                    className={`spa-messenger-contact${contact.id === activeContactId ? " is-active" : ""}`}
+                    onClick={() => handleSelect(contact.id)}
+                  >
+                    <div className={`spa-messenger-avatar${contact.kind === "group" ? " is-group" : ""}`}>
+                      {contact.initials}
+                    </div>
+                    <div className="spa-messenger-contact-copy">
+                      <div className="spa-messenger-contact-title">{contact.title}</div>
+                      {contact.subtitle && (
+                        <div className="spa-messenger-contact-subtitle">{contact.subtitle}</div>
+                      )}
+                    </div>
+                  </button>
                 </div>
-              </button>
-            ))
+              );
+            })
           )}
         </div>
       </aside>
@@ -209,9 +220,11 @@ export function InteractionMessenger({
                     ? isAdminSide(viewerRole ?? "student")
                       ? "Message all students..."
                       : "Message the group..."
-                    : isAdminSide(viewerRole ?? "student")
+                    : viewerRole === "student"
                       ? `Message ${activeContact.title}...`
-                      : "Message admin..."
+                      : activeContact.contactType === "admin"
+                        ? `Message ${activeContact.title}...`
+                        : `Message ${activeContact.title}...`
                 }
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}

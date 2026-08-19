@@ -3,6 +3,7 @@ import PageTitle from "../../layouts/PageTitle";
 import { ThemeContext } from "../../../context/ThemeContext";
 import { api } from "../api";
 import { notify } from "../toast";
+import { getPanelMotherMenu } from "../panelLabels";
 import {
   InteractionMessenger,
   type MessengerContact,
@@ -16,7 +17,7 @@ import {
 } from "../shared/interactionHelpers";
 import type { ChatMessage, MessagingContact } from "../types";
 
-const StudentInteraction = () => {
+const StaffInteraction = () => {
   const { auth } = useContext(ThemeContext);
   const [records, setRecords] = useState<MessagingContact[]>([]);
   const [activeContactId, setActiveContactId] = useState(GROUP_CONTACT_ID);
@@ -25,15 +26,15 @@ const StudentInteraction = () => {
 
   const contacts = useMemo<MessengerContact[]>(() => {
     const groupContact = buildGroupContact({
-      title: "Group Announcements",
-      subtitle: "Messages for all students",
-      initials: "GRP",
+      title: "All Students",
+      subtitle: "Group message to everyone",
+      initials: "ALL",
     });
 
     return [groupContact, ...records.map(messagingRecordToContact)];
   }, [records]);
 
-  const activeContact = contacts.find((contact) => contact.id === activeContactId) ?? contacts[0];
+  const activeContact = contacts.find((contact) => contact.id === activeContactId) ?? contacts[0] ?? null;
 
   useEffect(() => {
     api
@@ -43,6 +44,11 @@ const StudentInteraction = () => {
   }, []);
 
   const loadMessages = async () => {
+    if (!activeContact) {
+      setMessages([]);
+      return;
+    }
+
     const data = await api.getMessages(messageParamsFromContact(activeContact));
     setMessages(data);
   };
@@ -53,16 +59,18 @@ const StudentInteraction = () => {
       loadMessages().catch(console.error);
     }, 5000);
     return () => window.clearInterval(interval);
-  }, [activeContactId, activeContact.id]);
+  }, [activeContactId, activeContact?.id]);
 
   const handleSend = async (text: string) => {
+    if (!activeContact) return;
+
     setLoading(true);
     try {
       await api.sendMessage(text, sendParamsFromContact(activeContact));
       await loadMessages();
       notify.success(
         activeContact.kind === "group"
-          ? "Group message sent."
+          ? "Group message sent to all students."
           : `Message sent to ${activeContact.title}.`
       );
     } catch (error) {
@@ -74,7 +82,7 @@ const StudentInteraction = () => {
 
   return (
     <>
-      <PageTitle motherMenu="Student Panel" activeMenu="Staff Interaction" pageContent="" />
+      <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu="Messages" pageContent="" />
       <div className="card spa-messenger-card">
         <div className="card-body p-0">
           <InteractionMessenger
@@ -85,8 +93,8 @@ const StudentInteraction = () => {
             onSend={handleSend}
             loading={loading}
             viewerRole={auth?.role}
-            sidebarTitle="Staff Chats"
-            emptyThreadHint="Select Group or a staff member from the list."
+            sidebarTitle="Messages"
+            emptyThreadHint="Select Group, a student, or an admin from the list."
           />
         </div>
       </div>
@@ -94,4 +102,4 @@ const StudentInteraction = () => {
   );
 };
 
-export default StudentInteraction;
+export default StaffInteraction;

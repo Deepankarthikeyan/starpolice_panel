@@ -8,43 +8,38 @@ import {
   InteractionMessenger,
   type MessengerContact,
 } from "../shared/InteractionMessenger";
-import type { ChatMessage, ManagedUser } from "../types";
-
-const GROUP_CONTACT_ID = "group";
+import {
+  GROUP_CONTACT_ID,
+  buildGroupContact,
+  messageParamsFromContact,
+  messagingRecordToContact,
+  sendParamsFromContact,
+} from "../shared/interactionHelpers";
+import type { ChatMessage, MessagingContact } from "../types";
 
 const StudentInteraction = () => {
   const { auth } = useContext(ThemeContext);
-  const [students, setStudents] = useState<ManagedUser[]>([]);
+  const [records, setRecords] = useState<MessagingContact[]>([]);
   const [activeContactId, setActiveContactId] = useState(GROUP_CONTACT_ID);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
 
   const contacts = useMemo<MessengerContact[]>(() => {
-    const groupContact: MessengerContact = {
-      id: GROUP_CONTACT_ID,
-      kind: "group",
+    const groupContact = buildGroupContact({
       title: "All Students",
       subtitle: "Group message to everyone",
       initials: "ALL",
-    };
+    });
 
-    const studentContacts = students.map((student) => ({
-      id: student.id,
-      kind: "private" as const,
-      title: student.name,
-      subtitle: student.email,
-      initials: student.name.slice(0, 2).toUpperCase(),
-    }));
-
-    return [groupContact, ...studentContacts];
-  }, [students]);
+    return [groupContact, ...records.map(messagingRecordToContact)];
+  }, [records]);
 
   const activeContact = contacts.find((contact) => contact.id === activeContactId) ?? contacts[0] ?? null;
 
   useEffect(() => {
     api
-      .getUsers("student")
-      .then((data) => setStudents(data.filter((student) => student.isActive)))
+      .getMessageContacts()
+      .then(setRecords)
       .catch(console.error);
   }, []);
 
@@ -54,11 +49,7 @@ const StudentInteraction = () => {
       return;
     }
 
-    const data = await api.getMessages(
-      activeContact.kind === "group"
-        ? { channel: "group" }
-        : { channel: "private", studentUserId: activeContact.id }
-    );
+    const data = await api.getMessages(messageParamsFromContact(activeContact));
     setMessages(data);
   };
 
@@ -68,17 +59,14 @@ const StudentInteraction = () => {
       loadMessages().catch(console.error);
     }, 5000);
     return () => window.clearInterval(interval);
-  }, [activeContactId, activeContact?.kind, activeContact?.id]);
+  }, [activeContactId, activeContact?.id]);
 
   const handleSend = async (text: string) => {
     if (!activeContact) return;
 
     setLoading(true);
     try {
-      await api.sendMessage(text, {
-        channel: activeContact.kind === "group" ? "group" : "private",
-        studentUserId: activeContact.kind === "private" ? activeContact.id : undefined,
-      });
+      await api.sendMessage(text, sendParamsFromContact(activeContact));
       await loadMessages();
       notify.success(
         activeContact.kind === "group"
