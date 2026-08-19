@@ -14,6 +14,7 @@ import { getPanelMotherMenu, formatAccountType } from "../panelLabels";
 import { notify } from "../toast";
 import type { ManagedUser, Subject } from "../types";
 import { SubjectMultiSelect } from "./SubjectMultiSelect";
+import { PasswordInput } from "../shared/PasswordInput";
 
 type CreateAccountType = "student" | "admin" | "staff";
 
@@ -434,12 +435,11 @@ const UserManagement = () => {
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Password</label>
-                  <input
-                    type="password"
-                    className="form-control"
+                  <PasswordInput
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={setPassword}
                     required
+                    autoComplete="new-password"
                   />
                 </div>
 
@@ -546,12 +546,11 @@ const UserManagement = () => {
                   </div>
                   <div className="mb-0">
                     <label className="form-label">New Password</label>
-                    <input
-                      type="password"
-                      className="form-control"
+                    <PasswordInput
                       value={editPassword}
-                      onChange={(e) => setEditPassword(e.target.value)}
+                      onChange={setEditPassword}
                       placeholder="Leave blank to keep current password"
+                      autoComplete="new-password"
                     />
                   </div>
                 </div>

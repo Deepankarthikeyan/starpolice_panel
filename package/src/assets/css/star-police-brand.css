@@ -130,6 +130,38 @@
   text-decoration: underline;
 }
 
+.spa-password-field {
+  position: relative;
+}
+
+.spa-password-field .form-control,
+.spa-password-field .spa-auth-input {
+  padding-right: 2.75rem;
+}
+
+.spa-password-toggle {
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #6b7785;
+  padding: 0.15rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spa-password-toggle:hover {
+  color: var(--primary, #123d73);
+}
+
+.spa-password-toggle .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
 @media (max-width: 991px) {
   .spa-auth-brand-inner,
   .spa-auth-form-inner {

@@ -6,6 +6,7 @@ import { hasPermission } from "../permissions";
 import { getPanelMotherMenu } from "../panelLabels";
 import { FileUploadProgressOverlay } from "../shared/FileUploadProgress";
 import { notify } from "../toast";
+import { PasswordInput } from "../shared/PasswordInput";
 import {
   emptyStudentOnboardingForm,
   type StudentOnboardingFormState,
@@ -543,8 +544,8 @@ const StudentOnboarding = () => {
             <div className="row">
               <div className="col-md-4"><Field label="Username"><TextInput value={form.username} onChange={(v) => setField("username", v)} placeholder="Optional login username" /></Field></div>
               <div className="col-md-4"><Field label="Login Email"><TextInput type="email" value={form.loginEmail} onChange={(v) => setField("loginEmail", v)} placeholder="Used for student panel sign in" /></Field></div>
-              <div className="col-md-4"><Field label="Password"><TextInput type="password" value={form.password} onChange={(v) => setField("password", v)} placeholder={editingId ? "Leave blank to keep current" : "Required for panel access"} /></Field></div>
-              <div className="col-md-4"><Field label="Confirm Password"><TextInput type="password" value={form.confirmPassword} onChange={(v) => setField("confirmPassword", v)} /></Field></div>
+              <div className="col-md-4"><Field label="Password"><PasswordInput value={form.password} onChange={(v) => setField("password", v)} placeholder={editingId ? "Leave blank to keep current" : "Required for panel access"} /></Field></div>
+              <div className="col-md-4"><Field label="Confirm Password"><PasswordInput value={form.confirmPassword} onChange={(v) => setField("confirmPassword", v)} /></Field></div>
               <div className="col-md-4 d-flex align-items-end">
                 <label className="form-check mb-3">
                   <input type="checkbox" className="form-check-input" checked={form.grantLogin} onChange={(e) => setField("grantLogin", e.target.checked)} />

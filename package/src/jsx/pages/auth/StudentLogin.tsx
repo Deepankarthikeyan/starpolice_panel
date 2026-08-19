@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
+import { PasswordInput } from "../../starPolice/shared/PasswordInput";
 import { api, storeAuth } from "../../starPolice/api";
 import { notify } from "../../starPolice/toast";
 import type { AuthUser } from "../../starPolice/types";
@@ -59,13 +60,13 @@ const StudentLogin = ({ setAuth }: Props) => {
         </div>
         <div className="mb-4">
           <label className="form-label">Password</label>
-          <input
-            type="password"
+          <PasswordInput
             className="form-control spa-auth-input"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             placeholder="Enter password"
             required
+            autoComplete="current-password"
           />
         </div>
         <button type="submit" className="btn spa-auth-btn w-100" disabled={loading}>
