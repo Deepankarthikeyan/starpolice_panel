@@ -47,6 +47,7 @@ const TEMP_STUDENTS = [
     email: "student@starpolice.academy",
     loginEmail: "student@starpolice.academy",
     course: "TNUSRB Constable",
+    residenceType: "Day Scholar",
     admissionDate: "2025-01-15",
   },
   {
@@ -58,6 +59,7 @@ const TEMP_STUDENTS = [
     mobileNumber: "9876543211",
     email: "rajesh.kumar@example.com",
     course: "TNUSRB Constable",
+    residenceType: "Day Scholar",
     admissionDate: "2025-01-15",
   },
   {
@@ -69,6 +71,7 @@ const TEMP_STUDENTS = [
     mobileNumber: "9876543212",
     email: "priya.devi@example.com",
     course: "TNUSRB Constable",
+    residenceType: "Day Scholar",
     admissionDate: "2025-01-15",
   },
   {
@@ -80,6 +83,7 @@ const TEMP_STUDENTS = [
     mobileNumber: "9876543213",
     email: "arun.murugan@example.com",
     course: "TNUSRB Constable",
+    residenceType: "Hostel",
     admissionDate: "2025-02-01",
   },
   {
@@ -91,6 +95,7 @@ const TEMP_STUDENTS = [
     mobileNumber: "9876543214",
     email: "kavitha.selvam@example.com",
     course: "TNUSRB Constable",
+    residenceType: "Hostel",
     admissionDate: "2025-02-01",
   },
 ];

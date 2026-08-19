@@ -1,3 +1,5 @@
+export type ResidenceType = "Day Scholar" | "Hostel" | "";
+
 export interface StudentOnboardingRecord {
   id: string;
   studentId: string;
@@ -43,6 +45,7 @@ export interface StudentOnboardingRecord {
   section: string;
   admissionDate: string;
   modeOfLearning: string;
+  residenceType: ResidenceType;
   duration: string;
   expectedCompletionDate: string;
   aadhaarCardUrl: string;
@@ -135,6 +138,7 @@ export const emptyStudentOnboardingForm = (): StudentOnboardingFormState => ({
   section: "",
   admissionDate: "",
   modeOfLearning: "",
+  residenceType: "",
   duration: "",
   expectedCompletionDate: "",
   aadhaarCardUrl: "",

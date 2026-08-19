@@ -76,6 +76,7 @@ const TEXT_FIELDS = [
   "section",
   "admissionDate",
   "modeOfLearning",
+  "residenceType",
   "duration",
   "expectedCompletionDate",
   "emergencyContactName",
@@ -118,7 +119,12 @@ function parseBodyData(body) {
   const data = {};
   for (const key of TEXT_FIELDS) {
     if (body[key] !== undefined) {
-      data[key] = String(body[key]).trim();
+      const raw = body[key];
+      let normalized = raw;
+      if (Array.isArray(raw)) {
+        normalized = raw.map((entry) => String(entry).trim()).find(Boolean) ?? raw[raw.length - 1];
+      }
+      data[key] = String(normalized).trim();
     }
   }
   if (body.termsAccepted !== undefined) {
@@ -128,6 +134,16 @@ function parseBodyData(body) {
     data.privacyAccepted = body.privacyAccepted === "true" || body.privacyAccepted === true;
   }
   return data;
+}
+
+const RESIDENCE_TYPES = ["Day Scholar", "Hostel"];
+
+function validateResidenceType(data, existingRecord = null) {
+  const value = data.residenceType || existingRecord?.residenceType || "";
+  if (!RESIDENCE_TYPES.includes(value)) {
+    return "Day Scholar or Hostel selection is required in course details.";
+  }
+  return null;
 }
 
 function mapRecord(record) {
@@ -180,6 +196,7 @@ function mapRecord(record) {
     section: item.section,
     admissionDate: item.admissionDate,
     modeOfLearning: item.modeOfLearning,
+    residenceType: item.residenceType || "",
     duration: item.duration,
     expectedCompletionDate: item.expectedCompletionDate,
     aadhaarCardUrl: item.aadhaarCardUrl,
@@ -425,6 +442,10 @@ router.post(
       if (!data.firstName || !data.lastName) {
         return res.status(400).json({ message: "First name and last name are required." });
       }
+      const residenceError = validateResidenceType(data);
+      if (residenceError) {
+        return res.status(400).json({ message: residenceError });
+      }
 
       const studentId = await generateStudentId();
       const record = await StudentOnboarding.create({
@@ -461,6 +482,13 @@ router.put(
       }
 
       const data = parseBodyData(req.body);
+      const residenceError = validateResidenceType(data, record);
+      if (residenceError) {
+        return res.status(400).json({ message: residenceError });
+      }
+      if (!data.residenceType && record.residenceType) {
+        data.residenceType = record.residenceType;
+      }
       Object.assign(record, data, mapFileUrls(req.files));
       await record.save();
 

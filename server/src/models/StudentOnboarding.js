@@ -50,6 +50,11 @@ const studentOnboardingSchema = new mongoose.Schema(
     section: { type: String, default: "" },
     admissionDate: { type: String, default: "" },
     modeOfLearning: { type: String, default: "" },
+    residenceType: {
+      type: String,
+      enum: ["Day Scholar", "Hostel", ""],
+      default: "",
+    },
     duration: { type: String, default: "" },
     expectedCompletionDate: { type: String, default: "" },
 

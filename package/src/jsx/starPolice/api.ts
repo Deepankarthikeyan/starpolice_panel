@@ -804,6 +804,7 @@ const STUDENT_ONBOARDING_TEXT_FIELDS: Array<keyof StudentOnboardingFormState> = 
   "section",
   "admissionDate",
   "modeOfLearning",
+  "residenceType",
   "duration",
   "expectedCompletionDate",
   "emergencyContactName",
@@ -838,15 +839,28 @@ function buildStudentOnboardingFormData(
   files: Partial<Record<string, File>>
 ) {
   const formData = new FormData();
+  const skipKeys = new Set(["residenceType", "password", "confirmPassword"]);
+
   for (const key of STUDENT_ONBOARDING_TEXT_FIELDS) {
+    if (skipKeys.has(key)) continue;
     const value = form[key];
     if (typeof value === "string" && value) {
       formData.append(key, value);
     }
   }
+
   formData.append("termsAccepted", String(form.termsAccepted));
   formData.append("privacyAccepted", String(form.privacyAccepted));
   formData.append("grantLogin", String(form.grantLogin));
+  formData.append("residenceType", form.residenceType || "");
+
+  if (form.password) {
+    formData.append("password", form.password);
+  }
+  if (form.confirmPassword) {
+    formData.append("confirmPassword", form.confirmPassword);
+  }
+
   Object.entries(files).forEach(([key, file]) => {
     if (file) {
       formData.append(key, file);
