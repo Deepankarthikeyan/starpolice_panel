@@ -62,6 +62,8 @@ export interface ChatMessage {
   senderName: string;
   senderEmail: string;
   message: string;
+  channel: "group" | "private";
+  threadStudentId?: string | null;
   createdAt: string;
 }
 

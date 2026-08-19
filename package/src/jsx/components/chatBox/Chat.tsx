@@ -20,7 +20,7 @@ const Chat: React.FC<ChatProps> = ({ toggleChatBox, toggleTab, toggle }) => {
 
   const loadMessages = useCallback(async () => {
     if (!auth?.token) return;
-    const data = await api.getMessages();
+    const data = await api.getMessages({ channel: "group" });
     setMessages(data);
   }, [auth?.token]);
 

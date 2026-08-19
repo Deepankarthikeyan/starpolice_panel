@@ -528,6 +528,37 @@
   text-align: center;
 }
 
+.spa-interaction-feed {
+  min-height: 360px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.spa-interaction-bubble {
+  max-width: 75%;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.85rem;
+  border-radius: 0.85rem;
+  background: #f8fafc;
+}
+
+.spa-interaction-bubble.is-mine {
+  margin-left: auto;
+  background: rgba(var(--bs-primary-rgb, 77, 68, 181), 0.12);
+}
+
+.spa-interaction-bubble-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.spa-interaction-mode .btn {
+  min-width: 6.5rem;
+}
+
 .daywise-upload-form .form-select,
 .daywise-upload-form .form-control {
   border-radius: 0.5rem;

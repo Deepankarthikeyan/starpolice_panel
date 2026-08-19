@@ -403,14 +403,28 @@ export const api = {
     });
   },
 
-  getMessages() {
-    return request<ChatMessage[]>("/api/messages");
+  getMessages(params?: { channel?: "group" | "private"; studentUserId?: string }) {
+    const search = new URLSearchParams();
+    if (params?.channel) search.set("channel", params.channel);
+    if (params?.studentUserId) search.set("studentUserId", params.studentUserId);
+    const query = search.toString();
+    return request<ChatMessage[]>(`/api/messages${query ? `?${query}` : ""}`);
   },
 
-  sendMessage(message: string) {
+  sendMessage(
+    message: string,
+    options?: {
+      channel?: "group" | "private";
+      studentUserId?: string;
+    },
+  ) {
     return request<ChatMessage>("/api/messages", {
       method: "POST",
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({
+        message,
+        channel: options?.channel ?? "group",
+        studentUserId: options?.studentUserId,
+      }),
     });
   },
 
