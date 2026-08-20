@@ -25,17 +25,17 @@ import {
 import { AttendancePerformanceList } from "../shared/PerformanceDetailPanels";
 import { ExamMarksTable } from "../shared/ExamMarksTable";
 import PhysicalRecordCard from "../shared/PhysicalRecordCard";
+import {
+  DEFAULT_PERFORMANCE_SORT_ID,
+  findPerformanceSortId,
+  getPerformanceSortOption,
+  PERFORMANCE_SORT_GROUPS,
+  type PerformanceFieldSortKey,
+  type PerformanceSortDir,
+} from "./performanceSortOptions";
 
-type SortKey =
-  | "studentId"
-  | "fullName"
-  | "batch"
-  | "attendancePercent"
-  | "physicalExamPercent"
-  | "writtenExamPercent"
-  | "overallPercent";
-
-type SortDir = "asc" | "desc";
+type SortKey = PerformanceFieldSortKey;
+type SortDir = PerformanceSortDir;
 
 type PerformanceSection = "attendance" | "physical" | "written";
 
@@ -44,13 +44,6 @@ type PercentFilterKey =
   | "physicalExamPercent"
   | "writtenExamPercent"
   | "overallPercent";
-
-const PERCENT_SORT_KEYS = new Set<SortKey>([
-  "attendancePercent",
-  "physicalExamPercent",
-  "writtenExamPercent",
-  "overallPercent",
-]);
 
 const PERCENT_FILTER_OPTIONS: { value: PercentFilterKey | ""; label: string }[] = [
   { value: "", label: "Select category" },
@@ -70,29 +63,6 @@ function getStudentPercent(student: StudentPerformanceSummary, key: PercentFilte
     return null;
   }
   return Number(value);
-}
-
-function comparePercent(a: number | null | undefined, b: number | null | undefined) {
-  const aVal = a === null || a === undefined || Number.isNaN(Number(a)) ? null : Number(a);
-  const bVal = b === null || b === undefined || Number.isNaN(Number(b)) ? null : Number(b);
-  if (aVal === null && bVal === null) return 0;
-  if (aVal === null) return 1;
-  if (bVal === null) return -1;
-  return aVal - bVal;
-}
-
-function compareValues(
-  a: string | number | null | undefined,
-  b: string | number | null | undefined,
-  key: SortKey
-) {
-  if (PERCENT_SORT_KEYS.has(key)) {
-    return comparePercent(a as number | null | undefined, b as number | null | undefined);
-  }
-  if (a === null || a === undefined) return 1;
-  if (b === null || b === undefined) return -1;
-  if (typeof a === "number" && typeof b === "number") return a - b;
-  return String(a).localeCompare(String(b), undefined, { sensitivity: "base" });
 }
 
 function PerformanceSummaryCard({
@@ -149,8 +119,7 @@ const StudentPerformance = () => {
   const [writtenExams, setWrittenExams] = useState<StudentExamMarkEntry[]>([]);
   const [performanceForm, setPerformanceForm] = useState<StudentPerformanceRecord | null>(null);
   const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("overallPercent");
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [selectedSortId, setSelectedSortId] = useState(DEFAULT_PERFORMANCE_SORT_ID);
   const [percentFilterKey, setPercentFilterKey] = useState<PercentFilterKey | "">("");
   const [percentMin, setPercentMin] = useState("");
   const [percentMax, setPercentMax] = useState("");
@@ -181,6 +150,9 @@ const StudentPerformance = () => {
     loadStudents().catch(console.error);
   }, [canManage]);
 
+  const activeSort = getPerformanceSortOption(selectedSortId);
+  const sortDir = activeSort.dir ?? "desc";
+
   const filteredStudents = useMemo(() => {
     const query = search.trim().toLowerCase();
     let rows = students;
@@ -206,12 +178,9 @@ const StudentPerformance = () => {
       });
     }
 
-    rows = [...rows].sort((a, b) => {
-      const result = compareValues(a[sortKey], b[sortKey], sortKey);
-      return sortDir === "asc" ? result : -result;
-    });
+    rows = [...rows].sort(getPerformanceSortOption(selectedSortId).compare);
     return rows;
-  }, [students, search, sortKey, sortDir, percentFilterKey, percentMin, percentMax]);
+  }, [students, search, selectedSortId, percentFilterKey, percentMin, percentMax]);
 
   const percentFilterActive =
     Boolean(percentFilterKey) && (percentMin !== "" || percentMax !== "");
@@ -230,37 +199,19 @@ const StudentPerformance = () => {
   };
 
   const toggleSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
-      return;
-    }
-    setSortKey(key);
-    setSortDir(PERCENT_SORT_KEYS.has(key) ? "desc" : "asc");
+    const nextDir: SortDir =
+      activeSort.field === key
+        ? sortDir === "asc"
+          ? "desc"
+          : "asc"
+        : key.endsWith("Percent")
+          ? "desc"
+          : "asc";
+    setSelectedSortId(findPerformanceSortId(key, nextDir));
   };
 
-  const sortIndicator = (key: SortKey) => (sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : "");
-
-  const sortOptions: { key: SortKey; dir: SortDir; label: string }[] = [
-    { key: "overallPercent", dir: "desc", label: "Overall % (High to Low)" },
-    { key: "overallPercent", dir: "asc", label: "Overall % (Low to High)" },
-    { key: "attendancePercent", dir: "desc", label: "Attendance % (High to Low)" },
-    { key: "attendancePercent", dir: "asc", label: "Attendance % (Low to High)" },
-    { key: "physicalExamPercent", dir: "desc", label: "Physical Exam % (High to Low)" },
-    { key: "physicalExamPercent", dir: "asc", label: "Physical Exam % (Low to High)" },
-    { key: "writtenExamPercent", dir: "desc", label: "Written Exam % (High to Low)" },
-    { key: "writtenExamPercent", dir: "asc", label: "Written Exam % (Low to High)" },
-    { key: "fullName", dir: "asc", label: "Student Name (A-Z)" },
-    { key: "studentId", dir: "asc", label: "Register No. (A-Z)" },
-    { key: "batch", dir: "asc", label: "Batch (A-Z)" },
-  ];
-
-  const sortSelectValue = `${sortKey}:${sortDir}`;
-
-  const handleSortSelect = (value: string) => {
-    const [key, dir] = value.split(":") as [SortKey, SortDir];
-    setSortKey(key);
-    setSortDir(dir);
-  };
+  const sortIndicator = (key: SortKey) =>
+    activeSort.field === key ? (sortDir === "asc" ? " ↑" : " ↓") : "";
 
   const openStudent = async (studentOnboardingId: string) => {
     setLoading(true);
@@ -386,14 +337,18 @@ const StudentPerformance = () => {
             <div className="d-flex flex-wrap align-items-center gap-2">
               <select
                 className="form-select form-select-sm spa-performance-sort-select"
-                value={sortSelectValue}
-                onChange={(event) => handleSortSelect(event.target.value)}
+                value={selectedSortId}
+                onChange={(event) => setSelectedSortId(event.target.value)}
                 aria-label="Sort students"
               >
-                {sortOptions.map((option) => (
-                  <option key={`${option.key}:${option.dir}`} value={`${option.key}:${option.dir}`}>
-                    {option.label}
-                  </option>
+                {PERFORMANCE_SORT_GROUPS.map((group) => (
+                  <optgroup key={group.label} label={group.label}>
+                    {group.options.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
               <input
