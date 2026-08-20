@@ -57,13 +57,11 @@ function DualRangeSlider({
   const maxVal = parsePercent(max, 100);
 
   const setMinValue = (value: number) => {
-    const next = Math.min(value, maxVal);
-    onMinChange(String(next));
+    onMinChange(String(Math.min(value, maxVal)));
   };
 
   const setMaxValue = (value: number) => {
-    const next = Math.max(value, minVal);
-    onMaxChange(String(next));
+    onMaxChange(String(Math.max(value, minVal)));
   };
 
   const valueFromPointer = (clientX: number) => {
@@ -88,6 +86,7 @@ function DualRangeSlider({
 
   return (
     <div className={`spa-performance-dual-range ${disabled ? "is-disabled" : ""}`}>
+      <span className="spa-performance-dual-range-edge spa-performance-dual-range-edge-start">0%</span>
       <div
         ref={railRef}
         className="spa-performance-dual-range-rail"
@@ -120,10 +119,7 @@ function DualRangeSlider({
           onChange={(event) => setMaxValue(Number(event.target.value))}
         />
       </div>
-      <div className="spa-performance-dual-range-labels">
-        <span>0%</span>
-        <span>100%</span>
-      </div>
+      <span className="spa-performance-dual-range-edge spa-performance-dual-range-edge-end">100%</span>
     </div>
   );
 }
@@ -161,8 +157,8 @@ export function PerformanceCategoryFilter({
 
   return (
     <div className="spa-performance-category-filter spa-no-print">
-      <div className="spa-performance-category-filter-body">
-        <div className="spa-performance-category-picker-wrap" ref={rootRef}>
+      <div className="spa-performance-filter-row">
+        <div className="spa-performance-filter-cell spa-performance-filter-cell-category" ref={rootRef}>
           <label className="spa-performance-filter-field-label">Show by category</label>
           <button
             type="button"
@@ -216,7 +212,7 @@ export function PerformanceCategoryFilter({
           )}
         </div>
 
-        <div className={`spa-performance-range-panel ${disabled ? "is-disabled" : ""}`}>
+        <div className={`spa-performance-filter-cell spa-performance-filter-cell-range ${disabled ? "is-disabled" : ""}`}>
           <div className="spa-performance-range-panel-top">
             <label className="spa-performance-filter-field-label">Score range</label>
             {!disabled && (
@@ -225,7 +221,6 @@ export function PerformanceCategoryFilter({
               </span>
             )}
           </div>
-
           <DualRangeSlider
             min={min}
             max={max}
@@ -233,45 +228,43 @@ export function PerformanceCategoryFilter({
             onMinChange={onMinChange}
             onMaxChange={onMaxChange}
           />
-
-          <div className="spa-performance-range-inputs">
-            <label className="spa-performance-range-field" htmlFor="performance-filter-min">
-              <span className="spa-performance-filter-field-label">From %</span>
-              <span className="spa-performance-range-field-input-wrap">
-                <input
-                  id="performance-filter-min"
-                  type="number"
-                  min={0}
-                  max={100}
-                  className="spa-performance-range-field-input"
-                  placeholder="10"
-                  value={min}
-                  onChange={(event) => onMinChange(event.target.value)}
-                  disabled={disabled}
-                />
-                <span className="spa-performance-range-field-suffix">%</span>
-              </span>
-            </label>
-
-            <label className="spa-performance-range-field" htmlFor="performance-filter-max">
-              <span className="spa-performance-filter-field-label">To %</span>
-              <span className="spa-performance-range-field-input-wrap">
-                <input
-                  id="performance-filter-max"
-                  type="number"
-                  min={0}
-                  max={100}
-                  className="spa-performance-range-field-input"
-                  placeholder="30"
-                  value={max}
-                  onChange={(event) => onMaxChange(event.target.value)}
-                  disabled={disabled}
-                />
-                <span className="spa-performance-range-field-suffix">%</span>
-              </span>
-            </label>
-          </div>
         </div>
+
+        <label className="spa-performance-filter-cell spa-performance-filter-cell-input" htmlFor="performance-filter-min">
+          <span className="spa-performance-filter-field-label">From %</span>
+          <span className="spa-performance-range-field-input-wrap">
+            <input
+              id="performance-filter-min"
+              type="number"
+              min={0}
+              max={100}
+              className="spa-performance-range-field-input"
+              placeholder="10"
+              value={min}
+              onChange={(event) => onMinChange(event.target.value)}
+              disabled={disabled}
+            />
+            <span className="spa-performance-range-field-suffix">%</span>
+          </span>
+        </label>
+
+        <label className="spa-performance-filter-cell spa-performance-filter-cell-input" htmlFor="performance-filter-max">
+          <span className="spa-performance-filter-field-label">To %</span>
+          <span className="spa-performance-range-field-input-wrap">
+            <input
+              id="performance-filter-max"
+              type="number"
+              min={0}
+              max={100}
+              className="spa-performance-range-field-input"
+              placeholder="30"
+              value={max}
+              onChange={(event) => onMaxChange(event.target.value)}
+              disabled={disabled}
+            />
+            <span className="spa-performance-range-field-suffix">%</span>
+          </span>
+        </label>
 
         {active && (
           <button type="button" className="spa-performance-category-clear" onClick={onClear}>
