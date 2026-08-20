@@ -25,21 +25,25 @@ import {
 import { AttendancePerformanceList } from "../shared/PerformanceDetailPanels";
 import { ExamMarksTable } from "../shared/ExamMarksTable";
 import PhysicalRecordCard from "../shared/PhysicalRecordCard";
-import {
-  PerformanceOverviewControls,
-  PERFORMANCE_LENS_PRESETS,
-  type PerformanceLensId,
-  type PerformancePercentFilterKey,
-  type PerformanceSortDir,
-  type PerformanceSortKey,
-} from "./PerformanceOverviewControls";
 
-type SortKey = PerformanceSortKey;
-type SortDir = PerformanceSortDir;
+type SortKey =
+  | "studentId"
+  | "fullName"
+  | "batch"
+  | "attendancePercent"
+  | "physicalExamPercent"
+  | "writtenExamPercent"
+  | "overallPercent";
+
+type SortDir = "asc" | "desc";
 
 type PerformanceSection = "attendance" | "physical" | "written";
 
-type PercentFilterKey = PerformancePercentFilterKey;
+type PercentFilterKey =
+  | "attendancePercent"
+  | "physicalExamPercent"
+  | "writtenExamPercent"
+  | "overallPercent";
 
 const PERCENT_SORT_KEYS = new Set<SortKey>([
   "attendancePercent",
@@ -47,6 +51,18 @@ const PERCENT_SORT_KEYS = new Set<SortKey>([
   "writtenExamPercent",
   "overallPercent",
 ]);
+
+const PERCENT_FILTER_OPTIONS: { value: PercentFilterKey | ""; label: string }[] = [
+  { value: "", label: "Select category" },
+  { value: "attendancePercent", label: "Attendance" },
+  { value: "physicalExamPercent", label: "Physical Exam" },
+  { value: "writtenExamPercent", label: "Written Exam" },
+  { value: "overallPercent", label: "Overall" },
+];
+
+function percentFilterLabel(key: PercentFilterKey | "") {
+  return PERCENT_FILTER_OPTIONS.find((option) => option.value === key)?.label ?? "Performance";
+}
 
 function getStudentPercent(student: StudentPerformanceSummary, key: PercentFilterKey) {
   const value = student[key];
@@ -138,7 +154,6 @@ const StudentPerformance = () => {
   const [percentFilterKey, setPercentFilterKey] = useState<PercentFilterKey | "">("");
   const [percentMin, setPercentMin] = useState("");
   const [percentMax, setPercentMax] = useState("");
-  const [activeLensId, setActiveLensId] = useState<PerformanceLensId | "">("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [listLoading, setListLoading] = useState(true);
@@ -201,25 +216,17 @@ const StudentPerformance = () => {
   const percentFilterActive =
     Boolean(percentFilterKey) && (percentMin !== "" || percentMax !== "");
 
+  const percentFilterSummary = useMemo(() => {
+    if (!percentFilterActive || !percentFilterKey) return "";
+    const min = percentMin === "" ? "0" : percentMin;
+    const max = percentMax === "" ? "100" : percentMax;
+    return `${percentFilterLabel(percentFilterKey)}: ${min}% to ${max}%`;
+  }, [percentFilterActive, percentFilterKey, percentMin, percentMax]);
+
   const clearPercentFilter = () => {
     setPercentFilterKey("");
     setPercentMin("");
     setPercentMax("");
-    setActiveLensId("");
-  };
-
-  const resetOverviewControls = () => {
-    setSearch("");
-    clearPercentFilter();
-  };
-
-  const applyLensPreset = (lens: typeof PERFORMANCE_LENS_PRESETS[number]) => {
-    setActiveLensId(lens.id);
-    setPercentFilterKey(lens.filterKey);
-    setPercentMin(String(lens.min));
-    setPercentMax(String(lens.max));
-    setSortKey(lens.sortKey);
-    setSortDir(lens.sortDir);
   };
 
   const toggleSort = (key: SortKey) => {
@@ -232,6 +239,28 @@ const StudentPerformance = () => {
   };
 
   const sortIndicator = (key: SortKey) => (sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : "");
+
+  const sortOptions: { key: SortKey; dir: SortDir; label: string }[] = [
+    { key: "overallPercent", dir: "desc", label: "Overall % (High to Low)" },
+    { key: "overallPercent", dir: "asc", label: "Overall % (Low to High)" },
+    { key: "attendancePercent", dir: "desc", label: "Attendance % (High to Low)" },
+    { key: "attendancePercent", dir: "asc", label: "Attendance % (Low to High)" },
+    { key: "physicalExamPercent", dir: "desc", label: "Physical Exam % (High to Low)" },
+    { key: "physicalExamPercent", dir: "asc", label: "Physical Exam % (Low to High)" },
+    { key: "writtenExamPercent", dir: "desc", label: "Written Exam % (High to Low)" },
+    { key: "writtenExamPercent", dir: "asc", label: "Written Exam % (Low to High)" },
+    { key: "fullName", dir: "asc", label: "Student Name (A-Z)" },
+    { key: "studentId", dir: "asc", label: "Register No. (A-Z)" },
+    { key: "batch", dir: "asc", label: "Batch (A-Z)" },
+  ];
+
+  const sortSelectValue = `${sortKey}:${sortDir}`;
+
+  const handleSortSelect = (value: string) => {
+    const [key, dir] = value.split(":") as [SortKey, SortDir];
+    setSortKey(key);
+    setSortDir(dir);
+  };
 
   const openStudent = async (studentOnboardingId: string) => {
     setLoading(true);
@@ -352,31 +381,103 @@ const StudentPerformance = () => {
 
       {!detail ? (
         <div className="card">
-          <div className="card-header spa-no-print">
+          <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 spa-no-print">
             <h4 className="card-title mb-0">Student Performance Overview</h4>
+            <div className="d-flex flex-wrap align-items-center gap-2">
+              <select
+                className="form-select form-select-sm spa-performance-sort-select"
+                value={sortSelectValue}
+                onChange={(event) => handleSortSelect(event.target.value)}
+                aria-label="Sort students"
+              >
+                {sortOptions.map((option) => (
+                  <option key={`${option.key}:${option.dir}`} value={`${option.key}:${option.dir}`}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="search"
+                className="form-control form-control-sm spa-performance-search"
+                placeholder="Search name, register no., batch..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
           </div>
           <div className="card-body pt-0">
-            <PerformanceOverviewControls
-              search={search}
-              onSearchChange={setSearch}
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSortKeyChange={setSortKey}
-              onSortDirChange={setSortDir}
-              percentFilterKey={percentFilterKey}
-              percentMin={percentMin}
-              percentMax={percentMax}
-              onPercentFilterKeyChange={setPercentFilterKey}
-              onPercentMinChange={setPercentMin}
-              onPercentMaxChange={setPercentMax}
-              onClearPercentFilter={clearPercentFilter}
-              onResetAll={resetOverviewControls}
-              activeLensId={activeLensId}
-              onLensSelect={applyLensPreset}
-              onLensClear={() => setActiveLensId("")}
-              resultCount={filteredStudents.length}
-              totalCount={students.length}
-            />
+            <div className="spa-performance-filter-bar spa-no-print">
+              <div className="row g-2 align-items-end">
+                <div className="col-md-3 col-sm-6">
+                  <label className="form-label spa-performance-filter-label" htmlFor="performance-filter-category">
+                    Show by category
+                  </label>
+                  <select
+                    id="performance-filter-category"
+                    className="form-select form-select-sm"
+                    value={percentFilterKey}
+                    onChange={(event) =>
+                      setPercentFilterKey(event.target.value as PercentFilterKey | "")
+                    }
+                  >
+                    {PERCENT_FILTER_OPTIONS.map((option) => (
+                      <option key={option.value || "all"} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-md-2 col-sm-3">
+                  <label className="form-label spa-performance-filter-label" htmlFor="performance-filter-min">
+                    From %
+                  </label>
+                  <input
+                    id="performance-filter-min"
+                    type="number"
+                    min={0}
+                    max={100}
+                    className="form-control form-control-sm"
+                    placeholder="10"
+                    value={percentMin}
+                    onChange={(event) => setPercentMin(event.target.value)}
+                    disabled={!percentFilterKey}
+                  />
+                </div>
+                <div className="col-md-2 col-sm-3">
+                  <label className="form-label spa-performance-filter-label" htmlFor="performance-filter-max">
+                    To %
+                  </label>
+                  <input
+                    id="performance-filter-max"
+                    type="number"
+                    min={0}
+                    max={100}
+                    className="form-control form-control-sm"
+                    placeholder="30"
+                    value={percentMax}
+                    onChange={(event) => setPercentMax(event.target.value)}
+                    disabled={!percentFilterKey}
+                  />
+                </div>
+                <div className="col-md-auto col-sm-12 d-flex align-items-end gap-2">
+                  {percentFilterActive && (
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-secondary"
+                      onClick={clearPercentFilter}
+                    >
+                      Clear range
+                    </button>
+                  )}
+                </div>
+              </div>
+              {percentFilterActive && (
+                <p className="spa-performance-filter-summary mb-0 mt-2">
+                  Showing {percentFilterSummary} · {filteredStudents.length} student
+                  {filteredStudents.length === 1 ? "" : "s"}
+                </p>
+              )}
+            </div>
             {listError && (
               <div className="alert alert-danger spa-no-print">
                 {listError}
