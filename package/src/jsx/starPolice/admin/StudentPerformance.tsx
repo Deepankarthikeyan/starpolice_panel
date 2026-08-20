@@ -27,6 +27,7 @@ import { ExamMarksTable } from "../shared/ExamMarksTable";
 import PhysicalRecordCard from "../shared/PhysicalRecordCard";
 import { PerformanceSortPicker } from "./PerformanceSortPicker";
 import { PerformanceCategoryFilter } from "./PerformanceCategoryFilter";
+import { PerformanceSearchField } from "./PerformanceSearchField";
 
 type SortKey =
   | "studentId"
@@ -391,13 +392,7 @@ const StudentPerformance = () => {
                 value={sortSelectValue}
                 onChange={handleSortSelect}
               />
-              <input
-                type="search"
-                className="form-control form-control-sm spa-performance-search"
-                placeholder="Search name, register no., batch..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <PerformanceSearchField value={search} onChange={setSearch} />
             </div>
           </div>
           <div className="card-body pt-0">
