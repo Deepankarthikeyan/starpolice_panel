@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Exam from "../models/Exam.js";
 import { authRequired } from "../middleware/auth.js";
+import { requireDb } from "../middleware/requireDb.js";
 import { getEffectivePermissions } from "../permissions.js";
 
 const router = express.Router();
@@ -100,7 +101,7 @@ function canAccessStudentPanel(user) {
   return user.role === "student" && user.isActive;
 }
 
-router.get("/setup", async (_req, res) => {
+router.get("/setup", requireDb, async (_req, res) => {
   try {
     const superAdminCount = await User.countDocuments({ role: "superadmin" });
     res.json({ needsSuperAdmin: superAdminCount === 0 });
@@ -109,7 +110,7 @@ router.get("/setup", async (_req, res) => {
   }
 });
 
-router.post("/register", async (req, res) => {
+router.post("/register", requireDb, async (req, res) => {
   try {
     const { name, email, password, panel } = req.body;
     if (!name?.trim() || !email?.trim() || !password || !panel) {
@@ -152,7 +153,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", requireDb, async (req, res) => {
   try {
     const { email, password, panel } = req.body;
     if (!email || !password || !panel) {

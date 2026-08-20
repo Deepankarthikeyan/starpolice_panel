@@ -193,7 +193,9 @@ async function request<T>(path: string, options: RequestInit = {}, panel?: Panel
   if (!response.ok) {
     let message = data.message;
     if (!message) {
-      if (response.status === 404) {
+      if (response.status === 502 || response.status === 503) {
+        message = "API is waking up or temporarily unavailable. Wait 30 seconds and try again.";
+      } else if (response.status === 404) {
         message = "API endpoint not found. The server may need to be updated.";
       } else {
         message = `Request failed (${response.status})`;

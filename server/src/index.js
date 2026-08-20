@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import { connectDB } from "./config/db.js";
+import { connectDBWithRetry, isDbConnected } from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import uploadRoutes from "./routes/uploads.js";
 import messageRoutes from "./routes/messages.js";
@@ -40,9 +40,10 @@ app.use(express.json());
 app.use("/uploads", express.static(uploadDir));
 
 app.get("/api/health", (_req, res) => {
+  const connected = isDbConnected();
   res.json({
-    status: "ok",
-    database: "mongodb",
+    status: connected ? "ok" : "starting",
+    database: connected ? "mongodb" : "connecting",
     build: process.env.RENDER_GIT_COMMIT?.slice(0, 7) || "local",
     features: {
       messageContacts: true,
@@ -70,18 +71,7 @@ app.use((error, _req, res, _next) => {
   res.status(500).json({ message: error.message || "Server error" });
 });
 
-async function start() {
-  app.listen(PORT, () => {
-    console.log(`API server running on http://localhost:${PORT}`);
-  });
-
-  try {
-    await connectDB(process.env.MONGODB_URI);
-  } catch (error) {
-    console.error("Database connection failed:", error);
-    process.exit(1);
-  }
-
+async function runMigrations() {
   for (const [label, task] of [
     ["fixUsernameIndex", fixUsernameIndex],
     ["backfillAttendancePermission", backfillAttendancePermission],
@@ -93,6 +83,29 @@ async function start() {
       console.error(`Migration ${label} failed:`, error);
     }
   }
+}
+
+async function connectDatabaseInBackground() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    console.error("MONGODB_URI is not set. API will stay up but database routes will fail.");
+    return;
+  }
+
+  try {
+    await connectDBWithRetry(uri);
+    await runMigrations();
+  } catch (error) {
+    console.error("Database startup failed after retries:", error);
+  }
+}
+
+async function start() {
+  app.listen(PORT, () => {
+    console.log(`API server running on http://localhost:${PORT}`);
+  });
+
+  void connectDatabaseInBackground();
 }
 
 start().catch((error) => {
