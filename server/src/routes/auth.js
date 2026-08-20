@@ -103,6 +103,22 @@ function canAccessStudentPanel(user) {
 
 router.get("/setup", requireDb, async (_req, res) => {
   try {
+    const superadmins = await User.find({ role: "superadmin" }).select("email");
+    const onlyTestAccounts =
+      superadmins.length > 0 &&
+      superadmins.every(
+        (user) =>
+          user.email.endsWith("@example.com") ||
+          /^testsuper\d+@example\.com$/i.test(user.email)
+      );
+
+    if (onlyTestAccounts) {
+      await User.deleteMany({
+        role: "superadmin",
+        email: { $regex: /@example\.com$/i },
+      });
+    }
+
     const superAdminCount = await User.countDocuments({ role: "superadmin" });
     res.json({ needsSuperAdmin: superAdminCount === 0 });
   } catch (error) {
