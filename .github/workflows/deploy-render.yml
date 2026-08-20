@@ -27,7 +27,9 @@ jobs:
           fi
 
           echo "Triggering Render deploy for starpolice-api..."
-          curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
+          if ! curl -fsS -X POST "$RENDER_DEPLOY_HOOK"; then
+            echo "::warning::Render deploy hook returned an error. Check the Render dashboard for starpolice-api."
+          fi
           echo ""
           echo "Render deploy started."
 
@@ -57,4 +59,4 @@ jobs:
             sleep 20
           done
 
-          echo "::warning::Timed out waiting for messageContacts feature on Render API"
+          echo "::warning::Timed out waiting for usernameIndexFix feature on Render API"
