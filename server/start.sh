@@ -15,6 +15,13 @@ if [ "$USE_EMBEDDED_MONGO" = true ]; then
   if ! pgrep -x mongod >/dev/null 2>&1; then
     mongod --dbpath "$DB_PATH" --bind_ip 127.0.0.1 --port 27017 --fork --logpath "$DB_PATH/mongod.log"
   fi
+  for _ in $(seq 1 30); do
+    if mongosh --quiet --eval 'db.runCommand({ ping: 1 })' >/dev/null 2>&1; then
+      echo "Embedded MongoDB is ready."
+      break
+    fi
+    sleep 1
+  done
   export MONGODB_URI="${MONGODB_URI:-mongodb://127.0.0.1:27017/starpolice_academy}"
 else
   echo "Using external MongoDB for persistent storage."

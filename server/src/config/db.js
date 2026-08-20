@@ -17,7 +17,7 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function connectDBWithRetry(uri, { maxAttempts = MAX_ATTEMPTS } = {}) {
+export async function connectDBWithRetry(uri, { maxAttempts = MAX_ATTEMPTS, retryMs = RETRY_MS } = {}) {
   let lastError = null;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
@@ -31,7 +31,7 @@ export async function connectDBWithRetry(uri, { maxAttempts = MAX_ATTEMPTS } = {
       lastError = error;
       console.error(`MongoDB connection attempt ${attempt}/${maxAttempts} failed:`, error.message);
       if (attempt < maxAttempts) {
-        await sleep(RETRY_MS);
+        await sleep(retryMs);
       }
     }
   }
