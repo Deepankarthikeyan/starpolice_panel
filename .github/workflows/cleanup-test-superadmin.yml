@@ -1,0 +1,59 @@
+name: Cleanup test superadmin (production)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install API dependencies
+        run: npm ci --omit=dev
+        working-directory: server
+
+      - name: Remove @example.com superadmin from Atlas
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        run: |
+          if [ -z "$MONGODB_URI" ]; then
+            echo "::error::Add MONGODB_URI to GitHub repository secrets (same Atlas URI as Render)."
+            exit 1
+          fi
+
+          node --input-type=module <<'EOF'
+          import mongoose from "mongoose";
+
+          const uri = process.env.MONGODB_URI;
+          await mongoose.connect(uri);
+
+          const result = await mongoose.connection.db.collection("users").deleteMany({
+            role: "superadmin",
+            email: { $regex: /@example\.com$/i },
+          });
+
+          console.log(`Deleted ${result.deletedCount} test superadmin account(s).`);
+          const remaining = await mongoose.connection.db.collection("users").countDocuments({
+            role: "superadmin",
+          });
+          console.log(`Remaining superadmins: ${remaining}`);
+          console.log(`Signup open: ${remaining === 0}`);
+
+          await mongoose.disconnect();
+          EOF
+        working-directory: server
+
+      - name: Verify signup status
+        run: |
+          status=$(curl -fsS https://starpolice-api.onrender.com/api/auth/setup)
+          echo "Production setup status: $status"
+          if echo "$status" | grep -q '"needsSuperAdmin"[[:space:]]*:[[:space:]]*true'; then
+            echo "Super Admin signup is open at https://starpolice-panel.netlify.app/admin/signup"
+          else
+            echo "::warning::Signup still closed on production. Deploy latest API to Render or delete the user in Atlas."
+          fi

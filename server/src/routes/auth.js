@@ -6,6 +6,7 @@ import Exam from "../models/Exam.js";
 import { authRequired } from "../middleware/auth.js";
 import { requireDb } from "../middleware/requireDb.js";
 import { getEffectivePermissions } from "../permissions.js";
+import { clearTestSuperAdminsIfNeeded } from "../utils/clearTestSuperAdmins.js";
 
 const router = express.Router();
 
@@ -101,26 +102,25 @@ function canAccessStudentPanel(user) {
   return user.role === "student" && user.isActive;
 }
 
+async function getSetupStatus() {
+  await clearTestSuperAdminsIfNeeded();
+  const superAdminCount = await User.countDocuments({ role: "superadmin" });
+  return { needsSuperAdmin: superAdminCount === 0 };
+}
+
 router.get("/setup", requireDb, async (_req, res) => {
   try {
-    const superadmins = await User.find({ role: "superadmin" }).select("email");
-    const onlyTestAccounts =
-      superadmins.length > 0 &&
-      superadmins.every(
-        (user) =>
-          user.email.endsWith("@example.com") ||
-          /^testsuper\d+@example\.com$/i.test(user.email)
-      );
+    res.json(await getSetupStatus());
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
-    if (onlyTestAccounts) {
-      await User.deleteMany({
-        role: "superadmin",
-        email: { $regex: /@example\.com$/i },
-      });
-    }
-
-    const superAdminCount = await User.countDocuments({ role: "superadmin" });
-    res.json({ needsSuperAdmin: superAdminCount === 0 });
+router.post("/prepare-signup", requireDb, async (_req, res) => {
+  try {
+    const { cleared, deletedCount } = await clearTestSuperAdminsIfNeeded();
+    const status = await getSetupStatus();
+    res.json({ ...status, cleared, deletedCount });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

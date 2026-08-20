@@ -286,6 +286,13 @@ export const api = {
     return request<SetupStatus>("/api/auth/setup");
   },
 
+  prepareSignup() {
+    return request<SetupStatus & { cleared?: boolean; deletedCount?: number }>(
+      "/api/auth/prepare-signup",
+      { method: "POST" }
+    );
+  },
+
   register(name: string, email: string, password: string, panel: PanelType) {
     return request<AuthUser>("/api/auth/register", {
       method: "POST",

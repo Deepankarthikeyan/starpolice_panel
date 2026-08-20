@@ -158,6 +158,19 @@ If you see `"setupRequired"` or `"database":"missing"`, `MONGODB_URI` is not set
 1. Open https://starpolice-panel.netlify.app/admin/signup  
 2. Create your Super Admin account (only works when `/api/health` shows `"database":"mongodb"`)
 
+If signup shows **“Signup Closed”** because a test `@example.com` super admin exists, deploy the latest API commit on Render (see below). The signup page clears test-only accounts automatically once the new API is live.
+
+### Render stuck on an old build
+
+If `https://starpolice-api.onrender.com/api/health` shows an old `"build"` hash after you push to `master`:
+
+1. Open **Render → starpolice-api → Events** and check for failed deploys  
+2. **Manual Deploy → Deploy latest commit** (or connect the service to GitHub with auto-deploy)  
+3. Confirm `/api/health` `"build"` matches your latest Git commit (first 7 characters)  
+4. Open `/admin/signup` again — test `@example.com` super admins are removed automatically
+
+Optional: add the same `MONGODB_URI` as a GitHub secret and run the **Cleanup test superadmin (production)** workflow to delete test accounts without opening Atlas.
+
 ### Keep Render awake (free tier)
 
 Render free tier sleeps after ~15 minutes without traffic. This repo includes a GitHub Action (**Keep Render API awake**) that pings `/api/health` every 14 minutes automatically — no extra setup needed once Actions are enabled.

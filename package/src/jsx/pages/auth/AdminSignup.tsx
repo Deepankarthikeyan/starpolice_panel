@@ -20,7 +20,15 @@ const AdminSignup = ({ setAuth }: Props) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.getSetupStatus().then((status) => setNeedsSuperAdmin(status.needsSuperAdmin)).catch(console.error);
+    api
+      .prepareSignup()
+      .then((status) => setNeedsSuperAdmin(status.needsSuperAdmin))
+      .catch(() =>
+        api
+          .getSetupStatus()
+          .then((status) => setNeedsSuperAdmin(status.needsSuperAdmin))
+          .catch(console.error)
+      );
   }, []);
 
   const onSubmit = async (event: FormEvent) => {
