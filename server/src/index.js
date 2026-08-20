@@ -77,12 +77,21 @@ async function start() {
 
   try {
     await connectDB(process.env.MONGODB_URI);
-    await fixUsernameIndex();
-    await backfillAttendancePermission();
-    await stripLeadsFromStaff();
   } catch (error) {
-    console.error("Database startup failed:", error);
+    console.error("Database connection failed:", error);
     process.exit(1);
+  }
+
+  for (const [label, task] of [
+    ["fixUsernameIndex", fixUsernameIndex],
+    ["backfillAttendancePermission", backfillAttendancePermission],
+    ["stripLeadsFromStaff", stripLeadsFromStaff],
+  ]) {
+    try {
+      await task();
+    } catch (error) {
+      console.error(`Migration ${label} failed:`, error);
+    }
   }
 }
 

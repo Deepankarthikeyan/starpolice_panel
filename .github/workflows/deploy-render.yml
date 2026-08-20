@@ -42,15 +42,15 @@ jobs:
           fi
 
           API_URL="${RENDER_API_URL:-https://starpolice-api.onrender.com}"
-          echo "Waiting for $API_URL/api/health to report messageContacts..."
+          echo "Waiting for $API_URL/api/health to report usernameIndexFix..."
 
           for attempt in $(seq 1 30); do
             if response=$(curl -fsS "$API_URL/api/health" 2>/dev/null); then
-              if echo "$response" | grep -q '"messageContacts"[[:space:]]*:[[:space:]]*true'; then
+              if echo "$response" | grep -q '"usernameIndexFix"[[:space:]]*:[[:space:]]*true'; then
                 echo "API updated: $response"
                 exit 0
               fi
-              echo "Attempt $attempt: API up but messageContacts not ready yet"
+              echo "Attempt $attempt: API up but usernameIndexFix not ready yet ($response)"
             else
               echo "Attempt $attempt: API not reachable yet"
             fi
