@@ -5,12 +5,9 @@ type PerformanceSearchFieldProps = {
   onChange: (value: string) => void;
 };
 
-export function PerformanceSearchField({
-  value,
-  onChange,
-}: PerformanceSearchFieldProps) {
+export function PerformanceSearchField({ value, onChange }: PerformanceSearchFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const hasValue = value.trim().length > 0;
+  const hasValue = value.length > 0;
 
   const handleClear = () => {
     onChange("");
@@ -26,24 +23,24 @@ export function PerformanceSearchField({
         <i className="fa fa-magnifying-glass" />
       </span>
 
-      <span className="spa-performance-search-body">
-        <span className="spa-performance-search-label">Find student</span>
-        <input
-          ref={inputRef}
-          type="search"
-          className="spa-performance-search-input"
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              handleClear();
-            }
-          }}
-          aria-label="Find student by name, register number, or batch"
-        />
-      </span>
+      <input
+        ref={inputRef}
+        type="text"
+        className="spa-performance-search-input"
+        value={value}
+        placeholder=""
+        autoComplete="off"
+        spellCheck={false}
+        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            handleClear();
+          }
+        }}
+        aria-label="Search students"
+      />
 
-      {hasValue ? (
+      {hasValue && (
         <button
           type="button"
           className="spa-performance-search-clear"
@@ -55,12 +52,6 @@ export function PerformanceSearchField({
         >
           <i className="fa fa-xmark" aria-hidden="true" />
         </button>
-      ) : (
-        <span className="spa-performance-search-hints" aria-hidden="true">
-          <span className="spa-performance-search-hint">Name</span>
-          <span className="spa-performance-search-hint">Reg. No.</span>
-          <span className="spa-performance-search-hint">Batch</span>
-        </span>
       )}
     </div>
   );
