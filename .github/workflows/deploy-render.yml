@@ -1,0 +1,60 @@
+name: Deploy API to Render
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "server/**"
+      - "render.yaml"
+  workflow_dispatch:
+
+concurrency:
+  group: render-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "::warning::RENDER_DEPLOY_HOOK secret is not set."
+            echo "Add it from Render → starpolice-api → Settings → Deploy Hook"
+            exit 0
+          fi
+
+          echo "Triggering Render deploy for starpolice-api..."
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
+          echo ""
+          echo "Render deploy started."
+
+      - name: Wait for updated health check
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          RENDER_API_URL: ${{ secrets.VITE_API_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "Skipping health check because RENDER_DEPLOY_HOOK is not configured."
+            exit 0
+          fi
+
+          API_URL="${RENDER_API_URL:-https://starpolice-api.onrender.com}"
+          echo "Waiting for $API_URL/api/health to report messageContacts..."
+
+          for attempt in $(seq 1 30); do
+            if response=$(curl -fsS "$API_URL/api/health" 2>/dev/null); then
+              if echo "$response" | grep -q '"messageContacts"[[:space:]]*:[[:space:]]*true'; then
+                echo "API updated: $response"
+                exit 0
+              fi
+              echo "Attempt $attempt: API up but messageContacts not ready yet"
+            else
+              echo "Attempt $attempt: API not reachable yet"
+            fi
+            sleep 20
+          done
+
+          echo "::warning::Timed out waiting for messageContacts feature on Render API"

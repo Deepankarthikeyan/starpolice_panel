@@ -108,3 +108,20 @@ Redeploy the Netlify site after adding the variable.
 In **Render**, set `CLIENT_URL` to your Netlify URL (e.g. `https://starpolice-panel.netlify.app`).
 
 Run `npm run seed` in Render Shell, then log in at `/admin/login` or `/student/login` with the credentials above.
+
+---
+
+## Interaction page: "API endpoint not found"
+
+If **Interaction** shows *API endpoint not found. The server may need to be updated*, the live Render API is behind the latest code and is missing `/api/messages/contacts`.
+
+**Fix (one time):**
+
+1. Open [Render Dashboard → starpolice-api](https://dashboard.render.com/)
+2. Click **Manual Deploy** → **Deploy latest commit** (branch: `master`)
+3. Wait until deploy finishes, then verify:  
+   `https://starpolice-api.onrender.com/api/health`  
+   should include `"messageContacts": true`
+4. Hard-refresh the Netlify site and open Interaction again
+
+**Auto-deploy (recommended):** In Render → **Settings** → **Deploy Hook**, copy the hook URL and add it to GitHub → **Secrets** → `RENDER_DEPLOY_HOOK`. Pushes to `master` that change `server/` will then redeploy the API automatically.
