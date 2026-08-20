@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     isActive: { type: Boolean, default: false },
-    username: { type: String, trim: true, lowercase: true, default: null, sparse: true, unique: true },
+    username: { type: String, trim: true, lowercase: true, default: undefined },
     permissions: { type: [String], default: [] },
     staffType: {
       type: String,
@@ -25,5 +25,6 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.index({ role: 1, createdAt: -1 });
+userSchema.index({ username: 1 }, { unique: true, sparse: true });
 
 export default mongoose.model("User", userSchema);

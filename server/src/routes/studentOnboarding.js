@@ -317,7 +317,11 @@ async function syncLoginUser({ record, password, permissions, grantLogin, create
         }
         user.email = loginEmail;
       }
-      user.username = username || null;
+      if (username) {
+        user.username = username;
+      } else {
+        user.set("username", undefined);
+      }
       user.permissions = studentPermissions;
       user.isActive = Boolean(grantLogin);
 
@@ -344,7 +348,7 @@ async function syncLoginUser({ record, password, permissions, grantLogin, create
   const user = await User.create({
     name: fullName || loginEmail || username,
     email: loginEmail,
-    username: username || null,
+    ...(username ? { username } : {}),
     password: await bcrypt.hash(password, 10),
     role: "student",
     isActive: Boolean(grantLogin),

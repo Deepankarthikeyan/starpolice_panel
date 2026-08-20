@@ -21,6 +21,7 @@ import examRoutes from "./routes/exams.js";
 import { uploadDir } from "./middleware/upload.js";
 import { backfillAttendancePermission } from "./migrations/backfillAttendancePermission.js";
 import { stripLeadsFromStaff } from "./migrations/stripLeadsFromStaff.js";
+import { fixUsernameIndex } from "./migrations/fixUsernameIndex.js";
 
 dotenv.config();
 
@@ -74,6 +75,7 @@ async function start() {
 
   try {
     await connectDB(process.env.MONGODB_URI);
+    await fixUsernameIndex();
     await backfillAttendancePermission();
     await stripLeadsFromStaff();
   } catch (error) {
