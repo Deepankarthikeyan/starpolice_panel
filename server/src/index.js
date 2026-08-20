@@ -68,12 +68,18 @@ app.use((error, _req, res, _next) => {
 });
 
 async function start() {
-  await connectDB(process.env.MONGODB_URI);
-  await backfillAttendancePermission();
-  await stripLeadsFromStaff();
   app.listen(PORT, () => {
     console.log(`API server running on http://localhost:${PORT}`);
   });
+
+  try {
+    await connectDB(process.env.MONGODB_URI);
+    await backfillAttendancePermission();
+    await stripLeadsFromStaff();
+  } catch (error) {
+    console.error("Database startup failed:", error);
+    process.exit(1);
+  }
 }
 
 start().catch((error) => {

@@ -109,6 +109,8 @@ In **Render**, set `CLIENT_URL` to your Netlify URL (e.g. `https://starpolice-pa
 
 Run `npm run seed` in Render Shell, then log in at `/admin/login` or `/student/login` with the credentials above.
 
+> **Note:** The API no longer runs seed automatically on every deploy (that caused Render health-check timeouts). To seed on boot once, set Render env `SEED_ON_START=true`, deploy, then remove it.
+
 ---
 
 ## Interaction page: "API endpoint not found"
