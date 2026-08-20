@@ -54,9 +54,9 @@ jobs:
           for attempt in $(seq 1 45); do
             if response=$(curl -fsS "$API_URL/api/health" 2>/dev/null); then
               if echo "$response" | grep -q '"setupRequired"'; then
-                echo "::warning::API is up but MONGODB_URI is not configured on Render. Add MongoDB Atlas URI (see HOSTING.md)."
+                echo "::error::API deployed but MONGODB_URI is missing on Render. Add your Atlas connection string in Render → Environment, save, and redeploy."
                 echo "$response"
-                exit 0
+                exit 1
               fi
 
               if echo "$response" | grep -q '"database"[[:space:]]*:[[:space:]]*"mongodb"'; then
