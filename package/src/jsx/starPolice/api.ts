@@ -108,6 +108,68 @@ export async function validateStoredSession(panel?: PanelType): Promise<AuthUser
   }
 }
 
+function isMissingContactsEndpoint(error: unknown) {
+  return (
+    error instanceof Error &&
+    error.message.includes("API endpoint not found")
+  );
+}
+
+function managedUserToMessagingContact(
+  user: ManagedUser,
+  contactType: "student" | "staff" | "admin",
+): MessagingContact {
+  let subtitle = user.email;
+  if (contactType === "staff") {
+    subtitle = user.subjectNames?.length ? user.subjectNames.join(", ") : "Staff member";
+  }
+  if (contactType === "admin" && user.role === "superadmin") {
+    subtitle = "Super Admin";
+  }
+  if (!user.isActive && user.role !== "superadmin") {
+    subtitle = `${subtitle} · Pending login`;
+  }
+
+  return {
+    id: user.id,
+    contactType,
+    name: user.name,
+    subtitle,
+    role: user.role,
+    isActive: user.isActive,
+  };
+}
+
+async function legacyMessageContacts(
+  scope?: "admin" | "staff" | "student",
+  panel?: PanelType,
+): Promise<MessagingContact[]> {
+  const resolvedPanel = panel || resolvePanelFromPath(window.location.pathname);
+  const auth = getStoredAuth(resolvedPanel);
+
+  if (auth?.role !== "superadmin") {
+    throw new Error(
+      "Interaction requires an API update. Redeploy starpolice-api on Render from the latest master branch.",
+    );
+  }
+
+  if (scope === "staff") {
+    const users = await request<ManagedUser[]>("/api/users?type=staff");
+    return users.map((user) => managedUserToMessagingContact(user, "staff"));
+  }
+
+  if (scope === "admin") {
+    const users = await request<ManagedUser[]>("/api/users?type=admin");
+    const me = await request<Omit<AuthUser, "token">>("/api/auth/me", {}, resolvedPanel);
+    return users
+      .filter((user) => user.id !== me.id)
+      .map((user) => managedUserToMessagingContact(user, "admin"));
+  }
+
+  const users = await request<ManagedUser[]>("/api/users?type=student");
+  return users.map((user) => managedUserToMessagingContact(user, "student"));
+}
+
 async function request<T>(path: string, options: RequestInit = {}, panel?: PanelType): Promise<T> {
   const token = getToken(panel);
   const headers = new Headers(options.headers);
@@ -418,7 +480,14 @@ export const api = {
     const search = new URLSearchParams();
     if (scope) search.set("scope", scope);
     const query = search.toString();
-    return request<MessagingContact[]>(`/api/messages/contacts${query ? `?${query}` : ""}`);
+    return request<MessagingContact[]>(`/api/messages/contacts${query ? `?${query}` : ""}`).catch(
+      async (error) => {
+        if (!isMissingContactsEndpoint(error)) {
+          throw error;
+        }
+        return legacyMessageContacts(scope);
+      },
+    );
   },
 
   getMessages(params?: {

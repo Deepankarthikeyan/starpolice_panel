@@ -39,7 +39,13 @@ app.use(express.json());
 app.use("/uploads", express.static(uploadDir));
 
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", database: "mongodb" });
+  res.json({
+    status: "ok",
+    database: "mongodb",
+    features: {
+      messageContacts: true,
+    },
+  });
 });
 
 app.use("/api/auth", authRoutes);
