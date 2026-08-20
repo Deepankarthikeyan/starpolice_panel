@@ -14,6 +14,7 @@ const router = express.Router();
 function mapMessage(item) {
   return {
     id: item._id.toString(),
+    senderId: item.sender?.toString?.() ?? String(item.sender),
     senderRole: item.senderRole,
     senderName: item.senderName,
     senderEmail: item.senderEmail,

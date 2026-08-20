@@ -26,6 +26,7 @@ type InteractionMessengerProps = {
   onSend: (message: string) => Promise<void>;
   loading?: boolean;
   viewerRole?: UserRole;
+  viewerId?: string;
   viewerEmail?: string;
   sidebarTitle?: string;
   emptyThreadHint?: string;
@@ -39,8 +40,11 @@ function isAdminSide(role: UserRole) {
   return role === "admin" || role === "staff" || role === "superadmin";
 }
 
-function isMineMessage(item: ChatMessage, viewerEmail?: string) {
-  if (!viewerEmail) return false;
+function isMineMessage(item: ChatMessage, viewerId?: string, viewerEmail?: string) {
+  if (viewerId && item.senderId) {
+    return item.senderId === viewerId;
+  }
+  if (!viewerEmail || !item.senderEmail) return false;
   return item.senderEmail.toLowerCase() === viewerEmail.toLowerCase();
 }
 
@@ -52,6 +56,7 @@ export function InteractionMessenger({
   onSend,
   loading = false,
   viewerRole,
+  viewerId,
   viewerEmail,
   sidebarTitle = "Chats",
   emptyThreadHint = "Select a chat to start messaging.",
@@ -233,7 +238,7 @@ export function InteractionMessenger({
                 </p>
               ) : (
                 messages.map((item) => {
-                  const mine = isMineMessage(item, viewerEmail);
+                  const mine = isMineMessage(item, viewerId, viewerEmail);
                   return (
                     <div
                       key={item.id}

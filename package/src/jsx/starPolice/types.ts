@@ -58,6 +58,7 @@ export interface UploadedFile {
 
 export interface ChatMessage {
   id: string;
+  senderId?: string;
   senderRole: UserRole;
   senderName: string;
   senderEmail: string;

@@ -288,6 +288,7 @@ export function PanelInteractionPage({ config }: { config: PanelInteractionConfi
             onSend={handleSend}
             loading={loading}
             viewerRole={auth?.role}
+            viewerId={auth?.id}
             viewerEmail={auth?.email}
             sidebarTitle={sidebarTitle}
             emptyThreadHint={emptyHint}

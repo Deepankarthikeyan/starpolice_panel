@@ -768,6 +768,10 @@
   justify-content: flex-end;
 }
 
+.spa-messenger-row.is-other {
+  justify-content: flex-start;
+}
+
 .spa-messenger-msg-avatar {
   flex: 0 0 auto;
   width: 2rem;
