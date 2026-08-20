@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Deploys via Render deploy hook on pushes to master (server/**).
 set -euo pipefail
 
 USE_EMBEDDED_MONGO=false
