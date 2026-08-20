@@ -28,7 +28,7 @@ export function PerformanceSearchField({ value, onChange }: PerformanceSearchFie
         type="text"
         className="spa-performance-search-input"
         value={value}
-        placeholder=""
+        placeholder="Name, reg no., batch..."
         autoComplete="off"
         spellCheck={false}
         onChange={(event) => onChange(event.target.value)}
@@ -37,7 +37,7 @@ export function PerformanceSearchField({ value, onChange }: PerformanceSearchFie
             handleClear();
           }
         }}
-        aria-label="Search students"
+        aria-label="Search by name, register number, or batch"
       />
 
       {hasValue && (

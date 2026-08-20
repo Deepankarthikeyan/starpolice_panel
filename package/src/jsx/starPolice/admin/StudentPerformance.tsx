@@ -386,7 +386,7 @@ const StudentPerformance = () => {
         <div className="card spa-performance-overview-card">
           <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 spa-no-print">
             <h4 className="card-title mb-0">Student Performance Overview</h4>
-            <div className="d-flex flex-wrap align-items-center gap-2">
+            <div className="d-flex align-items-center gap-2 spa-performance-header-controls">
               <PerformanceSortPicker
                 options={sortOptions}
                 value={sortSelectValue}
