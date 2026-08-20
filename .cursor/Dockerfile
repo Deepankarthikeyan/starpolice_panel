@@ -13,8 +13,8 @@ RUN apt-get update \
   && dpkg -i /tmp/cloudflared.deb \
   && rm /tmp/cloudflared.deb \
   && (id ubuntu >/dev/null 2>&1 || useradd -m -s /bin/bash ubuntu) \
-  && mkdir -p /data/db \
-  && chown -R ubuntu:ubuntu /data/db
+  && mkdir -p /home/ubuntu/.mongodb/data \
+  && chown -R ubuntu:ubuntu /home/ubuntu/.mongodb
 
 USER ubuntu
 WORKDIR /home/ubuntu

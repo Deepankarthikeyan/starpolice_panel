@@ -2,10 +2,11 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+DB_PATH="${MONGODB_DATA_PATH:-$HOME/.mongodb/data}"
 
 if ! pgrep -x mongod >/dev/null 2>&1; then
-  mkdir -p /data/db
-  mongod --dbpath /data/db --bind_ip 127.0.0.1 --port 27017 --fork --logpath /tmp/mongod.log
+  mkdir -p "$DB_PATH"
+  mongod --dbpath "$DB_PATH" --bind_ip 127.0.0.1 --port 27017 --fork --logpath /tmp/mongod.log
 fi
 
 for _ in $(seq 1 20); do
