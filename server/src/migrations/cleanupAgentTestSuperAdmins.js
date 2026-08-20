@@ -10,6 +10,6 @@ export async function cleanupAgentTestSuperAdmins() {
   });
 
   if (result.deletedCount > 0) {
-    console.log(`Removed ${result.deletedCount} agent test superadmin account(s).`);
+    console.log(`Removed ${result.deletedCount} test superadmin account(s); signup is open again.`);
   }
 }
