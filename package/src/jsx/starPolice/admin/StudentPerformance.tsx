@@ -382,7 +382,7 @@ const StudentPerformance = () => {
       <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu="Student Performance" pageContent="" />
 
       {!detail ? (
-        <div className="card">
+        <div className="card spa-performance-overview-card">
           <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 spa-no-print">
             <h4 className="card-title mb-0">Student Performance Overview</h4>
             <div className="d-flex flex-wrap align-items-center gap-2">

@@ -1639,7 +1639,7 @@
   position: absolute;
   top: calc(100% + 0.35rem);
   left: 0;
-  z-index: 30;
+  z-index: 1060;
   width: min(22rem, 92vw);
   max-height: 18rem;
   overflow: auto;
@@ -1741,10 +1741,21 @@
   color: #64748b;
 }
 
+.spa-performance-overview-card,
+.spa-performance-overview-card .card-header,
+.spa-performance-overview-card .card-body {
+  overflow: visible;
+}
+
+.spa-performance-sort-picker:has(.spa-performance-sort-trigger.is-open) {
+  z-index: 1060;
+}
+
 .spa-performance-category-filter {
   padding: 0 0 1rem;
   margin-bottom: 1rem;
   border-bottom: 1px solid #e6e6e6;
+  overflow: visible;
 }
 
 .spa-performance-filter-row {
@@ -1757,7 +1768,7 @@
   border-radius: 0.75rem;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
-  overflow-x: auto;
+  overflow: visible;
 }
 
 .spa-performance-filter-cell {
@@ -1765,11 +1776,17 @@
   flex-direction: column;
   justify-content: flex-end;
   min-width: 0;
+  overflow: visible;
 }
 
 .spa-performance-filter-cell-category {
   position: relative;
   flex: 0 0 13.5rem;
+  z-index: 1;
+}
+
+.spa-performance-filter-cell-category.is-menu-open {
+  z-index: 1060;
 }
 
 .spa-performance-filter-cell-range {
@@ -1854,7 +1871,7 @@
   position: absolute;
   top: calc(100% + 0.35rem);
   left: 0;
-  z-index: 25;
+  z-index: 1060;
   width: 100%;
   min-width: 13rem;
   padding: 0.35rem;

@@ -145,6 +145,8 @@ export function PerformanceCategoryFilter({
   const maxDisplay = max === "" ? "100" : max;
 
   useEffect(() => {
+    if (!open) return;
+
     function handleClickOutside(event: MouseEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
         setOpen(false);
@@ -153,12 +155,15 @@ export function PerformanceCategoryFilter({
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [open]);
 
   return (
     <div className="spa-performance-category-filter spa-no-print">
       <div className="spa-performance-filter-row">
-        <div className="spa-performance-filter-cell spa-performance-filter-cell-category" ref={rootRef}>
+        <div
+          className={`spa-performance-filter-cell spa-performance-filter-cell-category ${open ? "is-menu-open" : ""}`}
+          ref={rootRef}
+        >
           <label className="spa-performance-filter-field-label">Show by category</label>
           <button
             type="button"
