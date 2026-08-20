@@ -22,6 +22,7 @@ import { uploadDir } from "./middleware/upload.js";
 import { backfillAttendancePermission } from "./migrations/backfillAttendancePermission.js";
 import { stripLeadsFromStaff } from "./migrations/stripLeadsFromStaff.js";
 import { fixUsernameIndex } from "./migrations/fixUsernameIndex.js";
+import { cleanupAgentTestSuperAdmins } from "./migrations/cleanupAgentTestSuperAdmins.js";
 
 dotenv.config();
 
@@ -73,6 +74,7 @@ app.use((error, _req, res, _next) => {
 
 async function runMigrations() {
   for (const [label, task] of [
+    ["cleanupAgentTestSuperAdmins", cleanupAgentTestSuperAdmins],
     ["fixUsernameIndex", fixUsernameIndex],
     ["backfillAttendancePermission", backfillAttendancePermission],
     ["stripLeadsFromStaff", stripLeadsFromStaff],
