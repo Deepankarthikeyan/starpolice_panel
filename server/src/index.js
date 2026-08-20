@@ -87,22 +87,27 @@ async function runMigrations() {
   }
 }
 
-async function start() {
+async function connectDatabaseInBackground() {
   const uri = process.env.MONGODB_URI;
-  if (uri) {
-    try {
-      await connectDBWithRetry(uri, { maxAttempts: 20, retryMs: 2500 });
-      await runMigrations();
-    } catch (error) {
-      console.error("Database startup failed:", error.message);
-    }
-  } else {
+  if (!uri) {
     console.error("MONGODB_URI is not set. Auth and data routes will fail.");
+    return;
   }
 
+  try {
+    await connectDBWithRetry(uri, { maxAttempts: 20, retryMs: 2500 });
+    await runMigrations();
+  } catch (error) {
+    console.error("Database startup failed:", error.message);
+  }
+}
+
+async function start() {
   app.listen(PORT, () => {
     console.log(`API server running on http://localhost:${PORT}`);
   });
+
+  void connectDatabaseInBackground();
 }
 
 start().catch((error) => {
