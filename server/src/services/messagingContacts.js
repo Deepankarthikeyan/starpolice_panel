@@ -132,6 +132,15 @@ export async function getMessagingContacts(user, panel, scope = "all") {
   }
 
   if (panel === "staff") {
+    if (scope === "student") {
+      return loadStudentContacts();
+    }
+    if (scope === "admin") {
+      return loadAdminContacts();
+    }
+    if (scope === "staff") {
+      return loadStaffContacts();
+    }
     const contacts = await loadStudentContacts();
     contacts.push(...(await loadAdminContacts()));
     return contacts;

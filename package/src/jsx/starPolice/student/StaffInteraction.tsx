@@ -1,18 +1,5 @@
-import { InteractionPage } from "../shared/useInteractionPage";
+import { Navigate } from "react-router-dom";
 
-const StaffInteraction = () => (
-  <InteractionPage
-    contactScope="staff"
-    includeGroup={false}
-    pageTitle="Staff Interaction"
-    activeMenu="Staff Interaction"
-    motherMenu="Student Panel"
-    sidebarTitle="Staff Chats"
-    emptyThreadHint="Select a staff member from the list."
-    contactsErrorMessage="Failed to load staff list"
-    groupSendSuccess="Message sent."
-    privateSendSuccess={(name) => `Message sent to ${name}.`}
-  />
-);
+const StaffInteraction = () => <Navigate to="/student/interaction" replace />;
 
 export default StaffInteraction;

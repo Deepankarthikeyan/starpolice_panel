@@ -1,5 +1,5 @@
-import { Navigate } from "react-router-dom";
+import { PanelInteractionPage, STUDENT_INTERACTION_CONFIG } from "../shared/useAdminInteractionPage";
 
-const StudentInteraction = () => <Navigate to="/student/admin-interaction" replace />;
+const StudentInteraction = () => <PanelInteractionPage config={STUDENT_INTERACTION_CONFIG} />;
 
 export default StudentInteraction;
