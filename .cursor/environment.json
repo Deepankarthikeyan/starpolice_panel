@@ -1,0 +1,26 @@
+{
+  "name": "Star Police Panel",
+  "user": "ubuntu",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "install": "./scripts/cloud-agent-install.sh",
+  "start": "./scripts/cloud-agent-start.sh",
+  "ports": [
+    { "name": "api", "port": 5000 },
+    { "name": "web", "port": 5173 }
+  ],
+  "terminals": [
+    {
+      "name": "starpolice-api",
+      "command": "cd server && npm start",
+      "description": "Express API on port 5000 (MongoDB + migrations on boot)."
+    },
+    {
+      "name": "starpolice-web",
+      "command": "cd package && npm run dev -- --host 0.0.0.0 --port 5173",
+      "description": "Vite dev server; proxies /api to localhost:5000."
+    }
+  ]
+}
