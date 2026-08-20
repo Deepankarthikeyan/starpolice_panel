@@ -1568,6 +1568,329 @@
   max-width: 320px;
 }
 
+/* Performance overview — command bar (lenses, chips, bands) */
+.spa-performance-command {
+  padding: 1rem 0 1.25rem;
+  border-bottom: 1px solid #e6e6e6;
+  margin-bottom: 1rem;
+}
+
+.spa-performance-command-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.spa-performance-command-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #123d73;
+}
+
+.spa-performance-command-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  max-width: 36rem;
+}
+
+.spa-performance-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  font-size: 0.8125rem;
+  color: #475569;
+}
+
+.spa-performance-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #fff;
+  margin-bottom: 1rem;
+}
+
+.spa-performance-search-icon {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.spa-performance-search-input {
+  border: none;
+  box-shadow: none;
+  padding: 0.25rem 0;
+  font-size: 0.9375rem;
+}
+
+.spa-performance-search-input:focus {
+  box-shadow: none;
+}
+
+.spa-performance-search-clear {
+  font-size: 0.8125rem;
+  text-decoration: none;
+  padding: 0;
+}
+
+.spa-performance-command-block {
+  margin-bottom: 1rem;
+}
+
+.spa-performance-command-block-grow {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.spa-performance-command-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.spa-performance-block-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.spa-performance-lens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.spa-performance-lens-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.65rem;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.spa-performance-lens-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.spa-performance-lens-card.is-active {
+  border-color: var(--primary, #123d73);
+  box-shadow: 0 0 0 2px rgba(18, 61, 115, 0.12);
+}
+
+.spa-performance-lens-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.spa-performance-lens-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.spa-performance-lens-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.spa-performance-lens-hint {
+  font-size: 0.7rem;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+.spa-performance-lens-gold .spa-performance-lens-icon {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.spa-performance-lens-teal .spa-performance-lens-icon {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.spa-performance-lens-amber .spa-performance-lens-icon {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.spa-performance-lens-rose .spa-performance-lens-icon {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.spa-performance-lens-sky .spa-performance-lens-icon {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.spa-performance-lens-violet .spa-performance-lens-icon {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.spa-performance-lens-indigo .spa-performance-lens-icon {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.spa-performance-sort-chips,
+.spa-performance-category-chips,
+.spa-performance-band-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+
+.spa-performance-sort-chip,
+.spa-performance-category-chip,
+.spa-performance-band-chip {
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.spa-performance-sort-chip:hover,
+.spa-performance-category-chip:hover,
+.spa-performance-band-chip:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.spa-performance-sort-chip.is-active,
+.spa-performance-category-chip.is-active,
+.spa-performance-band-chip.is-active {
+  background: var(--primary, #123d73);
+  border-color: var(--primary, #123d73);
+  color: #fff;
+}
+
+.spa-performance-sort-arrow {
+  margin-left: 0.25rem;
+  font-weight: 700;
+}
+
+.spa-performance-sort-hint {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.spa-performance-range-panel {
+  flex: 1 1 260px;
+  max-width: 100%;
+  padding: 0.75rem;
+  border: 1px dashed #e2e8f0;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+}
+
+.spa-performance-custom-range {
+  margin-top: 0.5rem;
+}
+
+.spa-performance-range-track {
+  position: relative;
+  height: 0.35rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  margin-bottom: 0.75rem;
+}
+
+.spa-performance-range-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #123d73, #3b82f6);
+}
+
+.spa-performance-active-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.65rem;
+  background: #f1f5f9;
+}
+
+.spa-performance-active-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.spa-performance-active-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  flex: 1 1 auto;
+}
+
+.spa-performance-active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: #123d73;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.spa-performance-active-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.spa-performance-active-remove:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
 .spa-performance-filter-bar {
   padding: 0 0 1rem;
   border-bottom: 1px solid #e6e6e6;
