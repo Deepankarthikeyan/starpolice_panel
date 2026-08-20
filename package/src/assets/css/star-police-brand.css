@@ -1563,6 +1563,179 @@
   min-width: 14rem;
 }
 
+.spa-performance-sort-picker {
+  position: relative;
+  min-width: 15rem;
+}
+
+.spa-performance-sort-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  color: #1e293b;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.spa-performance-sort-trigger:hover,
+.spa-performance-sort-trigger.is-open {
+  border-color: var(--primary, #123d73);
+  box-shadow: 0 0 0 3px rgba(18, 61, 115, 0.1);
+}
+
+.spa-performance-sort-trigger-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 0.55rem;
+  background: rgba(18, 61, 115, 0.1);
+  color: var(--primary, #123d73);
+  flex-shrink: 0;
+}
+
+.spa-performance-sort-trigger-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.spa-performance-sort-trigger-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+  line-height: 1.1;
+}
+
+.spa-performance-sort-trigger-value {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.spa-performance-sort-trigger-chevron {
+  color: #64748b;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.spa-performance-sort-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 30;
+  width: min(22rem, 92vw);
+  max-height: 18rem;
+  overflow: auto;
+  padding: 0.35rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.85rem;
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.spa-performance-sort-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  border: none;
+  border-radius: 0.6rem;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.spa-performance-sort-option:hover {
+  background: #f8fafc;
+}
+
+.spa-performance-sort-option.is-active {
+  background: rgba(18, 61, 115, 0.08);
+}
+
+.spa-performance-sort-option-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
+
+.spa-performance-sort-tone-overallPercent {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.spa-performance-sort-tone-attendancePercent {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.spa-performance-sort-tone-physicalExamPercent {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.spa-performance-sort-tone-writtenExamPercent {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.spa-performance-sort-tone-fullName,
+.spa-performance-sort-tone-studentId,
+.spa-performance-sort-tone-batch {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.spa-performance-sort-option-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.spa-performance-sort-option-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.spa-performance-sort-option-meta {
+  font-size: 0.6875rem;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+.spa-performance-sort-option-check {
+  color: var(--primary, #123d73);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
 .spa-performance-search {
   min-width: 16rem;
   max-width: 320px;

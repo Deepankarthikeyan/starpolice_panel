@@ -25,6 +25,7 @@ import {
 import { AttendancePerformanceList } from "../shared/PerformanceDetailPanels";
 import { ExamMarksTable } from "../shared/ExamMarksTable";
 import PhysicalRecordCard from "../shared/PhysicalRecordCard";
+import { PerformanceSortPicker } from "./PerformanceSortPicker";
 
 type SortKey =
   | "studentId"
@@ -384,18 +385,11 @@ const StudentPerformance = () => {
           <div className="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 spa-no-print">
             <h4 className="card-title mb-0">Student Performance Overview</h4>
             <div className="d-flex flex-wrap align-items-center gap-2">
-              <select
-                className="form-select form-select-sm spa-performance-sort-select"
+              <PerformanceSortPicker
+                options={sortOptions}
                 value={sortSelectValue}
-                onChange={(event) => handleSortSelect(event.target.value)}
-                aria-label="Sort students"
-              >
-                {sortOptions.map((option) => (
-                  <option key={`${option.key}:${option.dir}`} value={`${option.key}:${option.dir}`}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                onChange={handleSortSelect}
+              />
               <input
                 type="search"
                 className="form-control form-control-sm spa-performance-search"
