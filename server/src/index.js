@@ -43,8 +43,10 @@ app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
     database: "mongodb",
+    build: process.env.RENDER_GIT_COMMIT?.slice(0, 7) || "local",
     features: {
       messageContacts: true,
+      usernameIndexFix: true,
     },
   });
 });

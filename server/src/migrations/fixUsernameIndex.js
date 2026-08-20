@@ -5,17 +5,14 @@ export async function fixUsernameIndex() {
   const indexes = await collection.indexes();
   const usernameIndex = indexes.find((index) => index.name === "username_1");
 
-  if (usernameIndex && !usernameIndex.sparse) {
+  if (usernameIndex) {
     try {
       await collection.dropIndex("username_1");
-      console.log("Dropped non-sparse username_1 index.");
+      console.log("Dropped username_1 index.");
     } catch (error) {
       console.warn("Could not drop username_1 index:", error.message);
     }
   }
-
-  await User.syncIndexes();
-  console.log("Ensured sparse unique index on users.username.");
 
   const result = await collection.updateMany(
     { $or: [{ username: null }, { username: "" }] },
@@ -25,4 +22,7 @@ export async function fixUsernameIndex() {
   if (result.modifiedCount > 0) {
     console.log(`Removed empty username from ${result.modifiedCount} user(s).`);
   }
+
+  await User.syncIndexes();
+  console.log("Ensured sparse unique index on users.username.");
 }
