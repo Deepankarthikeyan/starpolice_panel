@@ -1,0 +1,27 @@
+name: Keep Render API awake
+
+on:
+  schedule:
+    # Render free tier sleeps after ~15 minutes of inactivity.
+    - cron: "*/14 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: keep-render-awake
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render health endpoint
+        env:
+          RENDER_API_URL: ${{ secrets.VITE_API_URL }}
+        run: |
+          API_URL="${RENDER_API_URL:-https://starpolice-api.onrender.com}"
+          echo "Pinging $API_URL/api/health to prevent Render free-tier sleep..."
+          if response=$(curl -fsS --max-time 90 "$API_URL/api/health" 2>/dev/null); then
+            echo "OK: $response"
+            exit 0
+          fi
+          echo "::warning::Render API did not respond. It may be deploying or misconfigured (check MONGODB_URI on Render)."

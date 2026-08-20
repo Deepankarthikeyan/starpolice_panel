@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
-# Deploys via Render deploy hook on pushes to master (server/**).
+# Local dev: optional embedded MongoDB. Render production: MongoDB Atlas via MONGODB_URI only.
 set -euo pipefail
 
-USE_EMBEDDED_MONGO=false
-if [[ -z "${MONGODB_URI:-}" ]] || [[ "$MONGODB_URI" == *"127.0.0.1"* ]] || [[ "$MONGODB_URI" == *"localhost"* ]]; then
-  USE_EMBEDDED_MONGO=true
-fi
+is_render() {
+  [ -n "${RENDER:-}" ] || [ -n "${RENDER_SERVICE_ID:-}" ]
+}
 
-if [ "$USE_EMBEDDED_MONGO" = true ]; then
-  echo "WARNING: Using embedded MongoDB. Data is lost when the container restarts."
-  echo "Set MONGODB_URI to a MongoDB Atlas connection string for permanent storage."
+start_embedded_mongo() {
+  echo "WARNING: Using embedded MongoDB for local development only."
+  echo "Production on Render requires MongoDB Atlas (see HOSTING.md)."
   DB_PATH="${MONGODB_DATA_PATH:-/data/db}"
   mkdir -p "$DB_PATH"
   if ! pgrep -x mongod >/dev/null 2>&1; then
+    if ! command -v mongod >/dev/null 2>&1; then
+      echo "ERROR: mongod not installed. Install MongoDB locally or set MONGODB_URI to Atlas."
+      exit 1
+    fi
     mongod --dbpath "$DB_PATH" --bind_ip 127.0.0.1 --port 27017 --fork --logpath "$DB_PATH/mongod.log" \
       || echo "WARNING: mongod failed to start; API will retry database connection."
   fi
@@ -24,8 +27,26 @@ if [ "$USE_EMBEDDED_MONGO" = true ]; then
     sleep 1
   done
   export MONGODB_URI="${MONGODB_URI:-mongodb://127.0.0.1:27017/starpolice_academy}"
+}
+
+if is_render; then
+  echo "Star Police API starting on Render (production mode)."
+  if [[ -z "${MONGODB_URI:-}" ]] || [[ "$MONGODB_URI" == *"127.0.0.1"* ]] || [[ "$MONGODB_URI" == *"localhost"* ]]; then
+    echo "ERROR: Set MONGODB_URI to your MongoDB Atlas connection string in Render → Environment."
+    echo "See HOSTING.md → Permanent production setup."
+  else
+    echo "Using MongoDB Atlas from MONGODB_URI."
+  fi
 else
-  echo "Using external MongoDB for persistent storage."
+  USE_EMBEDDED_MONGO=false
+  if [[ -z "${MONGODB_URI:-}" ]] || [[ "$MONGODB_URI" == *"127.0.0.1"* ]] || [[ "$MONGODB_URI" == *"localhost"* ]]; then
+    USE_EMBEDDED_MONGO=true
+  fi
+  if [ "$USE_EMBEDDED_MONGO" = true ]; then
+    start_embedded_mongo
+  else
+    echo "Using external MongoDB from MONGODB_URI."
+  fi
 fi
 
 if [[ "${SEED_ON_START:-}" == "true" ]]; then

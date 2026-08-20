@@ -4,6 +4,7 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { connectDBWithRetry, isDbConnected } from "./config/db.js";
+import { getMongoUriIssue } from "./config/production.js";
 import authRoutes from "./routes/auth.js";
 import uploadRoutes from "./routes/uploads.js";
 import messageRoutes from "./routes/messages.js";
@@ -41,10 +42,12 @@ app.use(express.json());
 app.use("/uploads", express.static(uploadDir));
 
 app.get("/api/health", (_req, res) => {
+  const mongoIssue = getMongoUriIssue();
   const connected = isDbConnected();
   res.json({
-    status: connected ? "ok" : "starting",
-    database: connected ? "mongodb" : "connecting",
+    status: mongoIssue ? "misconfigured" : connected ? "ok" : "starting",
+    database: connected ? "mongodb" : mongoIssue ? "missing" : "connecting",
+    setupRequired: mongoIssue,
     build: process.env.RENDER_GIT_COMMIT?.slice(0, 7) || "local",
     features: {
       messageContacts: true,

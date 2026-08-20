@@ -113,6 +113,59 @@ Run `npm run seed` in Render Shell, then log in at `/admin/login` or `/student/l
 
 ---
 
+## Permanent production setup (fixes 502/503 forever)
+
+The API **must** use **MongoDB Atlas** on Render. Embedded MongoDB inside the container was the main cause of lost accounts, failed signups, and 503 errors after redeploys.
+
+### One-time setup (~5 minutes)
+
+#### 1. Create MongoDB Atlas (free)
+
+1. Sign up at https://www.mongodb.com/cloud/atlas/register  
+2. Create a **free M0** cluster (any cloud region close to you)  
+3. **Database Access** → Add user (username + password, remember these)  
+4. **Network Access** → **Add IP Address** → **Allow Access from Anywhere** (`0.0.0.0/0`)  
+5. **Database** → **Connect** → **Drivers** → copy the connection string, e.g.  
+   `mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/starpolice_academy?retryWrites=true&w=majority`  
+6. Replace `USER`, `PASSWORD`, and set the database name to `starpolice_academy`
+
+#### 2. Add Atlas URI to Render
+
+1. Open [Render → starpolice-api → Environment](https://dashboard.render.com/)  
+2. Add or update:
+
+| Key | Value |
+|-----|-------|
+| `MONGODB_URI` | Your Atlas connection string from step 1 |
+| `CLIENT_URL` | `https://starpolice-panel.netlify.app` |
+
+3. **Save** → **Manual Deploy → Deploy latest commit**
+
+#### 3. Verify
+
+Open: `https://starpolice-api.onrender.com/api/health`
+
+You should see:
+
+```json
+{"status":"ok","database":"mongodb", ...}
+```
+
+If you see `"setupRequired"` or `"database":"missing"`, `MONGODB_URI` is not set correctly on Render.
+
+#### 4. Create Super Admin
+
+1. Open https://starpolice-panel.netlify.app/admin/signup  
+2. Create your Super Admin account (only works when `/api/health` shows `"database":"mongodb"`)
+
+### Keep Render awake (free tier)
+
+Render free tier sleeps after ~15 minutes without traffic. This repo includes a GitHub Action (**Keep Render API awake**) that pings `/api/health` every 14 minutes automatically — no extra setup needed once Actions are enabled.
+
+Optional: upgrade Render to a paid plan to avoid sleep entirely.
+
+---
+
 ## Interaction page: "API endpoint not found"
 
 If **Interaction** shows *API endpoint not found. The server may need to be updated*, the live Render API is behind the latest code and is missing `/api/messages/contacts`.

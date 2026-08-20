@@ -1,4 +1,4 @@
-# Render Blueprint — permanent API with MongoDB in Docker
+# Render Blueprint — production API (requires MongoDB Atlas)
 services:
   - type: web
     name: starpolice-api
