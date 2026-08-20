@@ -75,20 +75,9 @@ export function PerformanceCategoryFilter({
 
   return (
     <div className="spa-performance-category-filter spa-no-print">
-      <div className="spa-performance-category-filter-head">
-        <span className="spa-performance-category-filter-head-icon" aria-hidden="true">
-          <i className="fa fa-sliders" />
-        </span>
-        <div>
-          <p className="spa-performance-category-filter-title mb-0">Show by category</p>
-          <p className="spa-performance-category-filter-subtitle mb-0">
-            Pick a score type, then set the % range
-          </p>
-        </div>
-      </div>
-
       <div className="spa-performance-category-filter-body">
         <div className="spa-performance-category-picker-wrap" ref={rootRef}>
+          <label className="spa-performance-category-picker-label">Show by category</label>
           <button
             type="button"
             className={`spa-performance-category-trigger ${open ? "is-open" : ""}`}
@@ -101,10 +90,7 @@ export function PerformanceCategoryFilter({
             >
               <i className={`fa ${categoryIcon(category)}`} aria-hidden="true" />
             </span>
-            <span className="spa-performance-category-trigger-text">
-              <span className="spa-performance-category-trigger-label">Category</span>
-              <span className="spa-performance-category-trigger-value">{selected.label}</span>
-            </span>
+            <span className="spa-performance-category-trigger-value">{selected.label}</span>
             <span className="spa-performance-category-trigger-chevron" aria-hidden="true">
               <i className={`fa fa-chevron-${open ? "up" : "down"}`} />
             </span>
