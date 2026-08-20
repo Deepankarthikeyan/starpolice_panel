@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
 export type PerformanceCategoryFilterOption = {
   value: string;
@@ -32,11 +32,100 @@ function categoryTone(value: string) {
   return value;
 }
 
-function clampPercent(value: string, fallback: number) {
+function parsePercent(value: string, fallback: number) {
   if (value === "") return fallback;
   const num = Number(value);
   if (Number.isNaN(num)) return fallback;
-  return Math.min(100, Math.max(0, num));
+  return Math.min(100, Math.max(0, Math.round(num)));
+}
+
+function DualRangeSlider({
+  min,
+  max,
+  disabled,
+  onMinChange,
+  onMaxChange,
+}: {
+  min: string;
+  max: string;
+  disabled: boolean;
+  onMinChange: (value: string) => void;
+  onMaxChange: (value: string) => void;
+}) {
+  const railRef = useRef<HTMLDivElement>(null);
+  const minVal = parsePercent(min, 0);
+  const maxVal = parsePercent(max, 100);
+
+  const setMinValue = (value: number) => {
+    const next = Math.min(value, maxVal);
+    onMinChange(String(next));
+  };
+
+  const setMaxValue = (value: number) => {
+    const next = Math.max(value, minVal);
+    onMaxChange(String(next));
+  };
+
+  const valueFromPointer = (clientX: number) => {
+    const rail = railRef.current;
+    if (!rail) return 0;
+    const rect = rail.getBoundingClientRect();
+    const ratio = (clientX - rect.left) / rect.width;
+    return Math.min(100, Math.max(0, Math.round(ratio * 100)));
+  };
+
+  const handleRailPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (disabled || (event.target as HTMLElement).tagName === "INPUT") return;
+    const value = valueFromPointer(event.clientX);
+    const distanceToMin = Math.abs(value - minVal);
+    const distanceToMax = Math.abs(value - maxVal);
+    if (distanceToMin <= distanceToMax) {
+      setMinValue(value);
+    } else {
+      setMaxValue(value);
+    }
+  };
+
+  return (
+    <div className={`spa-performance-dual-range ${disabled ? "is-disabled" : ""}`}>
+      <div
+        ref={railRef}
+        className="spa-performance-dual-range-rail"
+        onPointerDown={handleRailPointerDown}
+      >
+        <div
+          className="spa-performance-dual-range-fill"
+          style={{ left: `${minVal}%`, right: `${100 - maxVal}%` }}
+        />
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={1}
+          value={minVal}
+          disabled={disabled}
+          aria-label="Minimum score percent"
+          className="spa-performance-dual-range-input spa-performance-dual-range-input-min"
+          onChange={(event) => setMinValue(Number(event.target.value))}
+        />
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={1}
+          value={maxVal}
+          disabled={disabled}
+          aria-label="Maximum score percent"
+          className="spa-performance-dual-range-input spa-performance-dual-range-input-max"
+          onChange={(event) => setMaxValue(Number(event.target.value))}
+        />
+      </div>
+      <div className="spa-performance-dual-range-labels">
+        <span>0%</span>
+        <span>100%</span>
+      </div>
+    </div>
+  );
 }
 
 export function PerformanceCategoryFilter({
@@ -56,11 +145,8 @@ export function PerformanceCategoryFilter({
   const rootRef = useRef<HTMLDivElement>(null);
   const selected = options.find((option) => option.value === category) ?? options[0];
   const disabled = !category;
-
-  const minNum = clampPercent(min, 0);
-  const maxNum = clampPercent(max, 100);
-  const rangeStart = Math.min(minNum, maxNum);
-  const rangeEnd = Math.max(minNum, maxNum);
+  const minDisplay = min === "" ? "0" : min;
+  const maxDisplay = max === "" ? "100" : max;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -77,7 +163,7 @@ export function PerformanceCategoryFilter({
     <div className="spa-performance-category-filter spa-no-print">
       <div className="spa-performance-category-filter-body">
         <div className="spa-performance-category-picker-wrap" ref={rootRef}>
-          <label className="spa-performance-category-picker-label">Show by category</label>
+          <label className="spa-performance-filter-field-label">Show by category</label>
           <button
             type="button"
             className={`spa-performance-category-trigger ${open ? "is-open" : ""}`}
@@ -131,34 +217,26 @@ export function PerformanceCategoryFilter({
         </div>
 
         <div className={`spa-performance-range-panel ${disabled ? "is-disabled" : ""}`}>
-          <div className="spa-performance-range-panel-head">
-            <span className="spa-performance-range-panel-label">Score range</span>
+          <div className="spa-performance-range-panel-top">
+            <label className="spa-performance-filter-field-label">Score range</label>
             {!disabled && (
               <span className="spa-performance-range-panel-value">
-                {min === "" ? "0" : min}% – {max === "" ? "100" : max}%
+                {minDisplay}% – {maxDisplay}%
               </span>
             )}
           </div>
 
-          <div className="spa-performance-range-track-wrap" aria-hidden="true">
-            <div className="spa-performance-range-track">
-              <span
-                className="spa-performance-range-track-fill"
-                style={{
-                  left: `${rangeStart}%`,
-                  right: `${100 - rangeEnd}%`,
-                }}
-              />
-            </div>
-            <div className="spa-performance-range-track-labels">
-              <span>0%</span>
-              <span>100%</span>
-            </div>
-          </div>
+          <DualRangeSlider
+            min={min}
+            max={max}
+            disabled={disabled}
+            onMinChange={onMinChange}
+            onMaxChange={onMaxChange}
+          />
 
           <div className="spa-performance-range-inputs">
             <label className="spa-performance-range-field" htmlFor="performance-filter-min">
-              <span className="spa-performance-range-field-label">From %</span>
+              <span className="spa-performance-filter-field-label">From %</span>
               <span className="spa-performance-range-field-input-wrap">
                 <input
                   id="performance-filter-min"
@@ -175,12 +253,8 @@ export function PerformanceCategoryFilter({
               </span>
             </label>
 
-            <span className="spa-performance-range-divider" aria-hidden="true">
-              <i className="fa fa-arrow-right" />
-            </span>
-
             <label className="spa-performance-range-field" htmlFor="performance-filter-max">
-              <span className="spa-performance-range-field-label">To %</span>
+              <span className="spa-performance-filter-field-label">To %</span>
               <span className="spa-performance-range-field-input-wrap">
                 <input
                   id="performance-filter-max"
@@ -201,18 +275,14 @@ export function PerformanceCategoryFilter({
 
         {active && (
           <button type="button" className="spa-performance-category-clear" onClick={onClear}>
-            <i className="fa fa-times me-1" aria-hidden="true" />
-            Clear range
+            Clear
           </button>
         )}
       </div>
 
       {active && (
         <div className="spa-performance-category-summary">
-          <span className="spa-performance-category-summary-badge">
-            <i className="fa fa-filter me-1" aria-hidden="true" />
-            {summary}
-          </span>
+          <span className="spa-performance-category-summary-badge">{summary}</span>
           <span className="spa-performance-category-summary-count">
             {resultCount} student{resultCount === 1 ? "" : "s"}
           </span>
