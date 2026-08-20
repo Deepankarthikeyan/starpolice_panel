@@ -168,6 +168,7 @@ export function InteractionPage(config: InteractionPageConfig) {
             onSend={handleSend}
             loading={loading}
             viewerRole={auth?.role}
+            viewerEmail={auth?.email}
             sidebarTitle={sidebarTitle}
             emptyThreadHint={emptyThreadHint}
           />
