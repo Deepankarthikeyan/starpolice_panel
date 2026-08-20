@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { AnchoredDropdownMenu } from "./AnchoredDropdownMenu";
 
 export type PerformanceSortPickerOption = {
   key: string;
@@ -33,19 +34,8 @@ function directionLabel(dir: "asc" | "desc") {
 
 export function PerformanceSortPicker({ options, value, onChange }: PerformanceSortPickerProps) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const selected = options.find((option) => optionValue(option) === value) ?? options[0];
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const handleSelect = (option: PerformanceSortPickerOption) => {
     onChange(optionValue(option));
@@ -53,8 +43,9 @@ export function PerformanceSortPicker({ options, value, onChange }: PerformanceS
   };
 
   return (
-    <div className="spa-performance-sort-picker" ref={rootRef}>
+    <div className="spa-performance-sort-picker">
       <button
+        ref={triggerRef}
         type="button"
         className={`spa-performance-sort-trigger ${open ? "is-open" : ""}`}
         aria-expanded={open}
@@ -73,39 +64,44 @@ export function PerformanceSortPicker({ options, value, onChange }: PerformanceS
         </span>
       </button>
 
-      {open && (
-        <div className="spa-performance-sort-menu" role="listbox" aria-label="Sort students">
-          {options.map((option) => {
-            const isActive = optionValue(option) === value;
-            const isPercent = option.key.endsWith("Percent");
-            return (
-              <button
-                key={optionValue(option)}
-                type="button"
-                role="option"
-                aria-selected={isActive}
-                className={`spa-performance-sort-option ${isActive ? "is-active" : ""}`}
-                onClick={() => handleSelect(option)}
-              >
-                <span className={`spa-performance-sort-option-icon spa-performance-sort-tone-${option.key}`}>
-                  <i className={`fa ${sortIcon(option.key)}`} aria-hidden="true" />
-                </span>
-                <span className="spa-performance-sort-option-body">
-                  <span className="spa-performance-sort-option-label">{option.label}</span>
-                  {isPercent && (
-                    <span className="spa-performance-sort-option-meta">{directionLabel(option.dir)}</span>
-                  )}
-                </span>
-                {isActive && (
-                  <span className="spa-performance-sort-option-check" aria-hidden="true">
-                    <i className="fa fa-check" />
-                  </span>
+      <AnchoredDropdownMenu
+        open={open}
+        anchorRef={triggerRef}
+        onClose={() => setOpen(false)}
+        className="spa-performance-sort-menu"
+        ariaLabel="Sort students"
+        minWidth={352}
+      >
+        {options.map((option) => {
+          const isActive = optionValue(option) === value;
+          const isPercent = option.key.endsWith("Percent");
+          return (
+            <button
+              key={optionValue(option)}
+              type="button"
+              role="option"
+              aria-selected={isActive}
+              className={`spa-performance-sort-option ${isActive ? "is-active" : ""}`}
+              onClick={() => handleSelect(option)}
+            >
+              <span className={`spa-performance-sort-option-icon spa-performance-sort-tone-${option.key}`}>
+                <i className={`fa ${sortIcon(option.key)}`} aria-hidden="true" />
+              </span>
+              <span className="spa-performance-sort-option-body">
+                <span className="spa-performance-sort-option-label">{option.label}</span>
+                {isPercent && (
+                  <span className="spa-performance-sort-option-meta">{directionLabel(option.dir)}</span>
                 )}
-              </button>
-            );
-          })}
-        </div>
-      )}
+              </span>
+              {isActive && (
+                <span className="spa-performance-sort-option-check" aria-hidden="true">
+                  <i className="fa fa-check" />
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </AnchoredDropdownMenu>
     </div>
   );
 }

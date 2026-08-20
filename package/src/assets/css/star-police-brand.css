@@ -1635,19 +1635,18 @@
   flex-shrink: 0;
 }
 
-.spa-performance-sort-menu {
-  position: absolute;
-  top: calc(100% + 0.35rem);
-  left: 0;
-  z-index: 1060;
-  width: min(22rem, 92vw);
+.spa-performance-sort-menu,
+.spa-performance-category-menu {
   max-height: 18rem;
   overflow: auto;
-  padding: 0.35rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.85rem;
-  background: #fff;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.spa-performance-dropdown-menu-portal.spa-performance-sort-menu {
+  width: min(22rem, 92vw);
+}
+
+.spa-performance-dropdown-menu-portal.spa-performance-category-menu {
+  width: auto;
 }
 
 .spa-performance-sort-option {
@@ -1868,17 +1867,19 @@
 }
 
 .spa-performance-category-menu {
-  position: absolute;
-  top: calc(100% + 0.35rem);
-  left: 0;
-  z-index: 1060;
-  width: 100%;
-  min-width: 13rem;
   padding: 0.35rem;
   border: 1px solid #e2e8f0;
   border-radius: 0.65rem;
   background: #fff;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.spa-performance-sort-menu {
+  padding: 0.35rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.85rem;
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
 }
 
 .spa-performance-category-option {

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { AnchoredDropdownMenu } from "./AnchoredDropdownMenu";
 
 export type PerformanceCategoryFilterOption = {
   value: string;
@@ -138,34 +139,19 @@ export function PerformanceCategoryFilter({
   onClear,
 }: PerformanceCategoryFilterProps) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const selected = options.find((option) => option.value === category) ?? options[0];
   const disabled = !category;
   const minDisplay = min === "" ? "0" : min;
   const maxDisplay = max === "" ? "100" : max;
 
-  useEffect(() => {
-    if (!open) return;
-
-    function handleClickOutside(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
-
   return (
     <div className="spa-performance-category-filter spa-no-print">
       <div className="spa-performance-filter-row">
-        <div
-          className={`spa-performance-filter-cell spa-performance-filter-cell-category ${open ? "is-menu-open" : ""}`}
-          ref={rootRef}
-        >
+        <div className="spa-performance-filter-cell spa-performance-filter-cell-category">
           <label className="spa-performance-filter-field-label">Show by category</label>
           <button
+            ref={triggerRef}
             type="button"
             className={`spa-performance-category-trigger ${open ? "is-open" : ""}`}
             aria-expanded={open}
@@ -183,38 +169,43 @@ export function PerformanceCategoryFilter({
             </span>
           </button>
 
-          {open && (
-            <div className="spa-performance-category-menu" role="listbox" aria-label="Filter category">
-              {options.map((option) => {
-                const isActive = option.value === category;
-                return (
-                  <button
-                    key={option.value || "all"}
-                    type="button"
-                    role="option"
-                    aria-selected={isActive}
-                    className={`spa-performance-category-option ${isActive ? "is-active" : ""}`}
-                    onClick={() => {
-                      onCategoryChange(option.value);
-                      setOpen(false);
-                    }}
+          <AnchoredDropdownMenu
+            open={open}
+            anchorRef={triggerRef}
+            onClose={() => setOpen(false)}
+            className="spa-performance-category-menu"
+            ariaLabel="Filter category"
+            minWidth={208}
+          >
+            {options.map((option) => {
+              const isActive = option.value === category;
+              return (
+                <button
+                  key={option.value || "all"}
+                  type="button"
+                  role="option"
+                  aria-selected={isActive}
+                  className={`spa-performance-category-option ${isActive ? "is-active" : ""}`}
+                  onClick={() => {
+                    onCategoryChange(option.value);
+                    setOpen(false);
+                  }}
+                >
+                  <span
+                    className={`spa-performance-sort-option-icon spa-performance-sort-tone-${categoryTone(option.value)}`}
                   >
-                    <span
-                      className={`spa-performance-sort-option-icon spa-performance-sort-tone-${categoryTone(option.value)}`}
-                    >
-                      <i className={`fa ${categoryIcon(option.value)}`} aria-hidden="true" />
+                    <i className={`fa ${categoryIcon(option.value)}`} aria-hidden="true" />
+                  </span>
+                  <span className="spa-performance-category-option-label">{option.label}</span>
+                  {isActive && (
+                    <span className="spa-performance-sort-option-check" aria-hidden="true">
+                      <i className="fa fa-check" />
                     </span>
-                    <span className="spa-performance-category-option-label">{option.label}</span>
-                    {isActive && (
-                      <span className="spa-performance-sort-option-check" aria-hidden="true">
-                        <i className="fa fa-check" />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+                  )}
+                </button>
+              );
+            })}
+          </AnchoredDropdownMenu>
         </div>
 
         <div className={`spa-performance-filter-cell spa-performance-filter-cell-range ${disabled ? "is-disabled" : ""}`}>
