@@ -3,13 +3,11 @@ import { useRef } from "react";
 type PerformanceSearchFieldProps = {
   value: string;
   onChange: (value: string) => void;
-  placeholder?: string;
 };
 
 export function PerformanceSearchField({
   value,
   onChange,
-  placeholder = "Search name, register no., batch...",
 }: PerformanceSearchFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const hasValue = value.trim().length > 0;
@@ -34,7 +32,6 @@ export function PerformanceSearchField({
           ref={inputRef}
           type="search"
           className="spa-performance-search-input"
-          placeholder={placeholder}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={(event) => {
@@ -42,7 +39,7 @@ export function PerformanceSearchField({
               handleClear();
             }
           }}
-          aria-label={placeholder}
+          aria-label="Find student by name, register number, or batch"
         />
       </span>
 
