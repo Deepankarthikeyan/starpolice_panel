@@ -26,6 +26,7 @@ import { AttendancePerformanceList } from "../shared/PerformanceDetailPanels";
 import { ExamMarksTable } from "../shared/ExamMarksTable";
 import PhysicalRecordCard from "../shared/PhysicalRecordCard";
 import { PerformanceSortPicker } from "./PerformanceSortPicker";
+import { PerformanceCategoryFilter } from "./PerformanceCategoryFilter";
 
 type SortKey =
   | "studentId"
@@ -400,78 +401,19 @@ const StudentPerformance = () => {
             </div>
           </div>
           <div className="card-body pt-0">
-            <div className="spa-performance-filter-bar spa-no-print">
-              <div className="row g-2 align-items-end">
-                <div className="col-md-3 col-sm-6">
-                  <label className="form-label spa-performance-filter-label" htmlFor="performance-filter-category">
-                    Show by category
-                  </label>
-                  <select
-                    id="performance-filter-category"
-                    className="form-select form-select-sm"
-                    value={percentFilterKey}
-                    onChange={(event) =>
-                      setPercentFilterKey(event.target.value as PercentFilterKey | "")
-                    }
-                  >
-                    {PERCENT_FILTER_OPTIONS.map((option) => (
-                      <option key={option.value || "all"} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="col-md-2 col-sm-3">
-                  <label className="form-label spa-performance-filter-label" htmlFor="performance-filter-min">
-                    From %
-                  </label>
-                  <input
-                    id="performance-filter-min"
-                    type="number"
-                    min={0}
-                    max={100}
-                    className="form-control form-control-sm"
-                    placeholder="10"
-                    value={percentMin}
-                    onChange={(event) => setPercentMin(event.target.value)}
-                    disabled={!percentFilterKey}
-                  />
-                </div>
-                <div className="col-md-2 col-sm-3">
-                  <label className="form-label spa-performance-filter-label" htmlFor="performance-filter-max">
-                    To %
-                  </label>
-                  <input
-                    id="performance-filter-max"
-                    type="number"
-                    min={0}
-                    max={100}
-                    className="form-control form-control-sm"
-                    placeholder="30"
-                    value={percentMax}
-                    onChange={(event) => setPercentMax(event.target.value)}
-                    disabled={!percentFilterKey}
-                  />
-                </div>
-                <div className="col-md-auto col-sm-12 d-flex align-items-end gap-2">
-                  {percentFilterActive && (
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={clearPercentFilter}
-                    >
-                      Clear range
-                    </button>
-                  )}
-                </div>
-              </div>
-              {percentFilterActive && (
-                <p className="spa-performance-filter-summary mb-0 mt-2">
-                  Showing {percentFilterSummary} · {filteredStudents.length} student
-                  {filteredStudents.length === 1 ? "" : "s"}
-                </p>
-              )}
-            </div>
+            <PerformanceCategoryFilter
+              options={PERCENT_FILTER_OPTIONS}
+              category={percentFilterKey}
+              min={percentMin}
+              max={percentMax}
+              active={percentFilterActive}
+              summary={percentFilterSummary}
+              resultCount={filteredStudents.length}
+              onCategoryChange={(value) => setPercentFilterKey(value as PercentFilterKey | "")}
+              onMinChange={setPercentMin}
+              onMaxChange={setPercentMax}
+              onClear={clearPercentFilter}
+            />
             {listError && (
               <div className="alert alert-danger spa-no-print">
                 {listError}
