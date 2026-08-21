@@ -601,7 +601,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #2b2f36;
+  color: #0f172a;
   margin-bottom: 0.35rem;
 }
 
@@ -616,7 +616,7 @@
   border: 1px solid #cbd5e1;
   border-radius: 0.625rem;
   background: #fff;
-  color: #2b2f36;
+  color: #0f172a;
   font-size: 0.875rem;
   font-weight: 600;
   text-align: left;
@@ -634,7 +634,7 @@
 
 .spa-messenger-audience-value,
 .spa-messenger-audience-chevron {
-  color: #2b2f36;
+  color: #0f172a;
 }
 
 .spa-messenger-audience-chevron {
@@ -658,7 +658,7 @@
   border: none;
   border-radius: 0.4rem;
   background: transparent;
-  color: #2b2f36;
+  color: #0f172a;
   font-size: 0.875rem;
   font-weight: 600;
   text-align: left;
@@ -668,7 +668,7 @@
 .spa-messenger-audience-option:hover,
 .spa-messenger-audience-option.is-active {
   background: rgba(18, 61, 115, 0.08);
-  color: #2b2f36;
+  color: #0f172a;
 }
 
 .spa-messenger-sidebar.is-group-only {

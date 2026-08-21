@@ -138,3 +138,17 @@ small.text-muted {
 .physical-record-header {
   color: #fff;
 }
+
+/* Interaction Message to is a custom dropdown; native option lists ignore CSS color. */
+#interaction-audience,
+#interaction-audience .spa-messenger-audience-value,
+#interaction-audience .spa-messenger-audience-chevron,
+.spa-messenger-audience-label,
+.spa-messenger-audience-trigger,
+.spa-messenger-audience-value,
+.spa-messenger-audience-chevron,
+.spa-messenger-audience-option {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
+  opacity: 1 !important;
+}
