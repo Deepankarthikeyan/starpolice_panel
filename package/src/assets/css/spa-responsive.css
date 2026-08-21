@@ -197,6 +197,16 @@ iframe {
     height: 4.25rem;
   }
 
+  .spa-sidebar-backdrop {
+    top: calc(4.25rem + env(safe-area-inset-top, 0px)) !important;
+  }
+
+  #main-wrapper .spa-sidebar,
+  [data-sidebar-style="overlay"] #main-wrapper:has(.spa-sidebar) .spa-sidebar {
+    top: calc(4.25rem + env(safe-area-inset-top, 0px)) !important;
+    height: calc(100dvh - 4.25rem - env(safe-area-inset-top, 0px)) !important;
+  }
+
   #main-wrapper:has(.spa-sidebar) .container-fluid {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
