@@ -658,6 +658,17 @@ iframe {
     margin-bottom: 0;
   }
 
+  #main-wrapper:has(.spa-sidebar) .table-responsive::-webkit-scrollbar,
+  #main-wrapper:has(.spa-sidebar) .spa-table-scroll::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .table-responsive::-webkit-scrollbar-thumb,
+  #main-wrapper:has(.spa-sidebar) .spa-table-scroll::-webkit-scrollbar-thumb {
+    background: rgba(18, 61, 115, 0.45);
+    border-radius: 999px;
+  }
+
   .attendance-table,
   .spa-leads-table,
   .spa-onboarding-table {
@@ -730,10 +741,9 @@ iframe {
     flex-wrap: wrap !important;
   }
 
-  .spa-performance-search-field {
-    min-width: 0 !important;
-    width: 100%;
-    flex: 1 1 100%;
+  .daywise-upload-dropzone input[type="file"] {
+    max-width: 100%;
+    font-size: 0.8125rem;
   }
 
   .daywise-upload-calendar .react-datepicker,
