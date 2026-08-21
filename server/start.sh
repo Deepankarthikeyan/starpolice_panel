@@ -1,16 +1,29 @@
 #!/usr/bin/env bash
-# Local dev: optional embedded MongoDB. Render production: MongoDB Atlas via MONGODB_URI only.
+# Local + Render: use MongoDB Atlas when MONGODB_URI points at it.
+# Otherwise start embedded mongod so the API can boot without a dashboard secret.
 set -euo pipefail
 
 is_render() {
   [ -n "${RENDER:-}" ] || [ -n "${RENDER_SERVICE_ID:-}" ]
 }
 
+is_local_mongo_uri() {
+  [[ -z "${MONGODB_URI:-}" ]] || [[ "$MONGODB_URI" == *"127.0.0.1"* ]] || [[ "$MONGODB_URI" == *"localhost"* ]]
+}
+
 start_embedded_mongo() {
-  echo "WARNING: Using embedded MongoDB for local development only."
-  echo "Production on Render requires MongoDB Atlas (see HOSTING.md)."
+  if is_render; then
+    echo "MONGODB_URI is not set to Atlas. Starting embedded MongoDB so the API can serve requests."
+    echo "Data on Render free tier is ephemeral (lost on sleep/redeploy). Set Atlas in Render → Environment for permanent storage."
+  else
+    echo "WARNING: Using embedded MongoDB for local development."
+  fi
+
   DB_PATH="${MONGODB_DATA_PATH:-/data/db}"
-  mkdir -p "$DB_PATH"
+  if ! mkdir -p "$DB_PATH" 2>/dev/null; then
+    DB_PATH="${HOME}/.mongodb/data"
+    mkdir -p "$DB_PATH"
+  fi
   if ! pgrep -x mongod >/dev/null 2>&1; then
     if ! command -v mongod >/dev/null 2>&1; then
       echo "ERROR: mongod not installed. Install MongoDB locally or set MONGODB_URI to Atlas."
@@ -29,24 +42,12 @@ start_embedded_mongo() {
   export MONGODB_URI="${MONGODB_URI:-mongodb://127.0.0.1:27017/starpolice_academy}"
 }
 
-if is_render; then
-  echo "Star Police API starting on Render (production mode)."
-  if [[ -z "${MONGODB_URI:-}" ]] || [[ "$MONGODB_URI" == *"127.0.0.1"* ]] || [[ "$MONGODB_URI" == *"localhost"* ]]; then
-    echo "ERROR: Set MONGODB_URI to your MongoDB Atlas connection string in Render → Environment."
-    echo "See HOSTING.md → Permanent production setup."
-  else
-    echo "Using MongoDB Atlas from MONGODB_URI."
-  fi
+if is_local_mongo_uri; then
+  start_embedded_mongo
+elif is_render; then
+  echo "Star Police API starting on Render using MongoDB Atlas from MONGODB_URI."
 else
-  USE_EMBEDDED_MONGO=false
-  if [[ -z "${MONGODB_URI:-}" ]] || [[ "$MONGODB_URI" == *"127.0.0.1"* ]] || [[ "$MONGODB_URI" == *"localhost"* ]]; then
-    USE_EMBEDDED_MONGO=true
-  fi
-  if [ "$USE_EMBEDDED_MONGO" = true ]; then
-    start_embedded_mongo
-  else
-    echo "Using external MongoDB from MONGODB_URI."
-  fi
+  echo "Using external MongoDB from MONGODB_URI."
 fi
 
 if [[ "${SEED_ON_START:-}" == "true" ]]; then

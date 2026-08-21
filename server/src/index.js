@@ -4,7 +4,7 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { connectDBWithRetry, isDbConnected } from "./config/db.js";
-import { getMongoUriIssue } from "./config/production.js";
+import { getMongoUriIssue, getMongoStorageKind } from "./config/production.js";
 import authRoutes from "./routes/auth.js";
 import uploadRoutes from "./routes/uploads.js";
 import messageRoutes from "./routes/messages.js";
@@ -47,6 +47,7 @@ app.get("/api/health", (_req, res) => {
   res.json({
     status: mongoIssue ? "misconfigured" : connected ? "ok" : "starting",
     database: connected ? "mongodb" : mongoIssue ? "missing" : "connecting",
+    storage: getMongoStorageKind(),
     setupRequired: mongoIssue,
     build: process.env.RENDER_GIT_COMMIT?.slice(0, 7) || "local",
     features: {
@@ -93,7 +94,7 @@ async function runMigrations() {
 async function connectDatabaseInBackground() {
   const uri = process.env.MONGODB_URI;
   if (!uri) {
-    console.error("MONGODB_URI is not set. Auth and data routes will fail.");
+    console.error("MONGODB_URI is not set. Start via ./start.sh or set an Atlas URI.");
     return;
   }
 

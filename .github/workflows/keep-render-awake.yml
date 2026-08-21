@@ -24,4 +24,4 @@ jobs:
             echo "OK: $response"
             exit 0
           fi
-          echo "::warning::Render API did not respond. It may be deploying or misconfigured (check MONGODB_URI on Render)."
+          echo "::warning::Render API did not respond. It may be sleeping, deploying, or still starting MongoDB."

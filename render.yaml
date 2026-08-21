@@ -1,4 +1,5 @@
-# Render Blueprint — production API (requires MongoDB Atlas)
+# Render Blueprint — production API
+# MONGODB_URI is optional: unset uses embedded MongoDB. Set Atlas for permanent storage.
 services:
   - type: web
     name: starpolice-api

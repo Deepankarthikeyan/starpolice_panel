@@ -115,9 +115,11 @@ Run `npm run seed` in Render Shell, then log in at `/admin/login` or `/student/l
 
 ## Permanent production setup (fixes 502/503 forever)
 
-The API **must** use **MongoDB Atlas** on Render. Embedded MongoDB inside the container was the main cause of lost accounts, failed signups, and 503 errors after redeploys.
+The API starts with **embedded MongoDB** when `MONGODB_URI` is not set, so login and signup work without a Render dashboard secret. Render free-tier disk is ephemeral, so accounts created this way can disappear after sleep or redeploy.
 
-### One-time setup (~5 minutes)
+For data that survives restarts, point `MONGODB_URI` at **MongoDB Atlas** (free M0 cluster).
+
+### Optional: MongoDB Atlas (~5 minutes)
 
 #### 1. Create MongoDB Atlas (free)
 
@@ -151,7 +153,7 @@ You should see:
 {"status":"ok","database":"mongodb", ...}
 ```
 
-If you see `"setupRequired"` or `"database":"missing"`, `MONGODB_URI` is not set correctly on Render.
+`"storage":"embedded"` means the API booted without Atlas (works, but data may reset). `"storage":"atlas"` means Render is using your Atlas URI.
 
 #### 4. Create Super Admin
 

@@ -30,7 +30,7 @@ Deploy the **Star Police Academy** panel for free using:
 3. Click **New Blueprint Instance** and connect your repo.
 4. Render reads `render.yaml` and creates the `starpolice-api` service.
 5. Set these environment variables when prompted:
-   - `MONGODB_URI` — your Atlas connection string
+   - `MONGODB_URI` — optional Atlas connection string (embedded MongoDB is used if unset)
    - `CLIENT_URL` — your Netlify URL (set after step 3), e.g. `https://your-app.netlify.app`
 6. After deploy, note the API URL, e.g. `https://starpolice-api.onrender.com`.
 
@@ -47,7 +47,7 @@ Deploy the **Star Police Academy** panel for free using:
 
    | Variable | Value |
    |----------|-------|
-   | `MONGODB_URI` | Atlas connection string |
+   | `MONGODB_URI` | Optional Atlas URI; embedded MongoDB is used if unset |
    | `JWT_SECRET` | Long random string |
    | `CLIENT_URL` | Your Netlify frontend URL |
 
