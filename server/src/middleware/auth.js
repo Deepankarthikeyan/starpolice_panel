@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { hasAnyPermission } from "../permissions.js";
+import { getJwtSecret } from "../config/jwt.js";
 
 export function authRequired(req, res, next) {
   const header = req.headers.authorization;
@@ -10,7 +11,7 @@ export function authRequired(req, res, next) {
 
   try {
     const token = header.split(" ")[1];
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, getJwtSecret());
     req.user = payload;
     next();
   } catch {

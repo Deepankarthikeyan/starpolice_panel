@@ -113,7 +113,8 @@ function publicApiErrorMessage(status: number, message: unknown) {
   if (
     text.includes("MONGODB_URI") ||
     text.includes("MongoDB Atlas") ||
-    text.includes("Database is still starting")
+    text.includes("Database is still starting") ||
+    text.includes("secretOrPrivateKey")
   ) {
     return "The API is starting. Wait about 30 seconds and try again.";
   }

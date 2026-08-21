@@ -7,6 +7,7 @@ import { authRequired } from "../middleware/auth.js";
 import { requireDb } from "../middleware/requireDb.js";
 import { getEffectivePermissions } from "../permissions.js";
 import { clearTestSuperAdminsIfNeeded } from "../utils/clearTestSuperAdmins.js";
+import { getJwtSecret } from "../config/jwt.js";
 
 const router = express.Router();
 
@@ -68,7 +69,7 @@ function createToken(user, panel, staffFields = {}) {
       permissions,
       ...staffFields,
     },
-    process.env.JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: "7d" }
   );
 }

@@ -5,6 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { connectDBWithRetry, isDbConnected } from "./config/db.js";
 import { getMongoUriIssue, getMongoStorageKind } from "./config/production.js";
+import { getJwtSecret } from "./config/jwt.js";
 import authRoutes from "./routes/auth.js";
 import uploadRoutes from "./routes/uploads.js";
 import messageRoutes from "./routes/messages.js";
@@ -49,6 +50,7 @@ app.get("/api/health", (_req, res) => {
     database: connected ? "mongodb" : mongoIssue ? "missing" : "connecting",
     storage: getMongoStorageKind(),
     setupRequired: mongoIssue,
+    jwt: Boolean(process.env.JWT_SECRET?.trim()),
     build: process.env.RENDER_GIT_COMMIT?.slice(0, 7) || "local",
     features: {
       messageContacts: true,
@@ -107,6 +109,7 @@ async function connectDatabaseInBackground() {
 }
 
 async function start() {
+  getJwtSecret();
   app.listen(PORT, () => {
     console.log(`API server running on http://localhost:${PORT}`);
   });

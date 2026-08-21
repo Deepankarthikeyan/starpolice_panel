@@ -24,6 +24,7 @@ start_embedded_mongo() {
     DB_PATH="${HOME}/.mongodb/data"
     mkdir -p "$DB_PATH"
   fi
+  export MONGODB_DATA_PATH="$DB_PATH"
   if ! pgrep -x mongod >/dev/null 2>&1; then
     if ! command -v mongod >/dev/null 2>&1; then
       echo "ERROR: mongod not installed. Install MongoDB locally or set MONGODB_URI to Atlas."
@@ -49,6 +50,29 @@ elif is_render; then
 else
   echo "Using external MongoDB from MONGODB_URI."
 fi
+
+ensure_jwt_secret() {
+  if [[ -n "${JWT_SECRET:-}" ]]; then
+    return
+  fi
+
+  local secret_file="${JWT_SECRET_FILE:-${MONGODB_DATA_PATH:-/data/db}/.jwt-secret}"
+  mkdir -p "$(dirname "$secret_file")" 2>/dev/null || secret_file="/tmp/.jwt-secret"
+
+  if [[ -s "$secret_file" ]]; then
+    JWT_SECRET="$(tr -d '\n' < "$secret_file")"
+    export JWT_SECRET
+    echo "JWT_SECRET was unset; loaded generated secret from $secret_file"
+    return
+  fi
+
+  JWT_SECRET="$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")"
+  export JWT_SECRET
+  printf '%s' "$JWT_SECRET" > "$secret_file" 2>/dev/null || printf '%s' "$JWT_SECRET" > /tmp/.jwt-secret
+  echo "JWT_SECRET was unset; generated a secret so login and signup can issue tokens."
+}
+
+ensure_jwt_secret
 
 if [[ "${SEED_ON_START:-}" == "true" ]]; then
   echo "Running database seed (SEED_ON_START=true)..."
