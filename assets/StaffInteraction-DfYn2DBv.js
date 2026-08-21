@@ -1,0 +1,1 @@
+import{j as t}from"./bootstrap-Jsk0Doig.js";import{P as o,S as r}from"./useAdminInteractionPage-DvJLAjUk.js";import"./vendor-aDLGiWsi.js";import"./PageTitle-BeVZm_bc.js";import"./index-DYqJaH7P.js";import"./datepicker-BZEbk3WD.js";import"./panelLabels-BQK2H8kG.js";import"./AnchoredDropdownMenu-Dd5Fs0qG.js";const I=()=>t.jsx(o,{config:r});export{I as default};

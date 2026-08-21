@@ -1,0 +1,1 @@
+function n(t){return t==="student"?"Student Panel":t==="staff"?"Staff Panel":"Admin Panel"}function e(t){return t==="superadmin"?"Super Admin":t==="admin"?"Admin":t==="staff"?"Staff":t==="student"?"Student":""}export{e as f,n as g};
