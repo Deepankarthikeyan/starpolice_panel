@@ -64,8 +64,15 @@ textarea.form-control,
 .spa-subject-multiselect-btn-text,
 .spa-subject-dropdown-item,
 .spa-subject-selected-label,
-.spa-lead-status-select {
+.spa-lead-status-select,
+#interaction-audience,
+.spa-messenger-audience-trigger,
+.spa-messenger-audience-value,
+.spa-messenger-audience-chevron,
+.spa-messenger-audience-menu,
+.spa-messenger-audience-option {
   color: #2b2f36 !important;
+  -webkit-text-fill-color: #2b2f36;
 }
 
 .form-control::placeholder,

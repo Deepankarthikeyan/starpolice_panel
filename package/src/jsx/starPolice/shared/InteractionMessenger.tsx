@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { AnchoredDropdownMenu } from "../admin/AnchoredDropdownMenu";
 import type { ChatMessage, UserRole } from "../types";
 
 export type InteractionAudience = "group" | "student" | "staff" | "admin";
@@ -68,7 +69,10 @@ export function InteractionMessenger({
   const [draft, setDraft] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileThreadOpen, setMobileThreadOpen] = useState(false);
+  const [audienceOpen, setAudienceOpen] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
+  const audienceTriggerRef = useRef<HTMLButtonElement>(null);
+  const selectedAudience = audienceOptions?.find((option) => option.value === audience);
 
   const activeContact = contacts.find((contact) => contact.id === activeContactId) ?? contacts[0] ?? null;
 
@@ -125,21 +129,50 @@ export function InteractionMessenger({
         </div>
         {audienceOptions && audience && onAudienceChange && (
           <div className="spa-messenger-audience">
-            <label className="form-label spa-messenger-audience-label" htmlFor="interaction-audience">
+            <span className="form-label spa-messenger-audience-label" id="interaction-audience-label">
               Message to
-            </label>
-            <select
+            </span>
+            <button
+              ref={audienceTriggerRef}
               id="interaction-audience"
-              className="form-select"
-              value={audience}
-              onChange={(event) => onAudienceChange(event.target.value as InteractionAudience)}
+              type="button"
+              className={`spa-messenger-audience-trigger${audienceOpen ? " is-open" : ""}`}
+              aria-labelledby="interaction-audience-label"
+              aria-expanded={audienceOpen}
+              aria-haspopup="listbox"
+              onClick={() => setAudienceOpen((open) => !open)}
             >
-              {audienceOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              <span className="spa-messenger-audience-value">{selectedAudience?.label ?? ""}</span>
+              <i className="material-symbols-outlined spa-messenger-audience-chevron" aria-hidden="true">
+                {audienceOpen ? "expand_less" : "expand_more"}
+              </i>
+            </button>
+            <AnchoredDropdownMenu
+              open={audienceOpen}
+              anchorRef={audienceTriggerRef}
+              onClose={() => setAudienceOpen(false)}
+              className="spa-messenger-audience-menu"
+              ariaLabel="Message to"
+            >
+              {audienceOptions.map((option) => {
+                const isActive = option.value === audience;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="option"
+                    aria-selected={isActive}
+                    className={`spa-messenger-audience-option${isActive ? " is-active" : ""}`}
+                    onClick={() => {
+                      onAudienceChange(option.value);
+                      setAudienceOpen(false);
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </AnchoredDropdownMenu>
           </div>
         )}
         {!hideContactList && (

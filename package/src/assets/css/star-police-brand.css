@@ -596,12 +596,79 @@
 }
 
 .spa-messenger-audience-label {
+  display: block;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: #2b2f36;
   margin-bottom: 0.35rem;
+}
+
+.spa-messenger-audience-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.625rem;
+  background: #fff;
+  color: #2b2f36;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.spa-messenger-audience-trigger:hover,
+.spa-messenger-audience-trigger.is-open,
+.spa-messenger-audience-trigger:focus-visible {
+  border-color: var(--primary, #123d73);
+  box-shadow: 0 0 0 3px rgba(18, 61, 115, 0.12);
+  outline: none;
+}
+
+.spa-messenger-audience-value,
+.spa-messenger-audience-chevron {
+  color: #2b2f36;
+}
+
+.spa-messenger-audience-chevron {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.spa-messenger-audience-menu {
+  padding: 0.35rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.65rem;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.spa-messenger-audience-option {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: none;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: #2b2f36;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.spa-messenger-audience-option:hover,
+.spa-messenger-audience-option.is-active {
+  background: rgba(18, 61, 115, 0.08);
+  color: #2b2f36;
 }
 
 .spa-messenger-sidebar.is-group-only {
