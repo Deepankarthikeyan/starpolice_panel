@@ -673,6 +673,11 @@ body.spa-drawer-open .Toastify__toast-container {
     touch-action: manipulation;
   }
 
+  html body #main-wrapper:has(.spa-sidebar) .content-body,
+  html body[data-sidebar-style] #main-wrapper:has(.spa-sidebar) .content-body {
+    margin-left: 0 !important;
+  }
+
   html body #main-wrapper .spa-sidebar,
   html body[data-sidebar-style] #main-wrapper .spa-sidebar,
   html body[data-sidebar-style="full"] #main-wrapper:has(.spa-sidebar).menu-toggle .spa-sidebar,

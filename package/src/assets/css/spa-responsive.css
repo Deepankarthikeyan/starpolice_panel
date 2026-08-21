@@ -81,13 +81,56 @@ iframe {
   overflow-y: auto;
 }
 
-/* Fluid tables stay inside the viewport */
+/* Fluid tables stay inside the viewport and scroll instead of clipping */
 #main-wrapper:has(.spa-sidebar) .table-responsive,
+#main-wrapper:has(.spa-sidebar) .spa-table-scroll,
 .spa-onboarding-table-wrap {
+  display: block;
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+#main-wrapper:has(.spa-sidebar) .table-responsive > table,
+#main-wrapper:has(.spa-sidebar) .spa-table-scroll > table {
+  width: max-content;
+  min-width: 100%;
+}
+
+/* Theme forces .fc-view-harness to 850px, which leaves a skinny grid on phones */
+.spa-calendar-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.spa-calendar-wrap .fc,
+.spa-calendar-wrap .fc-view-harness,
+.spa-calendar-wrap .fc-view-harness-active,
+.spa-calendar-wrap .fc-scrollgrid,
+.spa-calendar-wrap .fc-scrollgrid-sync-table,
+.spa-calendar-wrap .fc-col-header,
+.spa-calendar-wrap .fc-daygrid-body {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.spa-calendar-wrap .fc .fc-view-harness {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.spa-calendar-wrap .fc table {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+.spa-calendar-wrap .fc .fc-scroller,
+.spa-calendar-wrap .fc .fc-scroller-liquid-absolute {
+  overflow: hidden !important;
+  width: 100% !important;
 }
 
 /* ------------------------------------------------------------------ */
@@ -109,6 +152,18 @@ iframe {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  /* Keep hamburger + notifications + profile only on overlay viewports */
+  .header-right .dz-theme-mode,
+  .header-right .dz-fullscreen,
+  .header-right .bell-link {
+    display: none !important;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .navbar-collapse {
+    display: flex !important;
+    flex-basis: auto;
   }
 
   .spa-page-titles {
@@ -230,13 +285,6 @@ iframe {
 
   .spa-header-menu-btn {
     margin-top: env(safe-area-inset-top, 0px);
-  }
-
-  /* Header — keep notifications + profile only */
-  .header-right .dz-theme-mode,
-  .header-right .dz-fullscreen,
-  .header-right .bell-link {
-    display: none !important;
   }
 
   .header-right .navbar-nav,
@@ -595,32 +643,58 @@ iframe {
   #main-wrapper:has(.spa-sidebar) .table-responsive,
   #main-wrapper:has(.spa-sidebar) .spa-table-scroll,
   #main-wrapper:has(.spa-sidebar) .spa-onboarding-table-wrap {
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
   }
 
   #main-wrapper:has(.spa-sidebar) .table-responsive > table,
   #main-wrapper:has(.spa-sidebar) .spa-table-scroll > table {
-    width: max-content;
+    width: max-content !important;
     min-width: 100%;
+    margin-bottom: 0;
+  }
+
+  .attendance-table,
+  .spa-leads-table,
+  .spa-onboarding-table {
+    min-width: 40rem;
   }
 
   .spa-calendar-wrap,
   .spa-calendar-wrap .fc,
   .spa-calendar-wrap .fc-media-screen,
   .spa-calendar-wrap .fc-view-harness,
+  .spa-calendar-wrap .fc-view-harness-active,
   .spa-calendar-wrap .fc-scrollgrid,
   .spa-calendar-wrap .fc-scrollgrid table,
+  .spa-calendar-wrap .fc-scrollgrid-sync-table,
+  .spa-calendar-wrap .fc-col-header,
+  .spa-calendar-wrap .fc-daygrid-body,
   .spa-calendar-wrap .fc table {
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
   }
 
-  .spa-calendar-wrap .fc .fc-scroller {
+  .spa-calendar-wrap .fc .fc-view-harness {
+    height: auto !important;
+  }
+
+  .spa-calendar-wrap .fc .fc-scroller,
+  .spa-calendar-wrap .fc .fc-scroller-liquid-absolute {
     overflow: hidden !important;
+    width: 100% !important;
+  }
+
+  .spa-calendar-wrap .fc table,
+  .spa-calendar-wrap .fc .fc-scrollgrid,
+  .spa-calendar-wrap .fc .fc-scrollgrid-sync-table,
+  .spa-calendar-wrap .fc .fc-col-header {
+    table-layout: fixed !important;
   }
 
   .spa-calendar-wrap .fc .fc-toolbar.fc-header-toolbar {
@@ -632,12 +706,34 @@ iframe {
   .spa-calendar-wrap .fc .fc-toolbar-chunk {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .spa-calendar-wrap .fc .fc-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .spa-calendar-wrap .fc .fc-toolbar-title {
+    font-size: 1.05rem !important;
   }
 
   .spa-calendar-wrap .fc .fc-col-header-cell-cushion,
   .spa-calendar-wrap .fc .fc-daygrid-day-number {
     padding: 0.25rem 0.1rem;
     font-size: 0.7rem;
+  }
+
+  .spa-performance-filter-row,
+  .spa-performance-header-controls {
+    flex-wrap: wrap !important;
+  }
+
+  .spa-performance-search-field {
+    min-width: 0 !important;
+    width: 100%;
+    flex: 1 1 100%;
   }
 
   .daywise-upload-calendar .react-datepicker,
