@@ -97,7 +97,7 @@
 }
 
 .spa-auth-subtitle {
-  color: #6c757d;
+  color: #2b2f36;
   margin-bottom: 1.5rem;
 }
 
@@ -146,7 +146,7 @@
   transform: translateY(-50%);
   border: 0;
   background: transparent;
-  color: #6b7785;
+  color: #2b2f36;
   padding: 0.15rem;
   line-height: 1;
   display: inline-flex;
@@ -443,7 +443,7 @@
 .spa-upload-task-meta {
   margin-top: 0.15rem;
   font-size: 0.75rem;
-  color: #6b7785;
+  color: #2b2f36;
 }
 
 .spa-upload-task-dot {
@@ -600,7 +600,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #6c757d;
+  color: #2b2f36;
   margin-bottom: 0.35rem;
 }
 
@@ -623,7 +623,7 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: 1.1rem;
-  color: #6b7785;
+  color: #2b2f36;
   pointer-events: none;
 }
 
@@ -643,7 +643,7 @@
   transform: translateY(-50%);
   border: 0;
   background: transparent;
-  color: #6b7785;
+  color: #2b2f36;
   font-size: 1.25rem;
   line-height: 1;
   padding: 0.15rem 0.35rem;
@@ -652,7 +652,7 @@
 .spa-messenger-search-empty {
   margin: 1rem 0.5rem;
   text-align: center;
-  color: #6b7785;
+  color: #2b2f36;
   font-size: 0.875rem;
 }
 
@@ -662,7 +662,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #6b7785;
+  color: #2b2f36;
 }
 
 .spa-messenger-contact-list {
@@ -722,7 +722,7 @@
 .spa-messenger-contact-subtitle,
 .spa-messenger-thread-subtitle {
   font-size: 0.78rem;
-  color: #6b7785;
+  color: #2b2f36;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -811,7 +811,7 @@
 .spa-messenger-bubble small {
   display: block;
   margin-top: 0.35rem;
-  color: #6b7785;
+  color: #2b2f36;
   font-size: 0.72rem;
 }
 
@@ -829,7 +829,7 @@
   align-items: center;
   justify-content: center;
   min-height: 20rem;
-  color: #6b7785;
+  color: #2b2f36;
   padding: 1rem;
   text-align: center;
 }
@@ -1105,7 +1105,7 @@
 
 .spa-onboarding-empty {
   text-align: center;
-  color: #6c757d;
+  color: #2b2f36;
   padding: 2.5rem 1rem !important;
 }
 
@@ -1183,12 +1183,12 @@
 }
 
 .spa-breadcrumb-panel {
-  color: #6b6b6b;
+  color: #2b2f36;
   font-weight: 500;
 }
 
 .spa-breadcrumb-separator {
-  color: #9a9a9a;
+  color: #2b2f36;
   font-weight: 400;
 }
 
@@ -1253,7 +1253,7 @@
   display: block;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #6b7280;
+  color: #2b2f36;
   margin-bottom: 0.25rem;
 }
 
@@ -1507,7 +1507,7 @@
 .spa-subject-selected-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: #2b2f36;
   margin-bottom: 0.5rem;
 }
 
@@ -1619,7 +1619,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #2b2f36;
   line-height: 1.1;
 }
 
@@ -1634,7 +1634,7 @@
 }
 
 .spa-performance-sort-trigger-chevron {
-  color: #64748b;
+  color: #2b2f36;
   font-size: 0.75rem;
   flex-shrink: 0;
 }
@@ -1729,7 +1729,7 @@
 
 .spa-performance-sort-option-meta {
   font-size: 0.6875rem;
-  color: #64748b;
+  color: #2b2f36;
   line-height: 1.2;
 }
 
@@ -1741,7 +1741,7 @@
 
 .spa-performance-sort-tone-none {
   background: #e2e8f0;
-  color: #64748b;
+  color: #2b2f36;
 }
 
 .spa-performance-overview-card,
@@ -1814,7 +1814,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #2b2f36;
   margin-bottom: 0.4rem;
   white-space: nowrap;
 }
@@ -1865,7 +1865,7 @@
 }
 
 .spa-performance-category-trigger-chevron {
-  color: #64748b;
+  color: #2b2f36;
   font-size: 0.7rem;
   flex-shrink: 0;
 }
@@ -1993,7 +1993,7 @@
   flex: 0 0 auto;
   font-size: 0.6875rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: #2b2f36;
   line-height: 1;
   white-space: nowrap;
 }
@@ -2087,14 +2087,14 @@
 
 .spa-performance-range-field-input:disabled {
   background: #f8fafc;
-  color: #94a3b8;
+  color: #2b2f36;
 }
 
 .spa-performance-range-field-suffix {
   padding-right: 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: #2b2f36;
 }
 
 .spa-performance-category-clear {
@@ -2131,7 +2131,7 @@
 }
 
 .spa-performance-category-clear:hover {
-  border-color: #94a3b8;
+  border-color: #2b2f36;
   background: #f8fafc;
 }
 
@@ -2156,7 +2156,7 @@
 
 .spa-performance-category-summary-count {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #2b2f36;
 }
 
 .spa-performance-header-controls {
@@ -2230,7 +2230,7 @@
 }
 
 .spa-performance-search-input::placeholder {
-  color: #94a3b8;
+  color: #2b2f36;
   font-weight: 500;
 }
 
@@ -2291,7 +2291,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #6c757d;
+  color: #2b2f36;
   margin-bottom: 0.35rem;
 }
 

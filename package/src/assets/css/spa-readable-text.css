@@ -1,4 +1,4 @@
-/* Loaded last so theme #A098AE cannot keep dropdowns and field text washed out. */
+/* Loaded last so theme #A098AE cannot keep dropdowns, sort menus, and field text washed out. */
 :root {
   --bs-body-color: #2b2f36;
   --bs-body-color-rgb: 43, 47, 54;
@@ -6,6 +6,12 @@
 
 body,
 p,
+td,
+th,
+li,
+span,
+label,
+small,
 .table,
 select,
 .form-control,
@@ -14,12 +20,20 @@ select,
 .form-select:focus,
 .form-control-plaintext,
 .input-group-text,
+.dropdown-menu,
+.dropdown-item,
 .spa-auth-input,
 .spa-auth-subtitle,
+.content-body,
 .content-body label,
 .content-body .form-label,
 .spa-auth-form-inner label,
-.card .form-label {
+.card .form-label,
+.card-title,
+.spa-sort-btn,
+.spa-breadcrumb-panel,
+.spa-breadcrumb-separator,
+.spa-breadcrumb-page {
   color: #2b2f36;
 }
 
@@ -28,8 +42,29 @@ select,
 .form-control:focus,
 .form-select:focus,
 select.form-select,
+select.form-control,
 input.form-control,
-textarea.form-control {
+textarea.form-control,
+.dropdown-menu,
+.dropdown-item,
+.spa-sort-btn,
+.spa-performance-sort-trigger,
+.spa-performance-sort-trigger-label,
+.spa-performance-sort-trigger-value,
+.spa-performance-sort-trigger-chevron,
+.spa-performance-sort-option,
+.spa-performance-sort-option-label,
+.spa-performance-sort-option-meta,
+.spa-performance-category-picker-label,
+.spa-performance-filter-field-label,
+.spa-performance-category-trigger,
+.spa-performance-category-trigger-value,
+.spa-performance-category-trigger-chevron,
+.spa-subject-multiselect-btn,
+.spa-subject-multiselect-btn-text,
+.spa-subject-dropdown-item,
+.spa-subject-selected-label,
+.spa-lead-status-select {
   color: #2b2f36 !important;
 }
 
@@ -38,7 +73,7 @@ textarea.form-control {
 textarea.form-control::placeholder,
 .spa-auth-input::placeholder,
 .spa-performance-search-input::placeholder {
-  color: #4b5563 !important;
+  color: #374151 !important;
   opacity: 1;
 }
 
@@ -48,7 +83,7 @@ textarea.form-control::placeholder,
 .form-control::-webkit-datetime-edit-month-field,
 .form-control::-webkit-datetime-edit-day-field,
 .form-control::-webkit-datetime-edit-year-field {
-  color: #2b2f36;
+  color: #2b2f36 !important;
 }
 
 .form-select option,
@@ -64,8 +99,9 @@ select option {
 }
 
 .text-muted,
-.form-text {
-  color: #4b5563 !important;
+.form-text,
+small.text-muted {
+  color: #2b2f36 !important;
 }
 
 .table {
@@ -76,5 +112,22 @@ select option {
 }
 
 .spa-password-toggle {
-  color: #374151;
+  color: #2b2f36;
+}
+
+/* Keep white text on dark chrome (sidebar, primary buttons, badges). */
+.spa-sidebar,
+.spa-sidebar *,
+.btn-primary,
+.btn-primary *,
+.badge,
+.physical-record-header,
+.physical-record-header * {
+  color: inherit;
+}
+
+.spa-sidebar,
+.btn-primary,
+.physical-record-header {
+  color: #fff;
 }
