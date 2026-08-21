@@ -116,15 +116,15 @@ iframe {
   }
 
   [data-sidebar-style="overlay"] #main-wrapper:has(.spa-sidebar) .spa-sidebar {
-    left: 0 !important;
-    transform: translate3d(-110%, 0, 0) !important;
+    left: -110% !important;
+    transform: none !important;
     padding-top: env(safe-area-inset-top, 0px);
-    height: 100dvh !important;
   }
 
   [data-sidebar-style="overlay"] #main-wrapper.spa-mobile-nav-open:has(.spa-sidebar) .spa-sidebar,
   [data-sidebar-style="overlay"] #main-wrapper.menu-toggle:has(.spa-sidebar) .spa-sidebar,
   [data-sidebar-style="overlay"] #main-wrapper:has(.spa-sidebar) .spa-sidebar.is-open {
+    left: 0 !important;
     transform: none !important;
   }
 
