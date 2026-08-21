@@ -214,7 +214,7 @@ export function InteractionMessenger({
             <div className="spa-messenger-thread-head">
               <button
                 type="button"
-                className="spa-messenger-back d-md-none"
+                className="spa-messenger-back"
                 aria-label="Back to chats"
                 onClick={() => setMobileThreadOpen(false)}
               >

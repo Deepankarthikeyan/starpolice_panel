@@ -233,8 +233,7 @@ const ExamMarksEntry = ({ examType }: ExamMarksEntryProps) => {
             <h4 className="card-title mb-0">{pageTitle} — Enter Marks</h4>
             <input
               type="search"
-              className="form-control form-control-sm"
-              style={{ maxWidth: "320px" }}
+              className="form-control form-control-sm spa-toolbar-search"
               placeholder="Search name, register no., batch..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}

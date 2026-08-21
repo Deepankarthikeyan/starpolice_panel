@@ -640,7 +640,7 @@ const StudentOnboarding = () => {
             </div>
           </SectionCard>
 
-          <div className="d-flex gap-2 mb-4">
+          <div className="d-flex flex-wrap gap-2 mb-4">
             <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading ? "Saving..." : editingId ? "Update Student" : "Create Student"}
             </button>

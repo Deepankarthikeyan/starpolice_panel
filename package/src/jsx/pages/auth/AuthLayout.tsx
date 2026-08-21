@@ -40,6 +40,10 @@ const AuthLayout = ({ panel, title, subtitle, children, footer }: AuthLayoutProp
               </div>
               <div className="col-lg-6 spa-auth-form-wrap">
                 <div className="spa-auth-form-inner">
+                  <div className="spa-auth-mobile-brand">
+                    <img src={emblem} alt="Star Police Academy" className="spa-auth-logo-small" />
+                    <p>Star Police Academy</p>
+                  </div>
                   <h2>{title}</h2>
                   <p className="spa-auth-subtitle">{subtitle}</p>
                   {children}

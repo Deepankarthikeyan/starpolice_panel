@@ -52,7 +52,7 @@ const StudentMaterials = () => {
               ) : (
                 uploads.map((upload) => (
                   <div key={upload.id} className="border rounded p-3 mb-3">
-                    <div className="d-flex justify-content-between align-items-start mb-2">
+                    <div className="d-flex justify-content-between align-items-start mb-2 gap-2 flex-wrap">
                       <div>
                         <div className="fw-semibold">{upload.title || upload.name}</div>
                         {upload.title && (

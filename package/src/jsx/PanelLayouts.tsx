@@ -14,7 +14,7 @@ export function AdminLayout() {
   return (
     <div id="main-wrapper" className={`show ${openMenuToggle ? "menu-toggle" : ""}`}>
       <Nav basePath="/admin" panel="admin" />
-      <div className="content-body" style={{ minHeight: window.screen.height + 20 }}>
+      <div className="content-body spa-content-body">
         <div className="container-fluid">
           <Outlet />
         </div>
@@ -34,7 +34,7 @@ export function StaffLayout() {
   return (
     <div id="main-wrapper" className={`show ${openMenuToggle ? "menu-toggle" : ""}`}>
       <Nav basePath="/staff" panel="staff" />
-      <div className="content-body" style={{ minHeight: window.screen.height + 20 }}>
+      <div className="content-body spa-content-body">
         <div className="container-fluid">
           <Outlet />
         </div>
@@ -54,7 +54,7 @@ export function StudentLayout() {
   return (
     <div id="main-wrapper" className={`show ${openMenuToggle ? "menu-toggle" : ""}`}>
       <Nav basePath="/student" panel="student" />
-      <div className="content-body" style={{ minHeight: window.screen.height + 20 }}>
+      <div className="content-body spa-content-body">
         <div className="container-fluid">
           <Outlet />
         </div>

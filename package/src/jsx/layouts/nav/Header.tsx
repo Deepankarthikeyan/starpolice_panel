@@ -112,7 +112,7 @@ const Header = ({ onNote }: propType) => {
     ? filterName.filter((f) => f !== "editor")
     : filterName;
   return (
-    <div className={`header ${headerFix ? "sticky" : ""}`}>
+    <div className={`header spa-header ${headerFix ? "sticky" : ""}`}>
       <div className="header-content">
         <nav className="navbar navbar-expand">
           <div className="collapse navbar-collapse justify-content-between">
@@ -295,8 +295,7 @@ const Header = ({ onNote }: propType) => {
                   </div>
                   <div
                     id="DZ_W_Notification1"
-                    className="widget-media dlab-scroll p-3"
-                    style={{ height: "380px" }}
+                    className="widget-media dlab-scroll p-3 spa-header-notifications"
                   >
                     <ul className="timeline">
                       {notifications.length === 0 ? (

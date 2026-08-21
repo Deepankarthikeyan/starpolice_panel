@@ -34,24 +34,26 @@ export function AnchoredDropdownMenu({
     const rect = anchor.getBoundingClientRect();
     const viewportPadding = 12;
     const gap = 6;
+    const maxAllowed = Math.min(maxWidth ?? window.innerWidth * 0.92, window.innerWidth - viewportPadding * 2);
     let left = rect.left;
-    let width = Math.max(rect.width, minWidth ?? rect.width);
-
-    if (maxWidth) {
-      width = Math.min(width, maxWidth);
-    } else {
-      width = Math.min(width, window.innerWidth * 0.92);
-    }
+    let width = Math.min(Math.max(rect.width, minWidth ?? rect.width), maxAllowed);
 
     if (left + width > window.innerWidth - viewportPadding) {
       left = Math.max(viewportPadding, window.innerWidth - viewportPadding - width);
     }
+    if (left < viewportPadding) {
+      left = viewportPadding;
+    }
+
+    const top = Math.min(rect.bottom + gap, window.innerHeight - viewportPadding - 120);
 
     setMenuStyle({
       position: "fixed",
-      top: rect.bottom + gap,
+      top: Math.max(viewportPadding, top),
       left,
       width,
+      maxHeight: `min(24rem, calc(100dvh - ${viewportPadding * 2}px))`,
+      overflowY: "auto",
       zIndex: 1080,
       visibility: "visible",
     });
