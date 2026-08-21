@@ -1,0 +1,80 @@
+/* Loaded last so theme #A098AE cannot keep dropdowns and field text washed out. */
+:root {
+  --bs-body-color: #2b2f36;
+  --bs-body-color-rgb: 43, 47, 54;
+}
+
+body,
+p,
+.table,
+select,
+.form-control,
+.form-select,
+.form-control:focus,
+.form-select:focus,
+.form-control-plaintext,
+.input-group-text,
+.spa-auth-input,
+.spa-auth-subtitle,
+.content-body label,
+.content-body .form-label,
+.spa-auth-form-inner label,
+.card .form-label {
+  color: #2b2f36;
+}
+
+.form-control,
+.form-select,
+.form-control:focus,
+.form-select:focus,
+select.form-select,
+input.form-control,
+textarea.form-control {
+  color: #2b2f36 !important;
+}
+
+.form-control::placeholder,
+.form-select::placeholder,
+textarea.form-control::placeholder,
+.spa-auth-input::placeholder,
+.spa-performance-search-input::placeholder {
+  color: #4b5563 !important;
+  opacity: 1;
+}
+
+.form-control::-webkit-datetime-edit,
+.form-control::-webkit-datetime-edit-fields-wrapper,
+.form-control::-webkit-datetime-edit-text,
+.form-control::-webkit-datetime-edit-month-field,
+.form-control::-webkit-datetime-edit-day-field,
+.form-control::-webkit-datetime-edit-year-field {
+  color: #2b2f36;
+}
+
+.form-select option,
+.form-select optgroup,
+select option {
+  color: #2b2f36 !important;
+  background-color: #fff;
+}
+
+.form-select:-moz-focusring {
+  color: transparent !important;
+  text-shadow: 0 0 0 #2b2f36;
+}
+
+.text-muted,
+.form-text {
+  color: #4b5563 !important;
+}
+
+.table {
+  --bs-table-striped-color: #2b2f36;
+  --bs-table-active-color: #2b2f36;
+  --bs-table-hover-color: #2b2f36;
+  color: #2b2f36;
+}
+
+.spa-password-toggle {
+  color: #374151;
+}

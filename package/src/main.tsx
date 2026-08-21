@@ -10,6 +10,7 @@ import "./assets/css/spa-sidebar.css";
 import "./assets/css/spa-responsive.css";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-toastify/dist/ReactToastify.css";
+import "./assets/css/spa-readable-text.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
