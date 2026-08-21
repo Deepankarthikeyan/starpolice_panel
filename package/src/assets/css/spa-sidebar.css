@@ -587,6 +587,12 @@ body.spa-drawer-open {
   overflow: hidden;
 }
 
+body.spa-drawer-open .Toastify,
+body.spa-drawer-open .Toastify__toast-container {
+  z-index: 1500 !important;
+  pointer-events: none !important;
+}
+
 @media only screen and (max-width: 87.5rem) {
   #main-wrapper:has(.spa-sidebar) .header {
     left: var(--spa-width) !important;
