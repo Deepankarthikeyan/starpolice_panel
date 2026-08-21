@@ -9,7 +9,7 @@ import {
 import { getStoredAuth } from "../jsx/starPolice/api";
 import type { AuthUser, PanelType } from "../jsx/starPolice/types";
 
-export const MOBILE_NAV_QUERY = "(max-width: 1023px)";
+export const MOBILE_NAV_QUERY = "(max-width: 1024px)";
 
 function readIsMobileNav() {
   return typeof window !== "undefined" && window.matchMedia(MOBILE_NAV_QUERY).matches;
@@ -75,9 +75,7 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({
       const mobile = media.matches;
       setIsMobileNav(mobile);
       applySidebarStyle(mobile);
-      if (!mobile) {
-        setOpenMenuToggle(false);
-      }
+      setOpenMenuToggle(false);
     };
     sync();
     media.addEventListener("change", sync);
@@ -87,6 +85,12 @@ export const AppContextProvider: React.FC<AppContextProviderProps> = ({
       window.removeEventListener("orientationchange", sync);
     };
   }, []);
+
+  useEffect(() => {
+    const drawerOpen = isMobileNav && openMenuToggle;
+    document.body.classList.toggle("spa-drawer-open", drawerOpen);
+    return () => document.body.classList.remove("spa-drawer-open");
+  }, [isMobileNav, openMenuToggle]);
 
   return (
     <ThemeContext.Provider

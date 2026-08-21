@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { getMenuList } from "./Menu";
-import { ThemeContext } from "../../../context/ThemeContext";
+import { ThemeContext, MOBILE_NAV_QUERY } from "../../../context/ThemeContext";
 import fullLogo from "../../../assets/images/star-police-academy-logo-white.png";
 import emblemLogo from "../../../assets/images/star-police-academy-emblem.png";
 import type { PanelType } from "../../starPolice/types";
@@ -22,15 +22,14 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
   const { setIconhover, openMenuToggle, setOpenMenuToggle, isMobileNav, auth } = useContext(ThemeContext);
   const menuList = getMenuList(panel, auth);
   const currentSlug = location.pathname.split("/").pop() || "";
-  const drawerOpen = isMobileNav && openMenuToggle;
+  const drawerOpen = openMenuToggle && isMobileNav;
+
+  function isOverlayViewport() {
+    return window.matchMedia(MOBILE_NAV_QUERY).matches;
+  }
 
   useEffect(() => {
-    setOpenMenuToggle((open) => {
-      if (window.matchMedia("(max-width: 1023px)").matches) {
-        return false;
-      }
-      return open;
-    });
+    setOpenMenuToggle((open) => (isOverlayViewport() ? false : open));
   }, [location.pathname, setOpenMenuToggle]);
 
   useEffect(() => {
@@ -63,7 +62,7 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
   }
 
   const closeMobileMenu = () => {
-    if (isMobileNav) {
+    if (isMobileNav || isOverlayViewport()) {
       setOpenMenuToggle(false);
     }
   };
@@ -74,7 +73,7 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
 
   return (
     <>
-      {drawerOpen && (
+      {openMenuToggle && (
         <button
           type="button"
           className="spa-sidebar-backdrop"
@@ -83,20 +82,10 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
         />
       )}
 
-      <button
-        type="button"
-        className="spa-sidebar-mobile-trigger"
-        aria-expanded={drawerOpen}
-        aria-controls="spa-sidebar"
-        aria-label={drawerOpen ? "Close navigation menu" : "Open navigation menu"}
-        onClick={toggleMenu}
-      >
-        <i className="material-symbols-outlined">{drawerOpen ? "close" : "menu"}</i>
-      </button>
-
       <aside
         id="spa-sidebar"
-        className={`spa-sidebar spa-sidebar-${panel}${drawerOpen ? " is-open" : ""}`}
+        className={`spa-sidebar spa-sidebar-${panel}${openMenuToggle ? " is-open" : ""}`}
+        aria-hidden={isMobileNav ? !openMenuToggle : undefined}
         onMouseEnter={hoverHandler}
         onMouseLeave={() => setIconhover(false)}
       >
@@ -105,27 +94,24 @@ const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
         <div className="spa-sidebar-inner">
           <div className="spa-sidebar-header">
             <span className="spa-sidebar-panel">{panelLabel(panel)}</span>
-            {isMobileNav ? (
-              <button
-                type="button"
-                className="spa-sidebar-close"
-                aria-label="Close navigation menu"
-                onClick={closeMobileMenu}
-              >
-                <i className="material-symbols-outlined">close</i>
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="spa-sidebar-collapse"
-                aria-label="Toggle sidebar"
-                onClick={toggleMenu}
-              >
-                <i className="material-symbols-outlined">
-                  {openMenuToggle ? "chevron_right" : "chevron_left"}
-                </i>
-              </button>
-            )}
+            <button
+              type="button"
+              className="spa-sidebar-close"
+              aria-label="Close navigation menu"
+              onClick={closeMobileMenu}
+            >
+              <i className="material-symbols-outlined" aria-hidden="true">close</i>
+            </button>
+            <button
+              type="button"
+              className="spa-sidebar-collapse"
+              aria-label="Toggle sidebar"
+              onClick={toggleMenu}
+            >
+              <i className="material-symbols-outlined" aria-hidden="true">
+                {openMenuToggle ? "chevron_right" : "chevron_left"}
+              </i>
+            </button>
           </div>
 
           <div className="spa-sidebar-meta">
