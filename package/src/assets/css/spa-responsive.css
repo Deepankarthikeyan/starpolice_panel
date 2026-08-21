@@ -93,7 +93,7 @@ iframe {
 /* ------------------------------------------------------------------ */
 /* Tablet and below — overlay sidebar already active at 1023px         */
 /* ------------------------------------------------------------------ */
-@media only screen and (max-width: 63.9375rem) {
+@media only screen and (max-width: 1199px) {
   #main-wrapper:has(.spa-sidebar) .container-fluid {
     padding-left: 1rem;
     padding-right: 1rem;
@@ -565,5 +565,124 @@ iframe {
 
   .spa-header-notifications {
     max-height: 40dvh;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Phones + tablets — fill the viewport, scroll wide tables, calendar  */
+/* ------------------------------------------------------------------ */
+@media only screen and (max-width: 1199px) {
+  .chatbox:not(.active) {
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    right: auto !important;
+    left: -9999px !important;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .content-body,
+  #main-wrapper:has(.spa-sidebar) .container-fluid,
+  #main-wrapper:has(.spa-sidebar) .card,
+  #main-wrapper:has(.spa-sidebar) .card-body,
+  #main-wrapper:has(.spa-sidebar) .card-header,
+  #main-wrapper:has(.spa-sidebar) .row,
+  #main-wrapper:has(.spa-sidebar) .row > [class*="col-"] {
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .table-responsive,
+  #main-wrapper:has(.spa-sidebar) .spa-table-scroll,
+  #main-wrapper:has(.spa-sidebar) .spa-onboarding-table-wrap {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .table-responsive > table,
+  #main-wrapper:has(.spa-sidebar) .spa-table-scroll > table {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .spa-calendar-wrap,
+  .spa-calendar-wrap .fc,
+  .spa-calendar-wrap .fc-media-screen,
+  .spa-calendar-wrap .fc-view-harness,
+  .spa-calendar-wrap .fc-scrollgrid,
+  .spa-calendar-wrap .fc-scrollgrid table,
+  .spa-calendar-wrap .fc table {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .spa-calendar-wrap .fc .fc-scroller {
+    overflow: hidden !important;
+  }
+
+  .spa-calendar-wrap .fc .fc-toolbar.fc-header-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .spa-calendar-wrap .fc .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+  }
+
+  .spa-calendar-wrap .fc .fc-col-header-cell-cushion,
+  .spa-calendar-wrap .fc .fc-daygrid-day-number {
+    padding: 0.25rem 0.1rem;
+    font-size: 0.7rem;
+  }
+
+  .daywise-upload-calendar .react-datepicker,
+  .daywise-upload-calendar .react-datepicker__month-container,
+  .daywise-upload-calendar .react-datepicker__month {
+    width: 100% !important;
+  }
+
+  .daywise-upload-calendar .react-datepicker__day-names,
+  .daywise-upload-calendar .react-datepicker__week {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .daywise-upload-calendar .react-datepicker__day-name,
+  .daywise-upload-calendar .react-datepicker__day {
+    flex: 1 1 0;
+    margin: 0.15rem 0;
+  }
+
+  .header-right .navbar-nav {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .spa-onboarding-table,
+  .spa-leads-table {
+    min-width: 32rem;
+  }
+}
+
+@media only screen and (max-width: 575.98px) {
+  .card-header {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .card-header .btn,
+  .card-header .badge {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .spa-calendar-wrap .fc .fc-daygrid-body,
+  .spa-calendar-wrap .fc .fc-scrollgrid-sync-table {
+    width: 100% !important;
   }
 }

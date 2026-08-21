@@ -9,7 +9,7 @@ import {
 import { getStoredAuth } from "../jsx/starPolice/api";
 import type { AuthUser, PanelType } from "../jsx/starPolice/types";
 
-export const MOBILE_NAV_QUERY = "(max-width: 1024px)";
+export const MOBILE_NAV_QUERY = "(max-width: 1199px)";
 
 function readIsMobileNav() {
   return typeof window !== "undefined" && window.matchMedia(MOBILE_NAV_QUERY).matches;

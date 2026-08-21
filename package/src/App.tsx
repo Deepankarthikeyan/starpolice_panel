@@ -71,7 +71,7 @@ function App() {
 
   useEffect(() => {
     function resizeHandler() {
-        if (window.matchMedia("(max-width: 1024px)").matches) {
+        if (window.matchMedia("(max-width: 1199px)").matches) {
         document.body.setAttribute("data-sidebar-style", "overlay");
       } else {
         document.body.setAttribute("data-sidebar-style", "full");

@@ -289,7 +289,7 @@ const StudentAttendance = () => {
                       : "No students found."}
                   </p>
                 ) : (
-                  <div className="table-responsive">
+                  <div className="table-responsive spa-table-scroll">
                     <table className="table table-striped table-hover attendance-table mb-0">
                       <thead>
                         <tr>

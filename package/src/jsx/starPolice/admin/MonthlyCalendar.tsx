@@ -41,11 +41,13 @@ const MonthlyCalendar = () => {
       <div className="row">
         <div className="col-xl-8">
           <div className="card">
-            <div className="card-body">
+            <div className="card-body spa-calendar-wrap">
               <FullCalendar
                 plugins={[dayGridPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
                 height="auto"
+                expandRows
+                handleWindowResize
                 events={events}
                 dateClick={(info) => setSelectedDate(info.dateStr)}
                 eventClick={(info: EventClickArg) => setSelectedDate(info.event.startStr.slice(0, 10))}
