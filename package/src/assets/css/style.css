@@ -309,7 +309,7 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
   --bs-dark-rgb: 48, 57, 114;
   --bs-white-rgb: 255, 255, 255;
   --bs-black-rgb: 0, 0, 0;
-  --bs-body-color-rgb: 160, 152, 174;
+  --bs-body-color-rgb: 15, 23, 42;
   --bs-body-bg-rgb: 230, 235, 238;
   --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -318,7 +318,7 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
   --bs-body-font-size: 0.875rem;
   --bs-body-font-weight: 400;
   --bs-body-line-height: 1.5;
-  --bs-body-color: #A098AE;
+  --bs-body-color: #0f172a;
   --bs-body-bg: #E6EBEE;
 }
 
@@ -2220,7 +2220,7 @@ progress {
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #A098AE;
+  color: #0f172a;
   background-color: #E6EBEE;
   background-clip: padding-box;
   border: 1px solid #f2f2f2;
@@ -2240,7 +2240,7 @@ progress {
   cursor: pointer;
 }
 .form-control:focus {
-  color: #A098AE;
+  color: #0f172a;
   background-color: #E6EBEE;
   border-color: rgb(166, 161.5, 218);
   outline: 0;
@@ -2387,7 +2387,7 @@ textarea.form-control-lg {
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #A098AE;
+  color: #0f172a;
   background-color: #E6EBEE;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
@@ -2417,7 +2417,7 @@ textarea.form-control-lg {
 }
 .form-select:-moz-focusring {
   color: transparent;
-  text-shadow: 0 0 0 #A098AE;
+  text-shadow: 0 0 0 #0f172a;
 }
 
 .form-select-sm {
@@ -10451,7 +10451,7 @@ textarea.form-control {
 p {
   line-height: 1.8;
   font-weight: 400;
-  color: #A098AE;
+  color: #0f172a;
 }
 
 .box-shadow-none {

@@ -129,7 +129,11 @@ export function InteractionMessenger({
         </div>
         {audienceOptions && audience && onAudienceChange && (
           <div className="spa-messenger-audience">
-            <span className="form-label spa-messenger-audience-label" id="interaction-audience-label">
+            <span
+              className="form-label spa-messenger-audience-label"
+              id="interaction-audience-label"
+              style={{ color: "#0f172a", WebkitTextFillColor: "#0f172a" }}
+            >
               Message to
             </span>
             <button
@@ -141,8 +145,11 @@ export function InteractionMessenger({
               aria-expanded={audienceOpen}
               aria-haspopup="listbox"
               onClick={() => setAudienceOpen((open) => !open)}
+              style={{ color: "#0f172a", WebkitTextFillColor: "#0f172a" }}
             >
-              <span className="spa-messenger-audience-value">{selectedAudience?.label ?? ""}</span>
+              <span className="spa-messenger-audience-value" style={{ color: "#0f172a", WebkitTextFillColor: "#0f172a" }}>
+                {selectedAudience?.label ?? ""}
+              </span>
               <i className="material-symbols-outlined spa-messenger-audience-chevron" aria-hidden="true">
                 {audienceOpen ? "expand_less" : "expand_more"}
               </i>
@@ -163,6 +170,7 @@ export function InteractionMessenger({
                     role="option"
                     aria-selected={isActive}
                     className={`spa-messenger-audience-option${isActive ? " is-active" : ""}`}
+                    style={{ color: "#0f172a", WebkitTextFillColor: "#0f172a" }}
                     onClick={() => {
                       onAudienceChange(option.value);
                       setAudienceOpen(false);
