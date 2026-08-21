@@ -364,7 +364,7 @@ const Leads = () => {
             </div>
           </div>
 
-          <div className="d-flex gap-2">
+          <div className="d-flex flex-wrap gap-2">
             <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading ? "Saving..." : editingId ? "Update Lead" : "Save Lead"}
             </button>

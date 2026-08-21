@@ -30,7 +30,7 @@ const StudentDashboard = () => {
     <>
       <PageTitle motherMenu="Student Panel" activeMenu="Dashboard" pageContent="" />
       <div className="row">
-        <div className="col-xl-4 col-sm-6">
+        <div className="col-6 col-xl-3">
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Available Materials</h6>
@@ -38,7 +38,7 @@ const StudentDashboard = () => {
             </div>
           </div>
         </div>
-        <div className="col-xl-4 col-sm-6">
+        <div className="col-6 col-xl-3">
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Study Days</h6>
@@ -46,7 +46,7 @@ const StudentDashboard = () => {
             </div>
           </div>
         </div>
-        <div className="col-xl-4 col-sm-6">
+        <div className="col-6 col-xl-3">
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Admin Messages</h6>
@@ -54,7 +54,7 @@ const StudentDashboard = () => {
             </div>
           </div>
         </div>
-        <div className="col-xl-4 col-sm-6">
+        <div className="col-6 col-xl-3">
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Overall Physical Performance</h6>

@@ -78,9 +78,13 @@ function App() {
       }
     }
 
-    setTimeout(() => resizeHandler(), 100);
+    resizeHandler();
     window.addEventListener("resize", resizeHandler);
-    return () => window.removeEventListener("resize", resizeHandler);
+    window.addEventListener("orientationchange", resizeHandler);
+    return () => {
+      window.removeEventListener("resize", resizeHandler);
+      window.removeEventListener("orientationchange", resizeHandler);
+    };
   }, []);
 
   const setPanelAuth = (user: AuthUser) => setAuth(user);
