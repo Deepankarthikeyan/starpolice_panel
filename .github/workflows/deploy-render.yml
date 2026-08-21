@@ -51,23 +51,22 @@ jobs:
           EXPECTED_SHORT="${EXPECTED_BUILD:0:7}"
           echo "Waiting for $API_URL/api/health to report build $EXPECTED_SHORT..."
 
-          for attempt in $(seq 1 45); do
+          for attempt in $(seq 1 60); do
             if response=$(curl -fsS "$API_URL/api/health" 2>/dev/null); then
-              if echo "$response" | grep -q '"status"[[:space:]]*:[[:space:]]*"misconfigured"'; then
-                echo "::error::API deployed but MongoDB is still misconfigured. Check Render logs for mongod startup, or set MONGODB_URI to Atlas."
-                echo "$response"
-                exit 1
-              fi
-
-              if echo "$response" | grep -q '"database"[[:space:]]*:[[:space:]]*"mongodb"'; then
-                if echo "$response" | grep -q "\"build\"[[:space:]]*:[[:space:]]*\"$EXPECTED_SHORT\""; then
+              current_build=$(echo "$response" | sed -n 's/.*"build"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+              if echo "$response" | grep -q "\"build\"[[:space:]]*:[[:space:]]*\"$EXPECTED_SHORT\""; then
+                if echo "$response" | grep -q '"status"[[:space:]]*:[[:space:]]*"misconfigured"'; then
+                  echo "::error::Build $EXPECTED_SHORT is live but MongoDB is still misconfigured."
+                  echo "$response"
+                  exit 1
+                fi
+                if echo "$response" | grep -q '"database"[[:space:]]*:[[:space:]]*"mongodb"'; then
                   echo "API ready with expected build: $response"
                   exit 0
                 fi
-                current_build=$(echo "$response" | sed -n 's/.*"build"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
-                echo "Attempt $attempt: API up but build is $current_build (expected $EXPECTED_SHORT)"
+                echo "Attempt $attempt: build $EXPECTED_SHORT is live, waiting for database ($response)"
               else
-                echo "Attempt $attempt: API up, database not ready yet ($response)"
+                echo "Attempt $attempt: waiting for deploy (live build ${current_build:-unknown}, expected $EXPECTED_SHORT)"
               fi
             else
               echo "Attempt $attempt: API not reachable yet"

@@ -108,6 +108,25 @@ export async function validateStoredSession(panel?: PanelType): Promise<AuthUser
   }
 }
 
+function publicApiErrorMessage(status: number, message: unknown) {
+  const text = typeof message === "string" ? message : "";
+  if (
+    text.includes("MONGODB_URI") ||
+    text.includes("MongoDB Atlas") ||
+    text.includes("Database is still starting")
+  ) {
+    return "The API is starting. Wait about 30 seconds and try again.";
+  }
+  if (text) return text;
+  if (status === 404) {
+    return "API endpoint not found. The server may need to be updated.";
+  }
+  if (status >= 500) {
+    return "API is waking up or temporarily unavailable. Wait 30 seconds and try again.";
+  }
+  return `Request failed (${status})`;
+}
+
 function isMissingContactsEndpoint(error: unknown) {
   return (
     error instanceof Error &&
@@ -191,16 +210,7 @@ async function request<T>(path: string, options: RequestInit = {}, panel?: Panel
     ? await response.json().catch(() => ({}))
     : {};
   if (!response.ok) {
-    let message = data.message;
-    if (!message) {
-      if (response.status === 404) {
-        message = "API endpoint not found. The server may need to be updated.";
-      } else if (response.status >= 500) {
-        message = "API is waking up or temporarily unavailable. Wait 30 seconds and try again.";
-      } else {
-        message = `Request failed (${response.status})`;
-      }
-    }
+    let message = publicApiErrorMessage(response.status, data.message);
     if (isSessionInvalid(response.status, message)) {
       handleInvalidSession(panel);
     }
@@ -260,7 +270,7 @@ function uploadWithProgress<T>(
         return;
       }
 
-      const message = data.message || "Request failed";
+      const message = publicApiErrorMessage(xhr.status, data.message);
       if (isSessionInvalid(xhr.status, message)) {
         handleInvalidSession(resolvedPanel);
       }
