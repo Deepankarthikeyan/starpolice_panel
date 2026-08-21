@@ -109,8 +109,15 @@ iframe {
   }
 
   [data-sidebar-style="overlay"] #main-wrapper:has(.spa-sidebar) .spa-sidebar {
+    left: 0 !important;
+    transform: translateX(-110%);
     padding-top: env(safe-area-inset-top, 0px);
     height: 100dvh !important;
+  }
+
+  [data-sidebar-style="overlay"] #main-wrapper:has(.spa-sidebar).menu-toggle .spa-sidebar {
+    left: 0 !important;
+    transform: translateX(0);
   }
 
   .spa-auth-page .min-vh-100 {

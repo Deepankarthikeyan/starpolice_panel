@@ -78,7 +78,7 @@ function App() {
       }
     }
 
-    setTimeout(() => resizeHandler(), 100);
+    resizeHandler();
     window.addEventListener("resize", resizeHandler);
     window.addEventListener("orientationchange", resizeHandler);
     return () => {

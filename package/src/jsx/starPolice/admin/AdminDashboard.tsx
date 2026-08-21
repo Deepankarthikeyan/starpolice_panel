@@ -18,7 +18,7 @@ const AdminDashboard = () => {
     <>
       <PageTitle motherMenu={getPanelMotherMenu(auth?.panel)} activeMenu="Dashboard" pageContent="" />
       <div className="row">
-        <div className="col-xl-3 col-sm-6">
+        <div className="col-6 col-xl-3">
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Total Uploads</h6>
@@ -26,7 +26,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-        <div className="col-xl-3 col-sm-6">
+        <div className="col-6 col-xl-3">
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Active Days</h6>
@@ -34,7 +34,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-        <div className="col-xl-3 col-sm-6">
+        <div className="col-6 col-xl-3">
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Student Messages</h6>
@@ -42,7 +42,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-        <div className="col-xl-3 col-sm-6">
+        <div className="col-6 col-xl-3">
           <div className="card">
             <div className="card-body">
               <h6 className="text-muted">Admin Replies</h6>
