@@ -1,7 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
 import { AppContextProvider } from "./context/ThemeContext.tsx";
 import App from "./App.tsx";
 import "./assets/css/style.css";
@@ -11,11 +10,14 @@ import "./assets/css/spa-responsive.css";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./assets/css/spa-readable-text.css";
+import { ToastContainer } from "react-toastify";
+
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, "") || undefined;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AppContextProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={routerBasename === "" ? undefined : routerBasename}>
         <App />
         <ToastContainer
           position="top-right"
