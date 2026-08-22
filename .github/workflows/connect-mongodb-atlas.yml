@@ -1,0 +1,44 @@
+name: Connect MongoDB Atlas to Render
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/connect-mongodb-atlas.yml"
+      - "scripts/connect-mongodb-atlas.mjs"
+
+concurrency:
+  group: connect-mongodb-atlas
+  cancel-in-progress: false
+
+jobs:
+  connect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install API dependencies (for seed)
+        run: npm ci --omit=dev
+        working-directory: server
+
+      - name: Set MONGODB_URI on Render, deploy, seed Atlas
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$MONGODB_URI" ]; then
+            echo "::error::Add MONGODB_URI to GitHub repository secrets (Atlas URI with database starpolice_academy)."
+            exit 1
+          fi
+          if [ -z "$RENDER_API_KEY" ]; then
+            echo "::error::Add RENDER_API_KEY to GitHub repository secrets (Render → Account Settings → API Keys)."
+            exit 1
+          fi
+          node scripts/connect-mongodb-atlas.mjs

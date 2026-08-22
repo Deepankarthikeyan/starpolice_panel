@@ -17,7 +17,7 @@ COPY . .
 
 ENV PORT=5000
 ENV NODE_ENV=production
-ENV MONGODB_URI=mongodb://127.0.0.1:27017/starpolice_academy
+# MONGODB_URI: set Atlas URI on Render (starpolice_academy). Unset uses embedded MongoDB via start.sh.
 ENV CLIENT_URL=https://starpolice-panel.netlify.app
 
 RUN mkdir -p /data/db
