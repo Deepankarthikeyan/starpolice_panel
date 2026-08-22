@@ -37,6 +37,8 @@ The script prints the live **Website** and **API** Cloudflare URLs. Then open:
 
 **API (Render — permanent):** https://starpolice-api.onrender.com
 
+**Email (invite / forgot password):** The API must have `RESEND_API_KEY` or SMTP settings — see [EMAIL_SETUP.md](EMAIL_SETUP.md). Without this, links only show on screen, not in inbox.
+
 **Logins** (after running `npm run seed` on the API):
 
 | Panel | Email | Password |

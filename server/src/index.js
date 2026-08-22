@@ -21,6 +21,7 @@ import studentAttendanceRoutes from "./routes/studentAttendance.js";
 import subjectRoutes from "./routes/subjects.js";
 import examRoutes from "./routes/exams.js";
 import { uploadDir } from "./middleware/upload.js";
+import { isEmailConfigured, getEmailProvider } from "./services/email.js";
 import { backfillAttendancePermission } from "./migrations/backfillAttendancePermission.js";
 import { stripLeadsFromStaff } from "./migrations/stripLeadsFromStaff.js";
 import { fixUsernameIndex } from "./migrations/fixUsernameIndex.js";
@@ -51,6 +52,10 @@ app.get("/api/health", (_req, res) => {
     storage: getMongoStorageKind(),
     setupRequired: mongoIssue,
     jwt: Boolean(process.env.JWT_SECRET?.trim()),
+    email: {
+      configured: isEmailConfigured(),
+      provider: getEmailProvider(),
+    },
     build: process.env.RENDER_GIT_COMMIT?.slice(0, 7) || "local",
     features: {
       messageContacts: true,
@@ -110,6 +115,13 @@ async function connectDatabaseInBackground() {
 
 async function start() {
   getJwtSecret();
+  if (isEmailConfigured()) {
+    console.log(`Email delivery enabled (${getEmailProvider()})`);
+  } else {
+    console.warn(
+      "Email delivery NOT configured. Set RESEND_API_KEY or SMTP_HOST+SMTP_USER in environment. Invite/reset links will only appear in the UI.",
+    );
+  }
   app.listen(PORT, () => {
     console.log(`API server running on http://localhost:${PORT}`);
   });

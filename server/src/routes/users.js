@@ -159,16 +159,18 @@ router.post(
         await user.populate("subjectIds", "name");
       }
 
-      const devMode = emailResult?.devMode ?? false;
       res.status(201).json({
         ...mapUser(user),
         inviteSent: true,
         delivered: emailResult?.delivered ?? false,
-        devMode,
-        setupUrl: emailResult?.setupUrl,
-        message: devMode
-          ? "Account created. Email is not configured — share the setup link below with the user."
-          : "Account created. An email has been sent to set up the password and activate panel access.",
+        devMode: emailResult?.devMode ?? false,
+        setupUrl: emailResult?.devMode ? emailResult?.setupUrl : undefined,
+        deliveryError: emailResult?.deliveryError,
+        message: emailResult?.delivered
+          ? "Account created. An email has been sent to set up the password and activate panel access."
+          : emailResult?.devMode
+            ? "Account created. Email is not configured — add RESEND_API_KEY or SMTP settings to server/.env and restart the API."
+            : "Account created but email could not be sent. Check server email configuration.",
       });
     } catch (error) {
       if (error.message === "Email is already registered.") {
@@ -340,13 +342,14 @@ router.patch(
       const { clientUrl } = req.body;
       const { emailResult } = await sendSetupInvite(user, panelForRole(user.role), clientUrl);
       res.json({
-        message: emailResult?.devMode
-          ? "Email is not configured. Share the setup link below with the user."
-          : "Invite email sent.",
+        message: emailResult?.delivered
+          ? "Invite email sent."
+          : "Email is not configured. Add RESEND_API_KEY or SMTP settings to the API server and restart.",
         inviteSent: true,
         delivered: emailResult?.delivered ?? false,
         devMode: emailResult?.devMode ?? false,
-        setupUrl: emailResult?.setupUrl,
+        setupUrl: emailResult?.devMode ? emailResult?.setupUrl : undefined,
+        deliveryError: emailResult?.deliveryError,
       });
     } catch (error) {
       res.status(500).json({ message: error.message });

@@ -451,12 +451,20 @@ const UserManagement = () => {
             <div className="card-body">
               {inviteNotice && (
                 <div className="mb-3">
-                  <div className="alert alert-info py-2 small mb-2">{inviteNotice.message}</div>
-                  <EmailDeliveryNotice
-                    devMode={inviteNotice.devMode}
-                    setupUrl={inviteNotice.setupUrl}
-                    delivered={inviteNotice.delivered}
-                  />
+                  <div
+                    className={`alert py-2 small mb-2 ${
+                      inviteNotice.delivered ? "alert-success" : "alert-warning"
+                    }`}
+                  >
+                    {inviteNotice.message}
+                  </div>
+                  {inviteNotice.devMode && inviteNotice.setupUrl && (
+                    <EmailDeliveryNotice
+                      devMode={inviteNotice.devMode}
+                      setupUrl={inviteNotice.setupUrl}
+                      delivered={inviteNotice.delivered}
+                    />
+                  )}
                 </div>
               )}
               <form onSubmit={onCreate}>

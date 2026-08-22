@@ -87,7 +87,7 @@ const ForgotPassword = ({ panel }: Props) => {
     >
       {error && <div className="alert alert-danger py-2">{error}</div>}
       {success && <div className="alert alert-success py-2">{success}</div>}
-      {(devMode || setupUrl) && (
+      {(devMode && setupUrl) && (
         <div className="mb-3">
           <EmailDeliveryNotice devMode={devMode} setupUrl={setupUrl} delivered={delivered} />
         </div>

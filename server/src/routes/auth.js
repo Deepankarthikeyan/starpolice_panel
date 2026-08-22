@@ -289,12 +289,15 @@ router.post("/forgot-password", requireDb, async (req, res) => {
       return res.status(400).json({ message: "Email and panel are required." });
     }
     const result = await handleForgotPassword(email, panel, clientUrl);
-    const message = result.devMode
-      ? "Email delivery is not configured. Use the password setup link shown below."
-      : "Password reset link sent to your email.";
+    const message = result.delivered
+      ? "Password reset link sent to your email. Check your inbox and spam folder."
+      : result.devMode
+        ? "Email is not configured on this server. Ask your administrator to add email settings to the API."
+        : "Email could not be sent. Contact your administrator.";
     res.json({
       message,
       ...result,
+      setupUrl: result.devMode ? result.setupUrl : undefined,
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
