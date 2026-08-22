@@ -142,6 +142,10 @@ For data that survives restarts, point `MONGODB_URI` at **MongoDB Atlas** (free 
 |-----|-------|
 | `MONGODB_URI` | Your Atlas connection string from step 1 |
 | `CLIENT_URL` | `https://starpolice-panel.netlify.app` |
+| `RESEND_API_KEY` | Your Resend API key (from [resend.com](https://resend.com)) |
+| `EMAIL_FROM` | `Star Police Academy <onboarding@resend.dev>` (or your verified domain) |
+
+See [EMAIL_SETUP.md](EMAIL_SETUP.md) for Gmail SMTP instead of Resend.
 
 3. **Save** → **Manual Deploy → Deploy latest commit**
 
