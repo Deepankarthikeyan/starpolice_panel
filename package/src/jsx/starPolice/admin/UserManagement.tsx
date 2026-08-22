@@ -131,6 +131,14 @@ const UserManagement = () => {
     refreshSubjects().catch(console.error);
   }, [createAccountType]);
 
+  useEffect(() => {
+    if (!inviteNotice) return;
+    if (inviteNotice.devMode && inviteNotice.setupUrl) return;
+
+    const timer = window.setTimeout(() => setInviteNotice(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [inviteNotice]);
+
   const onCreate = async (event: FormEvent) => {
     event.preventDefault();
     setLoading(true);
