@@ -15,6 +15,8 @@ import { notify } from "../toast";
 import type { ManagedUser, Subject } from "../types";
 import { SubjectMultiSelect } from "./SubjectMultiSelect";
 import { PasswordInput } from "../shared/PasswordInput";
+import { validateEmailOrThrow } from "../emailValidation";
+import { EmailDeliveryNotice } from "../../pages/auth/EmailDeliveryNotice";
 
 type CreateAccountType = "student" | "admin" | "staff";
 
@@ -87,6 +89,12 @@ const UserManagement = () => {
   const [editPassword, setEditPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [inviteNotice, setInviteNotice] = useState<{
+    message: string;
+    setupUrl?: string;
+    devMode?: boolean;
+    delivered?: boolean;
+  } | null>(null);
 
   const refreshSubjects = async () => {
     const subjectData = await api.getSubjects();
@@ -127,6 +135,7 @@ const UserManagement = () => {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setInviteNotice(null);
     try {
       if (createAccountType === "staff" && createSubjectIds.length === 0) {
         setError("Please select at least one subject for this staff member.");
@@ -134,7 +143,20 @@ const UserManagement = () => {
         return;
       }
 
-      await api.createUser(
+      try {
+        validateEmailOrThrow(email);
+      } catch (validationError) {
+        const message =
+          validationError instanceof Error
+            ? validationError.message
+            : "Please enter a valid email address.";
+        setError(message);
+        notify.error(message);
+        setLoading(false);
+        return;
+      }
+
+      const result = await api.createUser(
         name.trim(),
         email.trim(),
         createAccountType,
@@ -146,7 +168,13 @@ const UserManagement = () => {
       setCreateSubjectIds([]);
       setCreatePermissions(defaultPermissionsForRole(createAccountType));
       await loadUsers();
-      notify.success("Account created. An invite email was sent to set the password and activate panel access.");
+      setInviteNotice({
+        message: result.message || "Account created.",
+        setupUrl: result.setupUrl,
+        devMode: result.devMode,
+        delivered: result.delivered,
+      });
+      notify.success(result.message || "Account created.");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to create user";
       setError(message);
@@ -168,8 +196,14 @@ const UserManagement = () => {
 
   const resendInvite = async (user: ManagedUser) => {
     try {
-      await api.resendInvite(user.id);
-      notify.success("Invite email sent.");
+      const result = await api.resendInvite(user.id);
+      setInviteNotice({
+        message: result.message,
+        setupUrl: result.setupUrl,
+        devMode: result.devMode,
+        delivered: result.delivered,
+      });
+      notify.success(result.message);
     } catch (err) {
       notify.error(err, "Failed to send invite email");
     }
@@ -415,6 +449,16 @@ const UserManagement = () => {
               <h4 className="card-title mb-0">Create Account</h4>
             </div>
             <div className="card-body">
+              {inviteNotice && (
+                <div className="mb-3">
+                  <div className="alert alert-info py-2 small mb-2">{inviteNotice.message}</div>
+                  <EmailDeliveryNotice
+                    devMode={inviteNotice.devMode}
+                    setupUrl={inviteNotice.setupUrl}
+                    delivered={inviteNotice.delivered}
+                  />
+                </div>
+              )}
               <form onSubmit={onCreate}>
                 {isSuperAdmin && (
                   <div className="mb-3">

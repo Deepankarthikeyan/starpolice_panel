@@ -284,13 +284,16 @@ router.get("/verify-setup-token", requireDb, async (req, res) => {
 
 router.post("/forgot-password", requireDb, async (req, res) => {
   try {
-    const { email, panel } = req.body;
+    const { email, panel, clientUrl } = req.body;
     if (!email?.trim() || !panel) {
       return res.status(400).json({ message: "Email and panel are required." });
     }
-    const result = await handleForgotPassword(email, panel);
+    const result = await handleForgotPassword(email, panel, clientUrl);
+    const message = result.devMode
+      ? "Email delivery is not configured. Use the password setup link shown below."
+      : "Password reset link sent to your email.";
     res.json({
-      message: "If an account exists for this email, a password reset link has been sent.",
+      message,
       ...result,
     });
   } catch (error) {

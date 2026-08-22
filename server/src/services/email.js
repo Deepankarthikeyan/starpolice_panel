@@ -2,7 +2,11 @@ import nodemailer from "nodemailer";
 
 let transporter = null;
 
-function getClientUrl() {
+function getClientUrl(requestedUrl) {
+  const trimmed = typeof requestedUrl === "string" ? requestedUrl.trim() : "";
+  if (trimmed && /^https?:\/\//i.test(trimmed)) {
+    return trimmed.replace(/\/$/, "");
+  }
   return (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
 }
 
@@ -53,8 +57,9 @@ export async function sendPasswordEmail({
   token,
   otp,
   isOtpOnly = false,
+  clientUrl: requestedClientUrl,
 }) {
-  const clientUrl = getClientUrl();
+  const clientUrl = getClientUrl(requestedClientUrl);
   const setupUrl = `${clientUrl}/auth/setup-password?token=${encodeURIComponent(token)}`;
   const panelName = panelLabel(panel);
   const action = purposeLabel(purpose);
@@ -117,6 +122,18 @@ export async function sendPasswordEmail({
     return { delivered: false, devMode: true, setupUrl, otp: isOtpOnly ? otp : undefined };
   }
 
-  await transport.sendMail(mail);
-  return { delivered: true, devMode: false };
+  try {
+    await transport.sendMail(mail);
+    return { delivered: true, devMode: false, setupUrl };
+  } catch (error) {
+    console.error("[email] SMTP send failed:", error.message);
+    console.log(JSON.stringify({ to, subject, setupUrl, otp: isOtpOnly ? otp : undefined }, null, 2));
+    return {
+      delivered: false,
+      devMode: true,
+      setupUrl,
+      otp: isOtpOnly ? otp : undefined,
+      smtpError: error.message,
+    };
+  }
 }

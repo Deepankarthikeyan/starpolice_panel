@@ -1,8 +1,10 @@
 import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
+import { EmailDeliveryNotice } from "./EmailDeliveryNotice";
 import { api } from "../../starPolice/api";
 import { notify } from "../../starPolice/toast";
+import { validateEmailOrThrow } from "../../starPolice/emailValidation";
 import type { PanelType } from "../../starPolice/types";
 
 interface Props {
@@ -25,6 +27,9 @@ const ForgotPassword = ({ panel }: Props) => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [setupUrl, setSetupUrl] = useState("");
+  const [devMode, setDevMode] = useState(false);
+  const [delivered, setDelivered] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (event: FormEvent) => {
@@ -32,10 +37,32 @@ const ForgotPassword = ({ panel }: Props) => {
     setLoading(true);
     setError("");
     setSuccess("");
+    setSetupUrl("");
+    setDevMode(false);
+    setDelivered(false);
+
+    try {
+      validateEmailOrThrow(email);
+    } catch (validationError) {
+      const message =
+        validationError instanceof Error ? validationError.message : "Please enter a valid email address.";
+      setError(message);
+      notify.error(message);
+      setLoading(false);
+      return;
+    }
+
     try {
       const result = await api.forgotPassword(email.trim(), panel);
       setSuccess(result.message);
-      notify.success("Reset link sent if the account exists.");
+      setSetupUrl(result.setupUrl || "");
+      setDevMode(Boolean(result.devMode));
+      setDelivered(Boolean(result.delivered));
+      if (result.devMode) {
+        notify.info("Email is not configured. Use the setup link shown on this page.");
+      } else {
+        notify.success("Reset link sent to your email.");
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to send reset link";
       setError(message);
@@ -60,14 +87,22 @@ const ForgotPassword = ({ panel }: Props) => {
     >
       {error && <div className="alert alert-danger py-2">{error}</div>}
       {success && <div className="alert alert-success py-2">{success}</div>}
-      <form onSubmit={onSubmit}>
+      {(devMode || setupUrl) && (
+        <div className="mb-3">
+          <EmailDeliveryNotice devMode={devMode} setupUrl={setupUrl} delivered={delivered} />
+        </div>
+      )}
+      <form onSubmit={onSubmit} noValidate>
         <div className="mb-4">
           <label className="form-label">Email</label>
           <input
             type="email"
             className="form-control spa-auth-input"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (error) setError("");
+            }}
             placeholder="your@email.com"
             required
           />

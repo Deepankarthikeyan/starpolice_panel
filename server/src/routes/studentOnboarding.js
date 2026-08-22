@@ -284,7 +284,7 @@ async function assertUniqueUsername(username, excludeUserId = null) {
   }
 }
 
-async function syncLoginUser({ record, password, permissions, grantLogin, createdBy }) {
+async function syncLoginUser({ record, password, permissions, grantLogin, createdBy, clientUrl }) {
   const loginEmail = resolveLoginEmail(record);
   const username = resolveUsername(record);
   const fullName = [record.firstName, record.middleName, record.lastName].filter(Boolean).join(" ");
@@ -337,7 +337,7 @@ async function syncLoginUser({ record, password, permissions, grantLogin, create
       } else {
         user.isActive = Boolean(grantLogin) && user.emailVerified;
         if (grantLogin && !user.emailVerified) {
-          await sendSetupInvite(user, "student");
+          await sendSetupInvite(user, "student", clientUrl);
         }
       }
 
@@ -371,7 +371,7 @@ async function syncLoginUser({ record, password, permissions, grantLogin, create
   });
 
   if (!password) {
-    await sendSetupInvite(user, "student");
+    await sendSetupInvite(user, "student", clientUrl);
   }
 
   record.userId = user._id;
@@ -408,6 +408,7 @@ async function handleCredentialSync(req, record) {
       : defaultPermissionsForRole("student"),
     grantLogin,
     createdBy: req.user.id,
+    clientUrl: req.body.clientUrl,
   });
 }
 

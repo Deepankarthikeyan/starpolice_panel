@@ -67,7 +67,7 @@ export async function issueAuthToken(user, purpose) {
   return token;
 }
 
-export async function sendSetupInvite(user, panel) {
+export async function sendSetupInvite(user, panel, clientUrl) {
   const token = await issueAuthToken(user, "setup");
   const result = await sendPasswordEmail({
     to: user.email,
@@ -75,11 +75,12 @@ export async function sendSetupInvite(user, panel) {
     panel,
     purpose: "setup",
     token,
+    clientUrl,
   });
   return { token, emailResult: result };
 }
 
-export async function sendResetInvite(user, panel) {
+export async function sendResetInvite(user, panel, clientUrl) {
   const token = await issueAuthToken(user, "reset");
   const result = await sendPasswordEmail({
     to: user.email,
@@ -87,6 +88,7 @@ export async function sendResetInvite(user, panel) {
     panel,
     purpose: "reset",
     token,
+    clientUrl,
   });
   return { token, emailResult: result };
 }
@@ -207,7 +209,13 @@ export async function verifyOtpForToken(token, otp) {
   };
 }
 
-export async function handleForgotPassword(email, panel) {
+function panelDisplayName(panel) {
+  if (panel === "staff") return "Staff";
+  if (panel === "student") return "Student";
+  return "Admin";
+}
+
+export async function handleForgotPassword(email, panel, clientUrl) {
   const normalizedEmail = validateEmailOrThrow(email);
 
   if (!["admin", "staff", "student"].includes(panel)) {
@@ -215,16 +223,27 @@ export async function handleForgotPassword(email, panel) {
   }
 
   const user = await User.findOne({ email: normalizedEmail });
-  if (!user || !roleMatchesPanel(user.role, panel)) {
-    return { sent: true };
+  if (!user) {
+    throw new Error("No account found with this email address.");
+  }
+
+  if (!roleMatchesPanel(user.role, panel)) {
+    throw new Error(
+      `This email is not registered for the ${panelDisplayName(panel)} panel. Use the correct login page for your account type.`,
+    );
   }
 
   if (user.role === "superadmin") {
-    return { sent: true };
+    throw new Error("Super admin password reset is not available here. Contact system support.");
   }
 
-  await sendResetInvite(user, panel);
-  return { sent: true };
+  const { emailResult } = await sendResetInvite(user, panel, clientUrl);
+  return {
+    sent: true,
+    delivered: emailResult?.delivered ?? false,
+    devMode: emailResult?.devMode ?? false,
+    setupUrl: emailResult?.setupUrl,
+  };
 }
 
 export async function createInvitedUser({
@@ -236,6 +255,7 @@ export async function createInvitedUser({
   subjectIds,
   createdBy,
   username,
+  clientUrl,
 }) {
   const normalizedEmail = validateEmailOrThrow(email);
 
@@ -268,7 +288,7 @@ export async function createInvitedUser({
 
   const user = await User.create(userData);
   const panel = panelForRole(role);
-  const { emailResult } = await sendSetupInvite(user, panel);
+  const { emailResult } = await sendSetupInvite(user, panel, clientUrl);
 
   return { user, panel, emailResult };
 }

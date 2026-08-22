@@ -119,7 +119,7 @@ router.post(
   superAdminOnly,
   async (req, res) => {
     try {
-      const { name, email, role, permissions, subjectIds } = req.body;
+      const { name, email, role, permissions, subjectIds, clientUrl } = req.body;
       if (!name?.trim() || !email?.trim() || !role) {
         return res.status(400).json({ message: "Name, email, and role are required." });
       }
@@ -144,7 +144,7 @@ router.post(
         return res.status(400).json({ message: "Invalid role." });
       }
 
-      const { user } = await createInvitedUser({
+      const { user, emailResult } = await createInvitedUser({
         name,
         email,
         role,
@@ -152,16 +152,23 @@ router.post(
         staffType: role === "staff" ? "subject" : null,
         subjectIds: role === "staff" ? validatedSubjectIds : undefined,
         createdBy: req.user.id,
+        clientUrl,
       });
 
       if (role === "staff" && user.subjectIds?.length) {
         await user.populate("subjectIds", "name");
       }
 
+      const devMode = emailResult?.devMode ?? false;
       res.status(201).json({
         ...mapUser(user),
         inviteSent: true,
-        message: "Account created. An email has been sent to set up the password and activate panel access.",
+        delivered: emailResult?.delivered ?? false,
+        devMode,
+        setupUrl: emailResult?.setupUrl,
+        message: devMode
+          ? "Account created. Email is not configured — share the setup link below with the user."
+          : "Account created. An email has been sent to set up the password and activate panel access.",
       });
     } catch (error) {
       if (error.message === "Email is already registered.") {
@@ -330,10 +337,16 @@ router.patch(
         return res.status(400).json({ message: "This account is already active." });
       }
 
-      await sendSetupInvite(user, panelForRole(user.role));
+      const { clientUrl } = req.body;
+      const { emailResult } = await sendSetupInvite(user, panelForRole(user.role), clientUrl);
       res.json({
-        message: "Invite email sent.",
+        message: emailResult?.devMode
+          ? "Email is not configured. Share the setup link below with the user."
+          : "Invite email sent.",
         inviteSent: true,
+        delivered: emailResult?.delivered ?? false,
+        devMode: emailResult?.devMode ?? false,
+        setupUrl: emailResult?.setupUrl,
       });
     } catch (error) {
       res.status(500).json({ message: error.message });

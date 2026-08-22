@@ -329,9 +329,15 @@ export const api = {
   },
 
   forgotPassword(email: string, panel: PanelType) {
-    return request<{ message: string; sent?: boolean }>("/api/auth/forgot-password", {
+    return request<{
+      message: string;
+      sent?: boolean;
+      delivered?: boolean;
+      devMode?: boolean;
+      setupUrl?: string;
+    }>("/api/auth/forgot-password", {
       method: "POST",
-      body: JSON.stringify({ email, panel }),
+      body: JSON.stringify({ email, panel, clientUrl: window.location.origin }),
     });
   },
 
@@ -360,8 +366,15 @@ export const api = {
   },
 
   resendInvite(id: string) {
-    return request<{ message: string; inviteSent: boolean }>(`/api/users/${id}/resend-invite`, {
+    return request<{
+      message: string;
+      inviteSent: boolean;
+      delivered?: boolean;
+      devMode?: boolean;
+      setupUrl?: string;
+    }>(`/api/users/${id}/resend-invite`, {
       method: "PATCH",
+      body: JSON.stringify({ clientUrl: window.location.origin }),
     });
   },
 
@@ -380,9 +393,22 @@ export const api = {
     permissions?: string[],
     subjectIds?: string[]
   ) {
-    return request<ManagedUser & { inviteSent?: boolean; message?: string }>("/api/users", {
+    return request<ManagedUser & {
+      inviteSent?: boolean;
+      message?: string;
+      delivered?: boolean;
+      devMode?: boolean;
+      setupUrl?: string;
+    }>("/api/users", {
       method: "POST",
-      body: JSON.stringify({ name, email, role, permissions, subjectIds }),
+      body: JSON.stringify({
+        name,
+        email,
+        role,
+        permissions,
+        subjectIds,
+        clientUrl: window.location.origin,
+      }),
     });
   },
 
@@ -988,6 +1014,7 @@ function buildStudentOnboardingFormData(
   formData.append("privacyAccepted", String(form.privacyAccepted));
   formData.append("grantLogin", String(form.grantLogin));
   formData.append("residenceType", form.residenceType || "");
+  formData.append("clientUrl", window.location.origin);
 
   if (form.password) {
     formData.append("password", form.password);
