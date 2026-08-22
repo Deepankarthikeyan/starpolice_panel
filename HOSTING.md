@@ -1,13 +1,23 @@
 # Hosting
 
-## Live site (Netlify)
+## Live site
+
+| Host | URL | Notes |
+|------|-----|--------|
+| **Cloudflare Pages** (recommended, free) | Set up once — see [CLOUDFLARE_PAGES.md](CLOUDFLARE_PAGES.md) | Auto-deploys from `master` |
+| **Netlify** | https://starpolice-panel.netlify.app | Free tier may **pause new deploys** when credits run out; old build may stay live |
+
+| Panel | Path |
+|-------|------|
+| **Admin login** | `/admin/login` |
+| **Staff login** | `/staff/login` |
+| **Student login** | `/student/login` |
+
+## Netlify (if deploy credits available)
 
 | | URL |
 |---|---|
 | **Website** | https://starpolice-panel.netlify.app |
-| **Admin login** | https://starpolice-panel.netlify.app/admin/login |
-| **Staff login** | https://starpolice-panel.netlify.app/staff/login |
-| **Student login** | https://starpolice-panel.netlify.app/student/login |
 
 ## Cloudflare quick tunnel links
 
