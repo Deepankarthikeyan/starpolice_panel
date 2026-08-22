@@ -17,9 +17,21 @@ const AdminSignup = ({ setAuth }: Props) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [needsSuperAdmin, setNeedsSuperAdmin] = useState(true);
+  const [storageWarning, setStorageWarning] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
+    api
+      .getHealth()
+      .then((health) => {
+        if (health.dataPersistent === false) {
+          setStorageWarning(
+            "Warning: the API database is not persistent. Your super admin account may be lost when the server restarts. Set MONGODB_URI to MongoDB Atlas on Render for permanent storage."
+          );
+        }
+      })
+      .catch(() => {});
+
     api
       .prepareSignup()
       .then((status) => setNeedsSuperAdmin(status.needsSuperAdmin))
@@ -86,6 +98,7 @@ const AdminSignup = ({ setAuth }: Props) => {
       }
     >
       {error && <div className="alert alert-danger py-2">{error}</div>}
+      {storageWarning && <div className="alert alert-warning py-2">{storageWarning}</div>}
       <form onSubmit={onSubmit}>
         <div className="mb-3">
           <label className="form-label">Full Name</label>
