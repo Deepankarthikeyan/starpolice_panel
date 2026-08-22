@@ -4,6 +4,8 @@ import User from "../models/User.js";
 import Subject from "../models/Subject.js";
 import { authRequired, adminPanelOnly, attachUser, superAdminOnly } from "../middleware/auth.js";
 import { defaultPermissionsForRole, sanitizePermissions } from "../permissions.js";
+import { createInvitedUser, sendSetupInvite, panelForRole } from "../services/passwordAuth.js";
+import { validateEmailOrThrow } from "../utils/emailValidation.js";
 
 const router = express.Router();
 
@@ -117,9 +119,15 @@ router.post(
   superAdminOnly,
   async (req, res) => {
     try {
-      const { name, email, password, role, permissions, subjectIds } = req.body;
-      if (!name?.trim() || !email?.trim() || !password || !role) {
-        return res.status(400).json({ message: "Name, email, password, and role are required." });
+      const { name, email, role, permissions, subjectIds } = req.body;
+      if (!name?.trim() || !email?.trim() || !role) {
+        return res.status(400).json({ message: "Name, email, and role are required." });
+      }
+
+      try {
+        validateEmailOrThrow(email);
+      } catch (validationError) {
+        return res.status(400).json({ message: validationError.message });
       }
 
       let validatedSubjectIds = [];
@@ -132,38 +140,33 @@ router.post(
         validatedSubjectIds = validation.ids;
       }
 
-      const existing = await User.findOne({ email: email.toLowerCase() });
-      if (existing) {
-        return res.status(409).json({ message: "Email is already registered." });
-      }
-
       if (!["admin", "staff", "student"].includes(role)) {
         return res.status(400).json({ message: "Invalid role." });
       }
 
-      const hashed = await bcrypt.hash(password, 10);
-      const userData = {
-        name: name.trim(),
-        email: email.toLowerCase(),
-        password: hashed,
+      const { user } = await createInvitedUser({
+        name,
+        email,
         role,
-        isActive: false,
         permissions: sanitizePermissions(role, permissions),
+        staffType: role === "staff" ? "subject" : null,
+        subjectIds: role === "staff" ? validatedSubjectIds : undefined,
         createdBy: req.user.id,
-      };
+      });
 
-      if (role === "staff") {
-        userData.staffType = "subject";
-        userData.subjectIds = validatedSubjectIds;
-      }
-
-      const user = await User.create(userData);
       if (role === "staff" && user.subjectIds?.length) {
         await user.populate("subjectIds", "name");
       }
 
-      res.status(201).json(mapUser(user));
+      res.status(201).json({
+        ...mapUser(user),
+        inviteSent: true,
+        message: "Account created. An email has been sent to set up the password and activate panel access.",
+      });
     } catch (error) {
+      if (error.message === "Email is already registered.") {
+        return res.status(409).json({ message: error.message });
+      }
       res.status(500).json({ message: error.message });
     }
   }
@@ -198,6 +201,11 @@ router.patch(
       if (email !== undefined) {
         if (!email?.trim()) {
           return res.status(400).json({ message: "Email cannot be empty." });
+        }
+        try {
+          validateEmailOrThrow(email);
+        } catch (validationError) {
+          return res.status(400).json({ message: validationError.message });
         }
         const normalizedEmail = email.toLowerCase().trim();
         if (normalizedEmail !== user.email) {
@@ -295,6 +303,38 @@ router.patch(
       await user.save();
 
       res.json(mapUser(user));
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+);
+
+router.patch(
+  "/:id/resend-invite",
+  authRequired,
+  adminPanelOnly,
+  attachUser,
+  superAdminOnly,
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      if (user.role === "superadmin") {
+        return res.status(400).json({ message: "Super admin cannot receive invites." });
+      }
+
+      if (user.emailVerified && user.isActive) {
+        return res.status(400).json({ message: "This account is already active." });
+      }
+
+      await sendSetupInvite(user, panelForRole(user.role));
+      res.json({
+        message: "Invite email sent.",
+        inviteSent: true,
+      });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

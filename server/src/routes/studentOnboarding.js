@@ -5,6 +5,9 @@ import User from "../models/User.js";
 import { authRequired, adminPanelOnly, attachUser, superAdminOnly } from "../middleware/auth.js";
 import { upload } from "../middleware/upload.js";
 import { defaultPermissionsForRole, sanitizePermissions } from "../permissions.js";
+import { sendSetupInvite } from "../services/passwordAuth.js";
+import { validateEmailOrThrow } from "../utils/emailValidation.js";
+import { generatePlaceholderPassword } from "../utils/authTokens.js";
 
 const router = express.Router();
 
@@ -294,12 +297,16 @@ async function syncLoginUser({ record, password, permissions, grantLogin, create
     return null;
   }
 
-  if (grantLogin && !password && !record.userId) {
-    throw new Error("Password is required when granting student panel login access.");
-  }
-
   if (!loginEmail && grantLogin) {
     throw new Error("Login email is required for student panel access.");
+  }
+
+  if (loginEmail) {
+    try {
+      validateEmailOrThrow(loginEmail);
+    } catch (validationError) {
+      throw new Error(validationError.message);
+    }
   }
 
   if (record.userId) {
@@ -323,10 +330,15 @@ async function syncLoginUser({ record, password, permissions, grantLogin, create
         user.set("username", undefined);
       }
       user.permissions = studentPermissions;
-      user.isActive = Boolean(grantLogin);
 
       if (password) {
         user.password = await bcrypt.hash(password, 10);
+        user.isActive = Boolean(grantLogin);
+      } else {
+        user.isActive = Boolean(grantLogin) && user.emailVerified;
+        if (grantLogin && !user.emailVerified) {
+          await sendSetupInvite(user, "student");
+        }
       }
 
       await user.save();
@@ -334,7 +346,7 @@ async function syncLoginUser({ record, password, permissions, grantLogin, create
     }
   }
 
-  if (!password) {
+  if (!grantLogin) {
     return null;
   }
 
@@ -345,16 +357,22 @@ async function syncLoginUser({ record, password, permissions, grantLogin, create
 
   await assertUniqueUsername(username);
 
+  const placeholder = await bcrypt.hash(generatePlaceholderPassword(), 10);
   const user = await User.create({
     name: fullName || loginEmail || username,
     email: loginEmail,
     ...(username ? { username } : {}),
-    password: await bcrypt.hash(password, 10),
+    password: password ? await bcrypt.hash(password, 10) : placeholder,
     role: "student",
-    isActive: Boolean(grantLogin),
+    isActive: password ? true : false,
+    emailVerified: password ? true : false,
     permissions: studentPermissions,
     createdBy,
   });
+
+  if (!password) {
+    await sendSetupInvite(user, "student");
+  }
 
   record.userId = user._id;
   await record.save();

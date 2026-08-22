@@ -71,7 +71,6 @@ const UserManagement = () => {
   const [students, setStudents] = useState<ManagedUser[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [createAccountType, setCreateAccountType] = useState<CreateAccountType>("student");
   const [createPermissions, setCreatePermissions] = useState<string[]>(
     defaultPermissionsForRole("student")
@@ -138,18 +137,16 @@ const UserManagement = () => {
       await api.createUser(
         name.trim(),
         email.trim(),
-        password,
         createAccountType,
         createPermissions,
         createAccountType === "staff" ? createSubjectIds : undefined
       );
       setName("");
       setEmail("");
-      setPassword("");
       setCreateSubjectIds([]);
       setCreatePermissions(defaultPermissionsForRole(createAccountType));
       await loadUsers();
-      notify.success("Account created successfully.");
+      notify.success("Account created. An invite email was sent to set the password and activate panel access.");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to create user";
       setError(message);
@@ -166,6 +163,15 @@ const UserManagement = () => {
       notify.success(user.isActive ? "Login access revoked." : "Login access granted.");
     } catch (err) {
       notify.error(err, "Failed to update login access");
+    }
+  };
+
+  const resendInvite = async (user: ManagedUser) => {
+    try {
+      await api.resendInvite(user.id);
+      notify.success("Invite email sent.");
+    } catch (err) {
+      notify.error(err, "Failed to send invite email");
     }
   };
 
@@ -342,6 +348,17 @@ const UserManagement = () => {
                             <i className="fa fa-key" />
                           </button>
                         )}
+                        {!user.isActive && (
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-info spa-user-action-btn"
+                            onClick={() => resendInvite(user)}
+                            title="Resend Invite Email"
+                            aria-label="Resend Invite Email"
+                          >
+                            <i className="fa fa-envelope" />
+                          </button>
+                        )}
                         <button
                           type="button"
                           className={`btn btn-sm spa-user-action-btn ${
@@ -432,15 +449,9 @@ const UserManagement = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Password</label>
-                  <PasswordInput
-                    value={password}
-                    onChange={setPassword}
-                    required
-                    autoComplete="new-password"
-                  />
+                  <p className="text-muted small mt-1 mb-0">
+                    An invite email will be sent to set the password and activate panel access.
+                  </p>
                 </div>
 
                 {createAccountType === "staff" && (
@@ -474,8 +485,8 @@ const UserManagement = () => {
                   {loading ? "Creating..." : "Create Account"}
                 </button>
                 <p className="text-muted small mt-2 mb-0">
-                  New accounts start with login access <strong>disabled</strong>. Use Grant Login
-                  after reviewing permissions.
+                  The user receives an email link to create their password and verify with a code.
+                  Panel access is activated after they complete that step.
                 </p>
               </form>
             </div>

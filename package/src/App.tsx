@@ -42,6 +42,8 @@ const AdminLogin = lazy(() => import("./jsx/pages/auth/AdminLogin"));
 const AdminSignup = lazy(() => import("./jsx/pages/auth/AdminSignup"));
 const StaffLogin = lazy(() => import("./jsx/pages/auth/StaffLogin"));
 const StudentLogin = lazy(() => import("./jsx/pages/auth/StudentLogin"));
+const ForgotPassword = lazy(() => import("./jsx/pages/auth/ForgotPassword"));
+const SetupPassword = lazy(() => import("./jsx/pages/auth/SetupPassword"));
 
 function Preloader() {
   return (
@@ -127,6 +129,11 @@ function App() {
               )
             }
           />
+
+          <Route path="/admin/forgot-password" element={<ForgotPassword panel="admin" />} />
+          <Route path="/staff/forgot-password" element={<ForgotPassword panel="staff" />} />
+          <Route path="/student/forgot-password" element={<ForgotPassword panel="student" />} />
+          <Route path="/auth/setup-password" element={<SetupPassword />} />
 
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />

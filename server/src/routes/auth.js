@@ -8,6 +8,14 @@ import { requireDb } from "../middleware/requireDb.js";
 import { getEffectivePermissions } from "../permissions.js";
 import { clearTestSuperAdminsIfNeeded } from "../utils/clearTestSuperAdmins.js";
 import { getJwtSecret } from "../config/jwt.js";
+import { validateEmailOrThrow } from "../utils/emailValidation.js";
+import {
+  getTokenInfo,
+  handleForgotPassword,
+  requestOtpForToken,
+  resendOtpForToken,
+  verifyOtpForToken,
+} from "../services/passwordAuth.js";
 
 const router = express.Router();
 
@@ -143,6 +151,12 @@ router.post("/register", requireDb, async (req, res) => {
       return res.status(409).json({ message: "Email is already registered." });
     }
 
+    try {
+      validateEmailOrThrow(email);
+    } catch (validationError) {
+      return res.status(400).json({ message: validationError.message });
+    }
+
     const superAdminCount = await User.countDocuments({ role: "superadmin" });
     const role = superAdminCount === 0 ? "superadmin" : "admin";
     const isActive = role === "superadmin";
@@ -160,6 +174,7 @@ router.post("/register", requireDb, async (req, res) => {
       password: hashed,
       role,
       isActive,
+      emailVerified: true,
     });
 
     const staffFields = await getStaffAuthFields(user);
@@ -252,6 +267,89 @@ router.get("/me", authRequired, async (req, res) => {
     panel: req.user.panel,
     ...staffFields,
   });
+});
+
+router.get("/verify-setup-token", requireDb, async (req, res) => {
+  try {
+    const token = req.query.token;
+    if (!token) {
+      return res.status(400).json({ message: "Token is required." });
+    }
+    const info = await getTokenInfo(String(token));
+    res.json(info);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post("/forgot-password", requireDb, async (req, res) => {
+  try {
+    const { email, panel } = req.body;
+    if (!email?.trim() || !panel) {
+      return res.status(400).json({ message: "Email and panel are required." });
+    }
+    const result = await handleForgotPassword(email, panel);
+    res.json({
+      message: "If an account exists for this email, a password reset link has been sent.",
+      ...result,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.post("/request-otp", requireDb, async (req, res) => {
+  try {
+    const { token, password, confirmPassword } = req.body;
+    if (!token) {
+      return res.status(400).json({ message: "Token is required." });
+    }
+    const result = await requestOtpForToken(token, password, confirmPassword);
+    res.json({
+      message: "Verification code sent to your email.",
+      email: result.email,
+      devMode: result.emailResult?.devMode ?? false,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.post("/resend-otp", requireDb, async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ message: "Token is required." });
+    }
+    const result = await resendOtpForToken(token);
+    res.json({
+      message: "A new verification code has been sent to your email.",
+      email: result.email,
+      devMode: result.emailResult?.devMode ?? false,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.post("/verify-otp", requireDb, async (req, res) => {
+  try {
+    const { token, otp } = req.body;
+    if (!token || !otp) {
+      return res.status(400).json({ message: "Token and verification code are required." });
+    }
+    const result = await verifyOtpForToken(token, otp);
+    res.json({
+      message:
+        result.purpose === "reset"
+          ? "Password updated successfully. You can sign in with your new password."
+          : "Account activated successfully. You can sign in with your new password.",
+      panel: result.panel,
+      purpose: result.purpose,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 });
 
 export default router;

@@ -6,7 +6,6 @@ import { hasPermission } from "../permissions";
 import { getPanelMotherMenu } from "../panelLabels";
 import { FileUploadProgressOverlay } from "../shared/FileUploadProgress";
 import { notify } from "../toast";
-import { PasswordInput } from "../shared/PasswordInput";
 import {
   emptyStudentOnboardingForm,
   type StudentOnboardingFormState,
@@ -205,12 +204,6 @@ const StudentOnboarding = () => {
     if (form.grantLogin) {
       if (!loginEmail) {
         const message = "Login email is required when granting student panel access.";
-        setError(message);
-        notify.error(message);
-        return;
-      }
-      if (!editingId && !form.password) {
-        const message = "Password is required when granting student panel access.";
         setError(message);
         notify.error(message);
         return;
@@ -566,14 +559,12 @@ const StudentOnboarding = () => {
 
           <SectionCard title="9. Login Credentials">
             <p className="text-muted small mb-3">
-              These credentials create the student panel login. Students sign in with the login email
-              (or username) and password from the student login page.
+              When panel access is granted, an email is sent to the login email with a link to create
+              a password and verify with a one-time code. Students can also sign in with username.
             </p>
             <div className="row">
               <div className="col-md-4"><Field label="Username"><TextInput value={form.username} onChange={(v) => setField("username", v)} placeholder="Optional login username" /></Field></div>
-              <div className="col-md-4"><Field label="Login Email"><TextInput type="email" value={form.loginEmail} onChange={(v) => setField("loginEmail", v)} placeholder="Used for student panel sign in" /></Field></div>
-              <div className="col-md-4"><Field label="Password"><PasswordInput value={form.password} onChange={(v) => setField("password", v)} placeholder={editingId ? "Leave blank to keep current" : "Required for panel access"} autoComplete="new-password" /></Field></div>
-              <div className="col-md-4"><Field label="Confirm Password"><PasswordInput value={form.confirmPassword} onChange={(v) => setField("confirmPassword", v)} autoComplete="new-password" /></Field></div>
+              <div className="col-md-4"><Field label="Login Email"><TextInput type="email" value={form.loginEmail} onChange={(v) => setField("loginEmail", v)} placeholder="Invite and sign-in email" /></Field></div>
               <div className="col-md-4 d-flex align-items-end">
                 <label className="form-check mb-3">
                   <input type="checkbox" className="form-check-input" checked={form.grantLogin} onChange={(e) => setField("grantLogin", e.target.checked)} />

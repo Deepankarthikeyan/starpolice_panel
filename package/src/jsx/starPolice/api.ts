@@ -318,6 +318,53 @@ export const api = {
     });
   },
 
+  verifySetupToken(token: string) {
+    return request<{
+      valid: boolean;
+      purpose?: "setup" | "reset";
+      panel?: PanelType;
+      email?: string;
+      name?: string;
+    }>(`/api/auth/verify-setup-token?token=${encodeURIComponent(token)}`);
+  },
+
+  forgotPassword(email: string, panel: PanelType) {
+    return request<{ message: string; sent?: boolean }>("/api/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email, panel }),
+    });
+  },
+
+  requestOtp(token: string, password: string, confirmPassword: string) {
+    return request<{ message: string; email: string; devMode?: boolean }>("/api/auth/request-otp", {
+      method: "POST",
+      body: JSON.stringify({ token, password, confirmPassword }),
+    });
+  },
+
+  resendOtp(token: string) {
+    return request<{ message: string; email: string; devMode?: boolean }>("/api/auth/resend-otp", {
+      method: "POST",
+      body: JSON.stringify({ token }),
+    });
+  },
+
+  verifyOtp(token: string, otp: string) {
+    return request<{ message: string; panel: PanelType; purpose: "setup" | "reset" }>(
+      "/api/auth/verify-otp",
+      {
+        method: "POST",
+        body: JSON.stringify({ token, otp }),
+      }
+    );
+  },
+
+  resendInvite(id: string) {
+    return request<{ message: string; inviteSent: boolean }>(`/api/users/${id}/resend-invite`, {
+      method: "PATCH",
+    });
+  },
+
   getMe(panel?: PanelType) {
     return request<Omit<AuthUser, "token">>("/api/auth/me", {}, panel);
   },
@@ -329,14 +376,13 @@ export const api = {
   createUser(
     name: string,
     email: string,
-    password: string,
     role: "admin" | "staff" | "student",
     permissions?: string[],
     subjectIds?: string[]
   ) {
-    return request<ManagedUser>("/api/users", {
+    return request<ManagedUser & { inviteSent?: boolean; message?: string }>("/api/users", {
       method: "POST",
-      body: JSON.stringify({ name, email, password, role, permissions, subjectIds }),
+      body: JSON.stringify({ name, email, role, permissions, subjectIds }),
     });
   },
 

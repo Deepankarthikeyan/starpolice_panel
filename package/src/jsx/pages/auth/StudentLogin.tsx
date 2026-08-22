@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthLayout from "./AuthLayout";
 import { PasswordInput } from "../../starPolice/shared/PasswordInput";
 import { api, storeAuth } from "../../starPolice/api";
@@ -68,6 +68,11 @@ const StudentLogin = ({ setAuth }: Props) => {
             required
             autoComplete="current-password"
           />
+          <div className="mt-2">
+            <Link to="/student/forgot-password" className="spa-auth-link small">
+              Forgot password?
+            </Link>
+          </div>
         </div>
         <button type="submit" className="btn spa-auth-btn w-100" disabled={loading}>
           {loading ? "Signing in..." : "Sign In to Student Panel"}

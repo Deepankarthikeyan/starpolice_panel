@@ -20,6 +20,13 @@ const userSchema = new mongoose.Schema(
     },
     subjectIds: { type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Subject" }], default: [] },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    emailVerified: { type: Boolean, default: false },
+    authTokenHash: { type: String, default: null },
+    authTokenExpires: { type: Date, default: null },
+    authTokenPurpose: { type: String, enum: ["setup", "reset"], default: null },
+    otpHash: { type: String, default: null },
+    otpExpires: { type: Date, default: null },
+    pendingPasswordHash: { type: String, default: null },
   },
   { timestamps: true }
 );

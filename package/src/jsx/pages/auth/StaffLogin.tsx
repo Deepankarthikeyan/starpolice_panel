@@ -88,6 +88,11 @@ const StaffLogin = ({ setAuth }: Props) => {
             required
             autoComplete="current-password"
           />
+          <div className="mt-2">
+            <Link to="/staff/forgot-password" className="spa-auth-link small">
+              Forgot password?
+            </Link>
+          </div>
         </div>
         <button type="submit" className="btn spa-auth-btn w-100" disabled={loading}>
           {loading ? "Signing in..." : "Sign In to Staff Panel"}
