@@ -7,7 +7,7 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "seed": "node src/seed.js",
-    "test": "node --test src/config/production.test.js src/config/jwt.test.js"
+    "test": "node --test src/config/production.test.js src/config/jwt.test.js src/utils/clearTestSuperAdmins.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
