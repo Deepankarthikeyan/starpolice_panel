@@ -26,6 +26,7 @@ import type {
   StudentAttendanceDateSummary,
   StudentAttendanceDayDetail,
 } from "./admin/attendanceDefaults";
+import type { HealthStatus } from "./types";
 import {
   defaultEvents,
   getCardTypeFromGender,
@@ -293,6 +294,10 @@ function uploadWithProgress<T>(
 }
 
 export const api = {
+  getHealth() {
+    return request<HealthStatus>("/api/health");
+  },
+
   getSetupStatus() {
     return request<SetupStatus>("/api/auth/setup");
   },

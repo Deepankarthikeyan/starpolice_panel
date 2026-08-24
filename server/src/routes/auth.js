@@ -6,7 +6,11 @@ import Exam from "../models/Exam.js";
 import { authRequired } from "../middleware/auth.js";
 import { requireDb } from "../middleware/requireDb.js";
 import { getEffectivePermissions } from "../permissions.js";
-import { clearTestSuperAdminsIfNeeded } from "../utils/clearTestSuperAdmins.js";
+import {
+  clearTestSuperAdminsIfNeeded,
+  isTestSuperAdminEmail,
+} from "../utils/clearTestSuperAdmins.js";
+import { isRenderProduction } from "../config/production.js";
 import { getJwtSecret } from "../config/jwt.js";
 import { validateEmailOrThrow } from "../utils/emailValidation.js";
 import {
@@ -160,6 +164,16 @@ router.post("/register", requireDb, async (req, res) => {
     const superAdminCount = await User.countDocuments({ role: "superadmin" });
     const role = superAdminCount === 0 ? "superadmin" : "admin";
     const isActive = role === "superadmin";
+    const normalizedEmail = email.toLowerCase().trim();
+
+    if (role === "superadmin" && isRenderProduction()) {
+      if (isTestSuperAdminEmail(normalizedEmail) || normalizedEmail.endsWith("@example.com")) {
+        return res.status(400).json({
+          message:
+            "Use your real email address for the super admin account (not @example.com test addresses).",
+        });
+      }
+    }
 
     if (role === "admin") {
       return res.status(403).json({

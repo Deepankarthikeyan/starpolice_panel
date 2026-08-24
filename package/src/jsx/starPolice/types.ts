@@ -44,6 +44,15 @@ export interface SetupStatus {
   needsSuperAdmin: boolean;
 }
 
+export interface HealthStatus {
+  status: string;
+  database: string;
+  storage: string;
+  dataPersistent?: boolean;
+  superAdminPersistence?: string;
+  jwt?: boolean;
+}
+
 export interface UploadedFile {
   id: string;
   date: string;

@@ -46,10 +46,17 @@ app.use("/uploads", express.static(uploadDir));
 app.get("/api/health", (_req, res) => {
   const mongoIssue = getMongoUriIssue();
   const connected = isDbConnected();
+  const storage = getMongoStorageKind();
+  const dataPersistent = storage === "atlas";
   res.json({
     status: mongoIssue ? "misconfigured" : connected ? "ok" : "starting",
     database: connected ? "mongodb" : mongoIssue ? "missing" : "connecting",
-    storage: getMongoStorageKind(),
+    storage,
+    dataPersistent,
+    superAdminPersistence:
+      dataPersistent
+        ? "atlas"
+        : "ephemeral — set MONGODB_URI to MongoDB Atlas on Render so super admin accounts survive restarts",
     setupRequired: mongoIssue,
     jwt: Boolean(process.env.JWT_SECRET?.trim()),
     email: {
