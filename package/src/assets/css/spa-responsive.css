@@ -6,10 +6,13 @@ html {
 }
 
 html,
-body,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 #root {
   max-width: 100%;
-  overflow-x: clip;
 }
 
 img,
@@ -27,6 +30,10 @@ iframe {
 .card,
 .row > [class*="col-"] {
   min-width: 0;
+}
+
+.chatbox:not(.active) {
+  pointer-events: none;
 }
 
 .spa-content-body {
@@ -74,19 +81,62 @@ iframe {
   overflow-y: auto;
 }
 
-/* Fluid tables stay inside the viewport */
+/* Fluid tables stay inside the viewport and scroll instead of clipping */
 #main-wrapper:has(.spa-sidebar) .table-responsive,
+#main-wrapper:has(.spa-sidebar) .spa-table-scroll,
 .spa-onboarding-table-wrap {
+  display: block;
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
+#main-wrapper:has(.spa-sidebar) .table-responsive > table,
+#main-wrapper:has(.spa-sidebar) .spa-table-scroll > table {
+  width: max-content;
+  min-width: 100%;
+}
+
+/* Theme forces .fc-view-harness to 850px, which leaves a skinny grid on phones */
+.spa-calendar-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.spa-calendar-wrap .fc,
+.spa-calendar-wrap .fc-view-harness,
+.spa-calendar-wrap .fc-view-harness-active,
+.spa-calendar-wrap .fc-scrollgrid,
+.spa-calendar-wrap .fc-scrollgrid-sync-table,
+.spa-calendar-wrap .fc-col-header,
+.spa-calendar-wrap .fc-daygrid-body {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.spa-calendar-wrap .fc .fc-view-harness {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.spa-calendar-wrap .fc table {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+.spa-calendar-wrap .fc .fc-scroller,
+.spa-calendar-wrap .fc .fc-scroller-liquid-absolute {
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
 /* ------------------------------------------------------------------ */
 /* Tablet and below — overlay sidebar already active at 1023px         */
 /* ------------------------------------------------------------------ */
-@media only screen and (max-width: 63.9375rem) {
+@media only screen and (max-width: 1199px) {
   #main-wrapper:has(.spa-sidebar) .container-fluid {
     padding-left: 1rem;
     padding-right: 1rem;
@@ -104,20 +154,33 @@ iframe {
     white-space: nowrap;
   }
 
+  /* Keep hamburger + notifications + profile only on overlay viewports */
+  .header-right .dz-theme-mode,
+  .header-right .dz-fullscreen,
+  .header-right .bell-link {
+    display: none !important;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .navbar-collapse {
+    display: flex !important;
+    flex-basis: auto;
+  }
+
   .spa-page-titles {
     top: 5rem;
   }
 
   [data-sidebar-style="overlay"] #main-wrapper:has(.spa-sidebar) .spa-sidebar {
-    left: 0 !important;
-    transform: translateX(-110%);
+    left: -110% !important;
+    transform: none !important;
     padding-top: env(safe-area-inset-top, 0px);
-    height: 100dvh !important;
   }
 
-  [data-sidebar-style="overlay"] #main-wrapper:has(.spa-sidebar).menu-toggle .spa-sidebar {
+  [data-sidebar-style="overlay"] #main-wrapper.spa-mobile-nav-open:has(.spa-sidebar) .spa-sidebar,
+  [data-sidebar-style="overlay"] #main-wrapper.menu-toggle:has(.spa-sidebar) .spa-sidebar,
+  [data-sidebar-style="overlay"] #main-wrapper:has(.spa-sidebar) .spa-sidebar.is-open {
     left: 0 !important;
-    transform: translateX(0);
+    transform: none !important;
   }
 
   .spa-auth-page .min-vh-100 {
@@ -184,9 +247,19 @@ iframe {
   }
 
   #main-wrapper:has(.spa-sidebar) .header .header-content {
-    padding-left: calc(3.75rem + env(safe-area-inset-left, 0px)) !important;
+    padding-left: calc(0.75rem + env(safe-area-inset-left, 0px)) !important;
     padding-right: calc(0.75rem + env(safe-area-inset-right, 0px)) !important;
     height: 4.25rem;
+  }
+
+  .spa-sidebar-backdrop {
+    top: calc(4.25rem + env(safe-area-inset-top, 0px)) !important;
+  }
+
+  #main-wrapper .spa-sidebar,
+  [data-sidebar-style="overlay"] #main-wrapper:has(.spa-sidebar) .spa-sidebar {
+    top: calc(4.25rem + env(safe-area-inset-top, 0px)) !important;
+    height: calc(100dvh - 4.25rem - env(safe-area-inset-top, 0px)) !important;
   }
 
   #main-wrapper:has(.spa-sidebar) .container-fluid {
@@ -210,16 +283,8 @@ iframe {
     word-break: break-word;
   }
 
-  .spa-sidebar-mobile-trigger {
-    top: calc(0.85rem + env(safe-area-inset-top, 0px)) !important;
-    left: calc(0.75rem + env(safe-area-inset-left, 0px)) !important;
-  }
-
-  /* Header — keep notifications + profile only */
-  .header-right .dz-theme-mode,
-  .header-right .dz-fullscreen,
-  .header-right .bell-link {
-    display: none !important;
+  .spa-header-menu-btn {
+    margin-top: env(safe-area-inset-top, 0px);
   }
 
   .header-right .navbar-nav,
@@ -433,15 +498,23 @@ iframe {
     width: 100vw !important;
     max-width: 100vw !important;
     right: -100vw !important;
+    pointer-events: none;
   }
 
   .chatActive,
   .chatbox.active {
     right: 0 !important;
+    pointer-events: auto;
   }
 
-  .chatbox-close {
+  .chatbox .chatbox-close {
+    width: 0 !important;
+    pointer-events: none;
+  }
+
+  .chatbox.active .chatbox-close {
     width: 100vw !important;
+    pointer-events: auto;
   }
 
   .modal-dialog {
@@ -540,5 +613,182 @@ iframe {
 
   .spa-header-notifications {
     max-height: 40dvh;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Phones + tablets — fill the viewport, scroll wide tables, calendar  */
+/* ------------------------------------------------------------------ */
+@media only screen and (max-width: 1199px) {
+  .chatbox:not(.active) {
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    right: auto !important;
+    left: -9999px !important;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .content-body,
+  #main-wrapper:has(.spa-sidebar) .container-fluid,
+  #main-wrapper:has(.spa-sidebar) .card,
+  #main-wrapper:has(.spa-sidebar) .card-body,
+  #main-wrapper:has(.spa-sidebar) .card-header,
+  #main-wrapper:has(.spa-sidebar) .row,
+  #main-wrapper:has(.spa-sidebar) .row > [class*="col-"] {
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .table-responsive,
+  #main-wrapper:has(.spa-sidebar) .spa-table-scroll,
+  #main-wrapper:has(.spa-sidebar) .spa-onboarding-table-wrap {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .table-responsive > table,
+  #main-wrapper:has(.spa-sidebar) .spa-table-scroll > table {
+    width: max-content !important;
+    min-width: 100%;
+    margin-bottom: 0;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .table-responsive::-webkit-scrollbar,
+  #main-wrapper:has(.spa-sidebar) .spa-table-scroll::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  #main-wrapper:has(.spa-sidebar) .table-responsive::-webkit-scrollbar-thumb,
+  #main-wrapper:has(.spa-sidebar) .spa-table-scroll::-webkit-scrollbar-thumb {
+    background: rgba(18, 61, 115, 0.45);
+    border-radius: 999px;
+  }
+
+  .attendance-table,
+  .spa-leads-table,
+  .spa-onboarding-table {
+    min-width: 40rem;
+  }
+
+  .spa-calendar-wrap,
+  .spa-calendar-wrap .fc,
+  .spa-calendar-wrap .fc-media-screen,
+  .spa-calendar-wrap .fc-view-harness,
+  .spa-calendar-wrap .fc-view-harness-active,
+  .spa-calendar-wrap .fc-scrollgrid,
+  .spa-calendar-wrap .fc-scrollgrid table,
+  .spa-calendar-wrap .fc-scrollgrid-sync-table,
+  .spa-calendar-wrap .fc-col-header,
+  .spa-calendar-wrap .fc-daygrid-body,
+  .spa-calendar-wrap .fc table {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .spa-calendar-wrap .fc .fc-view-harness {
+    height: auto !important;
+  }
+
+  .spa-calendar-wrap .fc .fc-scroller,
+  .spa-calendar-wrap .fc .fc-scroller-liquid-absolute {
+    overflow: hidden !important;
+    width: 100% !important;
+  }
+
+  .spa-calendar-wrap .fc table,
+  .spa-calendar-wrap .fc .fc-scrollgrid,
+  .spa-calendar-wrap .fc .fc-scrollgrid-sync-table,
+  .spa-calendar-wrap .fc .fc-col-header {
+    table-layout: fixed !important;
+  }
+
+  .spa-calendar-wrap .fc .fc-toolbar.fc-header-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .spa-calendar-wrap .fc .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .spa-calendar-wrap .fc .fc-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .spa-calendar-wrap .fc .fc-toolbar-title {
+    font-size: 1.05rem !important;
+  }
+
+  .spa-calendar-wrap .fc .fc-col-header-cell-cushion,
+  .spa-calendar-wrap .fc .fc-daygrid-day-number {
+    padding: 0.25rem 0.1rem;
+    font-size: 0.7rem;
+  }
+
+  .spa-performance-filter-row,
+  .spa-performance-header-controls {
+    flex-wrap: wrap !important;
+  }
+
+  .daywise-upload-dropzone input[type="file"] {
+    max-width: 100%;
+    font-size: 0.8125rem;
+  }
+
+  .daywise-upload-calendar .react-datepicker,
+  .daywise-upload-calendar .react-datepicker__month-container,
+  .daywise-upload-calendar .react-datepicker__month {
+    width: 100% !important;
+  }
+
+  .daywise-upload-calendar .react-datepicker__day-names,
+  .daywise-upload-calendar .react-datepicker__week {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .daywise-upload-calendar .react-datepicker__day-name,
+  .daywise-upload-calendar .react-datepicker__day {
+    flex: 1 1 0;
+    margin: 0.15rem 0;
+  }
+
+  .header-right .navbar-nav {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .spa-onboarding-table,
+  .spa-leads-table {
+    min-width: 32rem;
+  }
+}
+
+@media only screen and (max-width: 575.98px) {
+  .card-header {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .card-header .btn,
+  .card-header .badge {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .spa-calendar-wrap .fc .fc-daygrid-body,
+  .spa-calendar-wrap .fc .fc-scrollgrid-sync-table {
+    width: 100% !important;
   }
 }

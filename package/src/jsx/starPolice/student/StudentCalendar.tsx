@@ -1,8 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import type { EventClickArg } from "@fullcalendar/core";
+import PanelCalendar from "../shared/PanelCalendar";
 import PageTitle from "../../layouts/PageTitle";
 import { api } from "../api";
 import { FILE_CATEGORY_LABELS } from "../constants";
@@ -39,13 +36,10 @@ const StudentCalendar = () => {
         <div className="col-xl-8">
           <div className="card">
             <div className="card-body">
-              <FullCalendar
-                plugins={[dayGridPlugin, interactionPlugin]}
-                initialView="dayGridMonth"
-                height="auto"
+              <PanelCalendar
                 events={events}
                 dateClick={(info) => setSelectedDate(info.dateStr)}
-                eventClick={(info: EventClickArg) => setSelectedDate(info.event.startStr.slice(0, 10))}
+                eventClick={(info) => setSelectedDate(info.event.startStr.slice(0, 10))}
               />
             </div>
           </div>

@@ -25,7 +25,7 @@ interface propType {
 }
 
 const Header = ({ onNote }: propType) => {
-  const { auth } = useContext(ThemeContext);
+  const { auth, isMobileNav, openMenuToggle, setOpenMenuToggle } = useContext(ThemeContext);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -115,6 +115,24 @@ const Header = ({ onNote }: propType) => {
     <div className={`header spa-header ${headerFix ? "sticky" : ""}`}>
       <div className="header-content">
         <nav className="navbar navbar-expand">
+          <button
+            type="button"
+            className="spa-header-menu-btn"
+            aria-controls="spa-sidebar"
+            aria-expanded={isMobileNav && openMenuToggle}
+            aria-hidden={!isMobileNav}
+            tabIndex={isMobileNav ? 0 : -1}
+            aria-label={openMenuToggle ? "Close navigation menu" : "Open navigation menu"}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              setOpenMenuToggle((open) => !open);
+            }}
+          >
+            <i className="material-symbols-outlined" aria-hidden="true">
+              {isMobileNav && openMenuToggle ? "close" : "menu"}
+            </i>
+          </button>
           <div className="collapse navbar-collapse justify-content-between">
             <div className="header-left">
               <div
