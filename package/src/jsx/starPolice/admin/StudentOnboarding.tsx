@@ -8,6 +8,8 @@ import { FileUploadProgressOverlay } from "../shared/FileUploadProgress";
 import { notify } from "../toast";
 import {
   emptyStudentOnboardingForm,
+  type OnboardingActivityLog,
+  type OnboardingMaterial,
   type StudentOnboardingFormState,
   type StudentOnboardingRecord,
 } from "./studentOnboardingDefaults";
@@ -100,10 +102,54 @@ function formatResidenceType(value: string) {
   return "—";
 }
 
+function formatPaymentStatus(value: string) {
+  if (value === "Pending" || value === "Paid" || value === "Partial") return value;
+  return "—";
+}
+
+function paymentStatusBadgeClass(value: string) {
+  if (value === "Paid") return "badge bg-success";
+  if (value === "Partial") return "badge bg-info text-dark";
+  if (value === "Pending") return "badge bg-warning text-dark";
+  return "badge bg-secondary";
+}
+
+function formatLogField(field: string) {
+  const labels: Record<string, string> = {
+    paymentStatus: "Payment Status",
+    registrationFee: "Registration Fee",
+    courseFee: "Course Fee",
+    scholarship: "Scholarship",
+    discount: "Discount",
+    paymentMethod: "Payment Method",
+    transactionId: "Transaction ID",
+    receiptNumber: "Receipt Number",
+    materials: "Materials",
+  };
+  return labels[field] || field;
+}
+
+function formatLogDate(value?: string) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString();
+}
+
+function createMaterialDraft(material?: OnboardingMaterial): OnboardingMaterial {
+  return {
+    id: material?.id,
+    materialName: material?.materialName || "",
+    date: material?.date || "",
+    given: material?.given ?? false,
+  };
+}
+
 function recordToForm(record: StudentOnboardingRecord): StudentOnboardingFormState {
   return {
     ...emptyStudentOnboardingForm(),
     ...record,
+    materials: record.materials || [],
     loginEmail: record.loginEmail || record.email || "",
     password: "",
     confirmPassword: "",
@@ -127,6 +173,10 @@ const StudentOnboarding = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [showMaterialForm, setShowMaterialForm] = useState(false);
+  const [materialDraft, setMaterialDraft] = useState<OnboardingMaterial>(createMaterialDraft());
+  const [editingMaterialIndex, setEditingMaterialIndex] = useState<number | null>(null);
+  const [activityLogs, setActivityLogs] = useState<OnboardingActivityLog[]>([]);
 
   const canManage = hasPermission(auth, "admin:onboarding");
 
@@ -152,7 +202,8 @@ const StudentOnboarding = () => {
         record.loginEmail.toLowerCase().includes(query) ||
         record.course.toLowerCase().includes(query) ||
         record.batch.toLowerCase().includes(query) ||
-        (record.residenceType || "").toLowerCase().includes(query)
+        (record.residenceType || "").toLowerCase().includes(query) ||
+        (record.paymentStatus || "").toLowerCase().includes(query)
       );
     });
   }, [records, search]);
@@ -167,6 +218,10 @@ const StudentOnboarding = () => {
     setEditingId(null);
     setShowForm(false);
     setError("");
+    setShowMaterialForm(false);
+    setMaterialDraft(createMaterialDraft());
+    setEditingMaterialIndex(null);
+    setActivityLogs([]);
   };
 
   const startCreate = () => {
@@ -175,6 +230,10 @@ const StudentOnboarding = () => {
     setEditingId(null);
     setShowForm(true);
     setError("");
+    setShowMaterialForm(false);
+    setMaterialDraft(createMaterialDraft());
+    setEditingMaterialIndex(null);
+    setActivityLogs([]);
   };
 
   const startEdit = (record: StudentOnboardingRecord) => {
@@ -183,12 +242,22 @@ const StudentOnboarding = () => {
     setEditingId(record.id);
     setShowForm(true);
     setError("");
+    setShowMaterialForm(false);
+    setMaterialDraft(createMaterialDraft());
+    setEditingMaterialIndex(null);
+    setActivityLogs(record.activityLogs || []);
   };
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!form.residenceType) {
       const message = "Please select Day Scholar or Hostel in course details.";
+      setError(message);
+      notify.error(message);
+      return;
+    }
+    if (!form.paymentStatus) {
+      const message = "Payment status is required.";
       setError(message);
       notify.error(message);
       return;
@@ -222,7 +291,8 @@ const StudentOnboarding = () => {
     try {
       const onProgress = selectedFiles.length ? (percent: number) => setUploadProgress(percent) : undefined;
       if (editingId) {
-        await api.updateStudentOnboarding(editingId, payload, files, onProgress);
+        const saved = await api.updateStudentOnboarding(editingId, payload, files, onProgress);
+        setActivityLogs(saved.activityLogs || []);
         notify.success("Student onboarding record updated.");
       } else {
         await api.createStudentOnboarding(payload, files, onProgress);
@@ -266,6 +336,69 @@ const StudentOnboarding = () => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const resetMaterialDraft = () => {
+    setMaterialDraft(createMaterialDraft());
+    setEditingMaterialIndex(null);
+    setShowMaterialForm(false);
+  };
+
+  const startAddMaterial = () => {
+    setMaterialDraft(createMaterialDraft());
+    setEditingMaterialIndex(null);
+    setShowMaterialForm(true);
+  };
+
+  const startEditMaterial = (index: number) => {
+    const material = form.materials[index];
+    if (!material) return;
+    setMaterialDraft(createMaterialDraft(material));
+    setEditingMaterialIndex(index);
+    setShowMaterialForm(true);
+  };
+
+  const saveMaterialDraft = () => {
+    const name = materialDraft.materialName.trim();
+    if (!name) {
+      notify.error("Material name is required.");
+      return;
+    }
+    if (!materialDraft.date) {
+      notify.error("Material date is required.");
+      return;
+    }
+
+    const nextMaterial: OnboardingMaterial = {
+      ...materialDraft,
+      materialName: name,
+    };
+
+    setForm((prev) => {
+      const materials = [...(prev.materials || [])];
+      if (editingMaterialIndex === null) {
+        materials.push(nextMaterial);
+      } else {
+        materials[editingMaterialIndex] = nextMaterial;
+      }
+      return { ...prev, materials };
+    });
+    resetMaterialDraft();
+  };
+
+  const deleteMaterial = (index: number) => {
+    const material = form.materials[index];
+    if (!material) return;
+    if (!window.confirm(`Delete material "${material.materialName}"?`)) {
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      materials: prev.materials.filter((_, itemIndex) => itemIndex !== index),
+    }));
+    if (editingMaterialIndex === index) {
+      resetMaterialDraft();
+    }
   };
 
   const renderFileInput = (field: (typeof FILE_FIELDS)[number]) => (
@@ -328,7 +461,7 @@ const StudentOnboarding = () => {
               <input
                 type="search"
                 className="form-control"
-                placeholder="Search by ID, name, email, course, or batch..."
+                placeholder="Search by ID, name, email, course, batch, or payment status..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -342,6 +475,7 @@ const StudentOnboarding = () => {
                     <th scope="col">Course</th>
                     <th scope="col">Batch</th>
                     <th scope="col">Day Scholar / Hostel</th>
+                    <th scope="col">Payment Status</th>
                     <th scope="col">Email</th>
                     <th scope="col" className="spa-onboarding-actions-col spa-no-print">
                       Actions
@@ -351,7 +485,7 @@ const StudentOnboarding = () => {
                 <tbody>
                   {filteredRecords.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="spa-onboarding-empty">
+                      <td colSpan={8} className="spa-onboarding-empty">
                         No student onboarding records yet.
                       </td>
                     </tr>
@@ -363,6 +497,11 @@ const StudentOnboarding = () => {
                         <td>{record.course || "—"}</td>
                         <td>{record.batch || "—"}</td>
                         <td>{formatResidenceType(record.residenceType)}</td>
+                        <td>
+                          <span className={paymentStatusBadgeClass(record.paymentStatus)}>
+                            {formatPaymentStatus(record.paymentStatus)}
+                          </span>
+                        </td>
                         <td className="spa-onboarding-email">{record.loginEmail || record.email || "—"}</td>
                         <td className="spa-onboarding-actions-col spa-no-print">
                           <div className="spa-onboarding-actions">
@@ -583,7 +722,13 @@ const StudentOnboarding = () => {
               <div className="col-md-3"><Field label="Payment Method"><TextInput value={form.paymentMethod} onChange={(v) => setField("paymentMethod", v)} /></Field></div>
               <div className="col-md-3">
                 <Field label="Payment Status">
-                  <select className="form-select" value={form.paymentStatus} onChange={(e) => setField("paymentStatus", e.target.value)}>
+                  <select
+                    className="form-select"
+                    value={form.paymentStatus}
+                    onChange={(e) => setField("paymentStatus", e.target.value)}
+                    required
+                  >
+                    <option value="">Select</option>
                     <option value="Pending">Pending</option>
                     <option value="Paid">Paid</option>
                     <option value="Partial">Partial</option>
@@ -595,7 +740,121 @@ const StudentOnboarding = () => {
             </div>
           </SectionCard>
 
-          <SectionCard title="11. Medical Information (Optional)">
+          <SectionCard title="11. Materials Provided">
+            <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+              <p className="text-muted small mb-0">
+                Track study materials, uniforms, books, and other items given to the student.
+              </p>
+              <button type="button" className="btn btn-sm btn-primary" onClick={startAddMaterial}>
+                <i className="fa fa-plus me-1" />
+                Add Material
+              </button>
+            </div>
+
+            {showMaterialForm && (
+              <div className="border rounded p-3 mb-3 bg-light">
+                <h6 className="mb-3">{editingMaterialIndex === null ? "Add Material" : "Edit Material"}</h6>
+                <div className="row">
+                  <div className="col-md-4">
+                    <Field label="Material Name">
+                      <TextInput
+                        value={materialDraft.materialName}
+                        onChange={(value) => setMaterialDraft((prev) => ({ ...prev, materialName: value }))}
+                        placeholder="e.g. Uniform, Books, ID Card"
+                        required
+                      />
+                    </Field>
+                  </div>
+                  <div className="col-md-4">
+                    <Field label="Date">
+                      <TextInput
+                        type="date"
+                        value={materialDraft.date}
+                        onChange={(value) => setMaterialDraft((prev) => ({ ...prev, date: value }))}
+                        required
+                      />
+                    </Field>
+                  </div>
+                  <div className="col-md-4">
+                    <Field label="Given / Not Given">
+                      <select
+                        className="form-select"
+                        value={materialDraft.given ? "given" : "not-given"}
+                        onChange={(e) =>
+                          setMaterialDraft((prev) => ({ ...prev, given: e.target.value === "given" }))
+                        }
+                      >
+                        <option value="given">Given</option>
+                        <option value="not-given">Not Given</option>
+                      </select>
+                    </Field>
+                  </div>
+                </div>
+                <div className="d-flex flex-wrap gap-2">
+                  <button type="button" className="btn btn-sm btn-primary" onClick={saveMaterialDraft}>
+                    {editingMaterialIndex === null ? "Add" : "Update"}
+                  </button>
+                  <button type="button" className="btn btn-sm btn-outline-secondary" onClick={resetMaterialDraft}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="table-responsive">
+              <table className="table table-sm table-striped align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Material Name</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th className="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(form.materials || []).length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="text-muted">
+                        No materials added yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    form.materials.map((material, index) => (
+                      <tr key={`${material.id || "material"}-${index}`}>
+                        <td>{material.materialName}</td>
+                        <td>{material.date || "—"}</td>
+                        <td>
+                          <span className={material.given ? "badge bg-success" : "badge bg-secondary"}>
+                            {material.given ? "Given" : "Not Given"}
+                          </span>
+                        </td>
+                        <td className="text-end">
+                          <div className="d-inline-flex gap-2">
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-primary"
+                              onClick={() => startEditMaterial(index)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-sm btn-outline-danger"
+                              onClick={() => deleteMaterial(index)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </SectionCard>
+
+          <SectionCard title="12. Medical Information (Optional)">
             <div className="row">
               <div className="col-md-6"><Field label="Medical Conditions" optional><textarea className="form-control" rows={2} value={form.medicalConditions} onChange={(e) => setField("medicalConditions", e.target.value)} /></Field></div>
               <div className="col-md-6"><Field label="Allergies" optional><textarea className="form-control" rows={2} value={form.allergies} onChange={(e) => setField("allergies", e.target.value)} /></Field></div>
@@ -604,7 +863,7 @@ const StudentOnboarding = () => {
             </div>
           </SectionCard>
 
-          <SectionCard title="12. Skills & Preferences">
+          <SectionCard title="13. Skills & Preferences">
             <div className="row">
               <div className="col-md-6"><Field label="Languages Known"><TextInput value={form.languagesKnown} onChange={(v) => setField("languagesKnown", v)} /></Field></div>
               <div className="col-md-6"><Field label="Computer Skills"><TextInput value={form.computerSkills} onChange={(v) => setField("computerSkills", v)} /></Field></div>
@@ -613,7 +872,7 @@ const StudentOnboarding = () => {
             </div>
           </SectionCard>
 
-          <SectionCard title="13. Declaration">
+          <SectionCard title="14. Declaration">
             <div className="row">
               <div className="col-md-6">
                 <label className="form-check mb-3">
@@ -630,6 +889,54 @@ const StudentOnboarding = () => {
               <div className="col-md-4"><Field label="Date"><TextInput type="date" value={form.declarationDate} onChange={(v) => setField("declarationDate", v)} /></Field></div>
             </div>
           </SectionCard>
+
+          {editingId && activityLogs.length > 0 && (
+            <SectionCard title="Activity Log">
+              <div className="table-responsive">
+                <table className="table table-sm table-striped align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Date & Time</th>
+                      <th>Action</th>
+                      <th>Description</th>
+                      <th>Performed By</th>
+                      <th>Changes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...activityLogs]
+                      .sort((a, b) => {
+                        const aTime = a.performedAt ? new Date(a.performedAt).getTime() : 0;
+                        const bTime = b.performedAt ? new Date(b.performedAt).getTime() : 0;
+                        return bTime - aTime;
+                      })
+                      .map((log, index) => (
+                        <tr key={log.id || `log-${index}`}>
+                          <td>{formatLogDate(log.performedAt)}</td>
+                          <td className="text-capitalize">{log.action}</td>
+                          <td>{log.description}</td>
+                          <td>{log.performedByName || "—"}</td>
+                          <td>
+                            {log.changes.length === 0 ? (
+                              <span className="text-muted">—</span>
+                            ) : (
+                              <ul className="mb-0 ps-3">
+                                {log.changes.map((change, changeIndex) => (
+                                  <li key={`${log.id || index}-change-${changeIndex}`}>
+                                    <strong>{formatLogField(change.field)}:</strong>{" "}
+                                    {change.oldValue || "—"} → {change.newValue || "—"}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </SectionCard>
+          )}
 
           <div className="d-flex flex-wrap gap-2 mb-4">
             <button type="submit" className="btn btn-primary" disabled={loading}>

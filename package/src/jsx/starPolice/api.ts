@@ -1000,7 +1000,7 @@ function buildStudentOnboardingFormData(
   files: Partial<Record<string, File>>
 ) {
   const formData = new FormData();
-  const skipKeys = new Set(["residenceType", "password", "confirmPassword"]);
+  const skipKeys = new Set(["residenceType", "password", "confirmPassword", "paymentStatus", "materials"]);
 
   for (const key of STUDENT_ONBOARDING_TEXT_FIELDS) {
     if (skipKeys.has(key)) continue;
@@ -1014,6 +1014,8 @@ function buildStudentOnboardingFormData(
   formData.append("privacyAccepted", String(form.privacyAccepted));
   formData.append("grantLogin", String(form.grantLogin));
   formData.append("residenceType", form.residenceType || "");
+  formData.append("paymentStatus", form.paymentStatus || "Pending");
+  formData.append("materials", JSON.stringify(form.materials || []));
   formData.append("clientUrl", window.location.origin);
 
   if (form.password) {

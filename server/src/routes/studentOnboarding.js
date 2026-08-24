@@ -140,6 +140,7 @@ function parseBodyData(body) {
 }
 
 const RESIDENCE_TYPES = ["Day Scholar", "Hostel"];
+const PAYMENT_STATUSES = ["Pending", "Paid", "Partial"];
 
 function validateResidenceType(data, existingRecord = null) {
   const value = data.residenceType || existingRecord?.residenceType || "";
@@ -147,6 +148,98 @@ function validateResidenceType(data, existingRecord = null) {
     return "Day Scholar or Hostel selection is required in course details.";
   }
   return null;
+}
+
+function validatePaymentStatus(data, existingRecord = null) {
+  const value = data.paymentStatus || existingRecord?.paymentStatus || "";
+  if (!PAYMENT_STATUSES.includes(value)) {
+    return "Payment status is required (Pending, Paid, or Partial).";
+  }
+  return null;
+}
+
+function parseMaterials(body) {
+  if (body.materials === undefined) {
+    return undefined;
+  }
+
+  let raw = body.materials;
+  if (typeof raw === "string") {
+    try {
+      raw = JSON.parse(raw);
+    } catch {
+      throw new Error("Invalid materials data.");
+    }
+  }
+
+  if (!Array.isArray(raw)) {
+    throw new Error("Materials must be an array.");
+  }
+
+  return raw.map((item) => ({
+    materialName: String(item.materialName || "").trim(),
+    date: String(item.date || "").trim(),
+    given: item.given === true || item.given === "true",
+  }));
+}
+
+function formatLogValue(value) {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "boolean") return value ? "Given" : "Not Given";
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => {
+        if (entry && typeof entry === "object") {
+          const name = entry.materialName || "";
+          const date = entry.date || "";
+          const given = entry.given ? "Given" : "Not Given";
+          return [name, date, given].filter(Boolean).join(" / ");
+        }
+        return String(entry);
+      })
+      .filter(Boolean)
+      .join("; ");
+  }
+  return String(value);
+}
+
+const TRACKED_LOG_FIELDS = [
+  "paymentStatus",
+  "registrationFee",
+  "courseFee",
+  "scholarship",
+  "discount",
+  "paymentMethod",
+  "transactionId",
+  "receiptNumber",
+  "materials",
+];
+
+function buildChangeEntries(existingRecord, data) {
+  const changes = [];
+  for (const field of TRACKED_LOG_FIELDS) {
+    if (data[field] === undefined) continue;
+    const oldValue = formatLogValue(existingRecord[field]);
+    const newValue = formatLogValue(data[field]);
+    if (oldValue !== newValue) {
+      changes.push({ field, oldValue, newValue });
+    }
+  }
+  return changes;
+}
+
+function appendActivityLog(record, { action, description, performedBy, performedByName, changes = [] }) {
+  if (!Array.isArray(record.activityLogs)) {
+    record.activityLogs = [];
+  }
+  record.activityLogs.push({
+    action,
+    description,
+    performedBy,
+    performedByName,
+    performedAt: new Date(),
+    changes,
+  });
 }
 
 function mapRecord(record) {
@@ -224,6 +317,25 @@ function mapRecord(record) {
     paymentStatus: item.paymentStatus,
     transactionId: item.transactionId,
     receiptNumber: item.receiptNumber,
+    materials: (item.materials || []).map((material) => ({
+      id: material._id ? material._id.toString() : "",
+      materialName: material.materialName || "",
+      date: material.date || "",
+      given: Boolean(material.given),
+    })),
+    activityLogs: (item.activityLogs || []).map((log) => ({
+      id: log._id ? log._id.toString() : "",
+      action: log.action || "updated",
+      description: log.description || "",
+      performedBy: log.performedBy ? log.performedBy.toString() : null,
+      performedByName: log.performedByName || "",
+      performedAt: log.performedAt,
+      changes: (log.changes || []).map((change) => ({
+        field: change.field || "",
+        oldValue: change.oldValue || "",
+        newValue: change.newValue || "",
+      })),
+    })),
     medicalConditions: item.medicalConditions,
     allergies: item.allergies,
     disabilities: item.disabilities,
@@ -469,6 +581,15 @@ router.post(
       if (residenceError) {
         return res.status(400).json({ message: residenceError });
       }
+      const paymentError = validatePaymentStatus(data);
+      if (paymentError) {
+        return res.status(400).json({ message: paymentError });
+      }
+
+      const materials = parseMaterials(req.body);
+      if (materials !== undefined) {
+        data.materials = materials;
+      }
 
       const studentId = await generateStudentId();
       const record = await StudentOnboarding.create({
@@ -476,6 +597,16 @@ router.post(
         ...mapFileUrls(req.files),
         studentId,
         createdBy: req.user.id,
+        activityLogs: [
+          {
+            action: "created",
+            description: "Student onboarding record created.",
+            performedBy: req.user.id,
+            performedByName: req.user.name || req.user.email || "Admin",
+            performedAt: new Date(),
+            changes: [],
+          },
+        ],
       });
 
       await handleCredentialSync(req, record);
@@ -509,10 +640,32 @@ router.put(
       if (residenceError) {
         return res.status(400).json({ message: residenceError });
       }
+      const paymentError = validatePaymentStatus(data, record);
+      if (paymentError) {
+        return res.status(400).json({ message: paymentError });
+      }
       if (!data.residenceType && record.residenceType) {
         data.residenceType = record.residenceType;
       }
+
+      const materials = parseMaterials(req.body);
+      if (materials !== undefined) {
+        data.materials = materials;
+      }
+
+      const changes = buildChangeEntries(record, data);
       Object.assign(record, data, mapFileUrls(req.files));
+
+      if (changes.length > 0) {
+        appendActivityLog(record, {
+          action: "updated",
+          description: "Student onboarding record updated.",
+          performedBy: req.user.id,
+          performedByName: req.user.name || req.user.email || "Admin",
+          changes,
+        });
+      }
+
       await record.save();
 
       await handleCredentialSync(req, record);

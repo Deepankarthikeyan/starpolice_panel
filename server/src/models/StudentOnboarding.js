@@ -84,6 +84,31 @@ const studentOnboardingSchema = new mongoose.Schema(
     transactionId: { type: String, default: "" },
     receiptNumber: { type: String, default: "" },
 
+    materials: [
+      {
+        materialName: { type: String, trim: true, default: "" },
+        date: { type: String, default: "" },
+        given: { type: Boolean, default: false },
+      },
+    ],
+
+    activityLogs: [
+      {
+        action: { type: String, enum: ["created", "updated"], default: "updated" },
+        description: { type: String, default: "" },
+        performedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+        performedByName: { type: String, default: "" },
+        performedAt: { type: Date, default: Date.now },
+        changes: [
+          {
+            field: { type: String, default: "" },
+            oldValue: { type: String, default: "" },
+            newValue: { type: String, default: "" },
+          },
+        ],
+      },
+    ],
+
     medicalConditions: { type: String, default: "" },
     allergies: { type: String, default: "" },
     disabilities: { type: String, default: "" },

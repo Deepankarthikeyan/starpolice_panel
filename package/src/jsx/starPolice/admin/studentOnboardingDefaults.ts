@@ -1,5 +1,26 @@
 export type ResidenceType = "Day Scholar" | "Hostel" | "";
 
+export interface OnboardingMaterial {
+  id?: string;
+  materialName: string;
+  date: string;
+  given: boolean;
+}
+
+export interface OnboardingActivityLog {
+  id?: string;
+  action: "created" | "updated";
+  description: string;
+  performedBy: string | null;
+  performedByName: string;
+  performedAt?: string;
+  changes: Array<{
+    field: string;
+    oldValue: string;
+    newValue: string;
+  }>;
+}
+
 export interface StudentOnboardingRecord {
   id: string;
   studentId: string;
@@ -70,6 +91,8 @@ export interface StudentOnboardingRecord {
   paymentStatus: string;
   transactionId: string;
   receiptNumber: string;
+  materials: OnboardingMaterial[];
+  activityLogs?: OnboardingActivityLog[];
   medicalConditions: string;
   allergies: string;
   disabilities: string;
@@ -163,6 +186,7 @@ export const emptyStudentOnboardingForm = (): StudentOnboardingFormState => ({
   paymentStatus: "Pending",
   transactionId: "",
   receiptNumber: "",
+  materials: [],
   medicalConditions: "",
   allergies: "",
   disabilities: "",
