@@ -88,8 +88,9 @@ export function handleInvalidSession(panel?: PanelType) {
   const resolved = panel || resolvePanelFromPath(window.location.pathname);
   clearAuth(resolved);
   const loginPath = getLoginPath(resolved);
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   if (!window.location.pathname.includes("/login") && !window.location.pathname.includes("/signup")) {
-    window.location.replace(loginPath);
+    window.location.replace(`${base}${loginPath}`);
   }
 }
 
