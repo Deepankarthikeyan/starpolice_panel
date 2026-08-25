@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: false },
     username: { type: String, trim: true, lowercase: true, default: undefined },
     permissions: { type: [String], default: [] },
+    sidebarHiddenItems: { type: [String], default: [] },
     staffType: {
       type: String,
       enum: ["physical", "subject"],

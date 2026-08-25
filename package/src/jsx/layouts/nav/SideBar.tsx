@@ -20,7 +20,8 @@ function panelLabel(panel: PanelType) {
 const SideBar = ({ basePath = "/admin", panel = "admin" }: SideBarProps) => {
   const location = useLocation();
   const { setIconhover, openMenuToggle, setOpenMenuToggle, auth } = useContext(ThemeContext);
-  const menuList = getMenuList(panel, auth);
+  const hiddenItems = new Set(auth?.sidebarHiddenItems || []);
+  const menuList = getMenuList(panel, auth).filter((item) => !hiddenItems.has(item.to));
   const currentSlug = location.pathname.split("/").pop() || "";
 
   useEffect(() => {

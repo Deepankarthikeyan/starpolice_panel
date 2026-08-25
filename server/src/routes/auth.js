@@ -16,6 +16,7 @@ import {
   resendOtpForToken,
   verifyOtpForToken,
 } from "../services/passwordAuth.js";
+import { getAllowedMenuPaths, sanitizeSidebarHiddenItems } from "../menuItems.js";
 
 const router = express.Router();
 
@@ -93,6 +94,7 @@ async function publicUser(user, token, panel) {
     role: user.role,
     isActive: user.role === "superadmin" ? true : user.isActive,
     permissions,
+    sidebarHiddenItems: user.sidebarHiddenItems || [],
     panel,
     token,
     ...staffFields,
@@ -264,9 +266,55 @@ router.get("/me", authRequired, async (req, res) => {
     role: user.role,
     isActive: user.role === "superadmin" ? true : user.isActive,
     permissions,
+    sidebarHiddenItems: user.sidebarHiddenItems || [],
     panel: req.user.panel,
     ...staffFields,
   });
+});
+
+router.patch("/sidebar-preferences", authRequired, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(401).json({ message: "Session expired. Please sign in again." });
+    }
+
+    const panel = req.user.panel || "admin";
+    const permissions = resolveRolePermissions(user);
+    const staffFields = await getStaffAuthFields(user);
+    const allowedPaths = getAllowedMenuPaths(
+      {
+        role: user.role,
+        permissions,
+        staffExamTypes: staffFields.staffExamTypes || [],
+      },
+      panel
+    );
+
+    let sidebarHiddenItems;
+    try {
+      sidebarHiddenItems = sanitizeSidebarHiddenItems(req.body?.hiddenItems, allowedPaths);
+    } catch (error) {
+      return res.status(error.statusCode || 400).json({ message: error.message });
+    }
+
+    user.sidebarHiddenItems = sidebarHiddenItems;
+    await user.save();
+
+    res.json({
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isActive: user.role === "superadmin" ? true : user.isActive,
+      permissions,
+      sidebarHiddenItems,
+      panel,
+      ...staffFields,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 router.get("/verify-setup-token", requireDb, async (req, res) => {

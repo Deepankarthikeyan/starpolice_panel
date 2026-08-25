@@ -13,6 +13,7 @@ export interface AuthUser {
   name: string;
   isActive: boolean;
   permissions: PermissionKey[];
+  sidebarHiddenItems?: string[];
   panel: PanelType;
   token: string;
   subjectIds?: string[];

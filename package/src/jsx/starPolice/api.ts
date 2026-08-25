@@ -383,6 +383,13 @@ export const api = {
     return request<Omit<AuthUser, "token">>("/api/auth/me", {}, panel);
   },
 
+  updateSidebarPreferences(hiddenItems: string[], panel?: PanelType) {
+    return request<Omit<AuthUser, "token">>("/api/auth/sidebar-preferences", {
+      method: "PATCH",
+      body: JSON.stringify({ hiddenItems }),
+    }, panel);
+  },
+
   getUsers(type: "admin" | "staff" | "student") {
     return request<ManagedUser[]>(`/api/users?type=${type}`);
   },
