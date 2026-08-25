@@ -56,6 +56,18 @@ export interface UploadedFile {
   uploadedBy: string;
 }
 
+export interface QuestionPaper {
+  id: string;
+  paperName: string;
+  date: string;
+  name: string;
+  category: Exclude<FileCategory, "video">;
+  fileUrl: string;
+  mimeType?: string;
+  uploadedAt: string;
+  uploadedBy: string;
+}
+
 export interface ChatMessage {
   id: string;
   senderId?: string;

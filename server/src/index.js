@@ -20,9 +20,11 @@ import studentPerformanceRoutes from "./routes/studentPerformance.js";
 import studentAttendanceRoutes from "./routes/studentAttendance.js";
 import subjectRoutes from "./routes/subjects.js";
 import examRoutes from "./routes/exams.js";
+import questionPaperRoutes from "./routes/questionPapers.js";
 import { uploadDir } from "./middleware/upload.js";
 import { isEmailConfigured, getEmailProvider } from "./services/email.js";
 import { backfillAttendancePermission } from "./migrations/backfillAttendancePermission.js";
+import { backfillQuestionsPermission } from "./migrations/backfillQuestionsPermission.js";
 import { stripLeadsFromStaff } from "./migrations/stripLeadsFromStaff.js";
 import { fixUsernameIndex } from "./migrations/fixUsernameIndex.js";
 import { cleanupAgentTestSuperAdmins } from "./migrations/cleanupAgentTestSuperAdmins.js";
@@ -78,6 +80,7 @@ app.use("/api/student-performance", studentPerformanceRoutes);
 app.use("/api/student-attendance", studentAttendanceRoutes);
 app.use("/api/subjects", subjectRoutes);
 app.use("/api/exams", examRoutes);
+app.use("/api/question-papers", questionPaperRoutes);
 
 app.use((error, _req, res, _next) => {
   res.status(500).json({ message: error.message || "Server error" });
@@ -88,6 +91,7 @@ async function runMigrations() {
     ["cleanupAgentTestSuperAdmins", cleanupAgentTestSuperAdmins],
     ["fixUsernameIndex", fixUsernameIndex],
     ["backfillAttendancePermission", backfillAttendancePermission],
+    ["backfillQuestionsPermission", backfillQuestionsPermission],
     ["stripLeadsFromStaff", stripLeadsFromStaff],
   ]) {
     try {

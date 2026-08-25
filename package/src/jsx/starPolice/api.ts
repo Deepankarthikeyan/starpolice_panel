@@ -8,6 +8,7 @@ import type {
   MessagingContact,
   Note,
   PanelType,
+  QuestionPaper,
   SetupStatus,
   StudentDashboardStats,
   UploadedFile,
@@ -564,6 +565,54 @@ export const api = {
 
   deleteUpload(id: string) {
     return request<{ message: string }>(`/api/uploads/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  getQuestionPapers(date?: string) {
+    const query = date ? `?date=${encodeURIComponent(date)}` : "";
+    return request<QuestionPaper[]>(`/api/question-papers${query}`);
+  },
+
+  uploadQuestionPaper(
+    paperName: string,
+    date: string,
+    file: File,
+    onProgress?: (percent: number) => void,
+  ) {
+    const formData = new FormData();
+    formData.append("paperName", paperName);
+    formData.append("date", date);
+    formData.append("file", file);
+    if (onProgress) {
+      return uploadWithProgress<QuestionPaper>("/api/question-papers", formData, onProgress);
+    }
+    return request<QuestionPaper>("/api/question-papers", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  updateQuestionPaper(
+    id: string,
+    data: { paperName?: string; date?: string; file?: File },
+    onProgress?: (percent: number) => void,
+  ) {
+    const formData = new FormData();
+    if (data.paperName) formData.append("paperName", data.paperName);
+    if (data.date) formData.append("date", data.date);
+    if (data.file) formData.append("file", data.file);
+    if (onProgress) {
+      return uploadWithProgress<QuestionPaper>(`/api/question-papers/${id}`, formData, onProgress, undefined, "PATCH");
+    }
+    return request<QuestionPaper>(`/api/question-papers/${id}`, {
+      method: "PATCH",
+      body: formData,
+    });
+  },
+
+  deleteQuestionPaper(id: string) {
+    return request<{ message: string }>(`/api/question-papers/${id}`, {
       method: "DELETE",
     });
   },

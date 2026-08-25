@@ -12,6 +12,7 @@ const StaffLayout = lazy(() => import("./jsx/PanelLayouts").then((m) => ({ defau
 const StudentLayout = lazy(() => import("./jsx/PanelLayouts").then((m) => ({ default: m.StudentLayout })));
 const AdminDashboard = lazy(() => import("./jsx/starPolice/admin/AdminDashboard"));
 const DaywiseUpload = lazy(() => import("./jsx/starPolice/admin/DaywiseUpload"));
+const QuestionPapers = lazy(() => import("./jsx/starPolice/admin/QuestionPapers"));
 const AdminStudentInteraction = lazy(() => import("./jsx/starPolice/admin/StudentInteraction"));
 const StaffInteraction = lazy(() => import("./jsx/starPolice/staff/StaffInteraction"));
 const MonthlyCalendar = lazy(() => import("./jsx/starPolice/admin/MonthlyCalendar"));
@@ -139,6 +140,7 @@ function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="daywise-upload" element={<DaywiseUpload />} />
+            <Route path="questions" element={<QuestionPapers />} />
             <Route path="interaction" element={<AdminStudentInteraction />} />
             <Route path="student-interaction" element={<Navigate to="interaction" replace />} />
             <Route path="monthly-calendar" element={<MonthlyCalendar />} />
@@ -160,6 +162,7 @@ function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="daywise-upload" element={<DaywiseUpload />} />
+            <Route path="questions" element={<QuestionPapers />} />
             <Route path="interaction" element={<StaffInteraction />} />
             <Route path="staff-interaction" element={<Navigate to="interaction" replace />} />
             <Route path="student-interaction" element={<Navigate to="interaction" replace />} />
@@ -177,6 +180,7 @@ function App() {
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<StudentDashboard />} />
             <Route path="materials" element={<StudentMaterials />} />
+            <Route path="questions" element={<QuestionPapers />} />
             <Route path="admin-interaction" element={<StudentAdminInteraction />} />
             <Route path="staff-interaction" element={<StudentStaffInteraction />} />
             <Route path="interaction" element={<StudentInteraction />} />

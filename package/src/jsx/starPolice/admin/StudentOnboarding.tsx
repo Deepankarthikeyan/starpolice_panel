@@ -5,6 +5,7 @@ import { api } from "../api";
 import { hasPermission } from "../permissions";
 import { getPanelMotherMenu } from "../panelLabels";
 import { FileUploadProgressOverlay } from "../shared/FileUploadProgress";
+import { getAbsoluteFileUrl } from "../fileUrl";
 import { notify } from "../toast";
 import {
   emptyStudentOnboardingForm,
@@ -67,12 +68,14 @@ function TextInput({
   type = "text",
   placeholder,
   required,
+  disabled,
 }: {
   value: string;
   onChange: (value: string) => void;
   type?: string;
   placeholder?: string;
   required?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <input
@@ -82,6 +85,8 @@ function TextInput({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       required={required}
+      disabled={disabled}
+      readOnly={disabled}
     />
   );
 }
@@ -168,6 +173,7 @@ const StudentOnboarding = () => {
   const [form, setForm] = useState<StudentOnboardingFormState>(emptyStudentOnboardingForm());
   const [files, setFiles] = useState<Partial<Record<FileFieldKey, File>>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
@@ -216,6 +222,7 @@ const StudentOnboarding = () => {
     setForm(emptyStudentOnboardingForm());
     setFiles({});
     setEditingId(null);
+    setViewMode(false);
     setShowForm(false);
     setError("");
     setShowMaterialForm(false);
@@ -228,6 +235,7 @@ const StudentOnboarding = () => {
     setForm(emptyStudentOnboardingForm());
     setFiles({});
     setEditingId(null);
+    setViewMode(false);
     setShowForm(true);
     setError("");
     setShowMaterialForm(false);
@@ -240,6 +248,20 @@ const StudentOnboarding = () => {
     setForm(recordToForm(record));
     setFiles({});
     setEditingId(record.id);
+    setViewMode(false);
+    setShowForm(true);
+    setError("");
+    setShowMaterialForm(false);
+    setMaterialDraft(createMaterialDraft());
+    setEditingMaterialIndex(null);
+    setActivityLogs(record.activityLogs || []);
+  };
+
+  const startView = (record: StudentOnboardingRecord) => {
+    setForm(recordToForm(record));
+    setFiles({});
+    setEditingId(record.id);
+    setViewMode(true);
     setShowForm(true);
     setError("");
     setShowMaterialForm(false);
@@ -403,17 +425,29 @@ const StudentOnboarding = () => {
 
   const renderFileInput = (field: (typeof FILE_FIELDS)[number]) => (
     <Field key={field.key} label={field.label} optional={field.key !== "profilePhoto"}>
-      <input
-        type="file"
-        className="form-control"
-        accept="image/*,.pdf"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          setFiles((prev) => ({ ...prev, [field.key]: file }));
-        }}
-      />
-      {form[field.urlKey] && (
-        <small className="text-muted d-block mt-1">Current file uploaded</small>
+      {viewMode ? (
+        form[field.urlKey] ? (
+          <a href={getAbsoluteFileUrl(String(form[field.urlKey]))} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">
+            View File
+          </a>
+        ) : (
+          <span className="text-muted">No file uploaded</span>
+        )
+      ) : (
+        <>
+          <input
+            type="file"
+            className="form-control"
+            accept="image/*,.pdf"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              setFiles((prev) => ({ ...prev, [field.key]: file }));
+            }}
+          />
+          {form[field.urlKey] && (
+            <small className="text-muted d-block mt-1">Current file uploaded</small>
+          )}
+        </>
       )}
     </Field>
   );
@@ -507,6 +541,13 @@ const StudentOnboarding = () => {
                           <div className="spa-onboarding-actions">
                             <button
                               type="button"
+                              className="btn btn-sm btn-outline-secondary"
+                              onClick={() => startView(record)}
+                            >
+                              View
+                            </button>
+                            <button
+                              type="button"
                               className="btn btn-sm btn-outline-primary"
                               onClick={() => startEdit(record)}
                             >
@@ -532,11 +573,33 @@ const StudentOnboarding = () => {
       ) : (
         <form onSubmit={onSubmit}>
           <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-            <h4 className="mb-0">{editingId ? "Edit Student Onboarding" : "New Student Onboarding"}</h4>
-            <button type="button" className="btn btn-outline-secondary" onClick={resetForm}>
-              Back to List
-            </button>
+            <h4 className="mb-0">
+              {viewMode
+                ? "View Student Onboarding"
+                : editingId
+                  ? "Edit Student Onboarding"
+                  : "New Student Onboarding"}
+            </h4>
+            <div className="d-flex gap-2">
+              {viewMode && editingId && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    const record = records.find((item) => item.id === editingId);
+                    if (record) startEdit(record);
+                  }}
+                >
+                  Edit
+                </button>
+              )}
+              <button type="button" className="btn btn-outline-secondary" onClick={resetForm}>
+                Back to List
+              </button>
+            </div>
           </div>
+
+          <fieldset disabled={viewMode}>
 
           <SectionCard title="1. Personal Information">
             <div className="row">
@@ -939,13 +1002,18 @@ const StudentOnboarding = () => {
           )}
 
           <div className="d-flex flex-wrap gap-2 mb-4">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? "Saving..." : editingId ? "Update Student" : "Create Student"}
-            </button>
-            <button type="button" className="btn btn-outline-secondary" onClick={resetForm} disabled={loading}>
-              Cancel
-            </button>
+            {!viewMode && (
+              <>
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? "Saving..." : editingId ? "Update Student" : "Create Student"}
+                </button>
+                <button type="button" className="btn btn-outline-secondary" onClick={resetForm} disabled={loading}>
+                  Cancel
+                </button>
+              </>
+            )}
           </div>
+          </fieldset>
         </form>
       )}
       {loading && Object.values(files).some(Boolean) && (
